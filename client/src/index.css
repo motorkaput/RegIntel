@@ -1,0 +1,290 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: hsl(0, 0%, 100%);
+  --foreground: hsl(20, 14.3%, 4.1%);
+  --muted: hsl(60, 4.8%, 95.9%);
+  --muted-foreground: hsl(25, 5.3%, 44.7%);
+  --popover: hsl(0, 0%, 100%);
+  --popover-foreground: hsl(20, 14.3%, 4.1%);
+  --card: hsl(0, 0%, 100%);
+  --card-foreground: hsl(20, 14.3%, 4.1%);
+  --border: hsl(20, 5.9%, 90%);
+  --input: hsl(20, 5.9%, 90%);
+  --primary: hsl(207, 90%, 54%);
+  --primary-foreground: hsl(211, 100%, 99%);
+  --secondary: hsl(60, 4.8%, 95.9%);
+  --secondary-foreground: hsl(24, 9.8%, 10%);
+  --accent: hsl(60, 4.8%, 95.9%);
+  --accent-foreground: hsl(24, 9.8%, 10%);
+  --destructive: hsl(0, 84.2%, 60.2%);
+  --destructive-foreground: hsl(60, 9.1%, 97.8%);
+  --ring: hsl(20, 14.3%, 4.1%);
+  --radius: 0.5rem;
+
+  /* Dark Street Tech Custom Colors */
+  --neon-green: hsl(150, 100%, 50%);
+  --neon-cyan: hsl(180, 100%, 50%);
+  --dark-gray: hsl(0, 0%, 10%);
+  --darker-gray: hsl(0, 0%, 6%);
+}
+
+.dark {
+  --background: hsl(0, 0%, 0%);
+  --foreground: hsl(0, 0%, 98%);
+  --muted: hsl(0, 0%, 10%);
+  --muted-foreground: hsl(0, 0%, 64.9%);
+  --popover: hsl(0, 0%, 0%);
+  --popover-foreground: hsl(0, 0%, 98%);
+  --card: hsl(0, 0%, 10%);
+  --card-foreground: hsl(0, 0%, 98%);
+  --border: hsl(0, 0%, 15%);
+  --input: hsl(0, 0%, 15%);
+  --primary: hsl(150, 100%, 50%);
+  --primary-foreground: hsl(0, 0%, 0%);
+  --secondary: hsl(0, 0%, 15%);
+  --secondary-foreground: hsl(0, 0%, 98%);
+  --accent: hsl(0, 0%, 15%);
+  --accent-foreground: hsl(0, 0%, 98%);
+  --destructive: hsl(0, 62.8%, 30.6%);
+  --destructive-foreground: hsl(0, 0%, 98%);
+  --ring: hsl(0, 0%, 83.9%);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@layer utilities {
+  .text-neon-green {
+    color: var(--neon-green);
+  }
+
+  .text-neon-cyan {
+    color: var(--neon-cyan);
+  }
+
+  .bg-neon-green {
+    background-color: var(--neon-green);
+  }
+
+  .bg-neon-cyan {
+    background-color: var(--neon-cyan);
+  }
+
+  .bg-dark-gray {
+    background-color: var(--dark-gray);
+  }
+
+  .bg-darker-gray {
+    background-color: var(--darker-gray);
+  }
+
+  .border-neon-green {
+    border-color: var(--neon-green);
+  }
+
+  .border-neon-cyan {
+    border-color: var(--neon-cyan);
+  }
+
+  .hover\:bg-neon-green:hover {
+    background-color: var(--neon-green);
+  }
+
+  .hover\:bg-neon-cyan:hover {
+    background-color: var(--neon-cyan);
+  }
+
+  .hover\:text-neon-green:hover {
+    color: var(--neon-green);
+  }
+
+  .hover\:text-neon-cyan:hover {
+    color: var(--neon-cyan);
+  }
+}
+
+@layer components {
+  .animate-pulse-slow {
+    animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  .animate-glow {
+    animation: glow 2s ease-in-out infinite alternate;
+  }
+
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  @keyframes glow {
+    from {
+      text-shadow: 0 0 20px var(--neon-green);
+    }
+    to {
+      text-shadow: 0 0 30px var(--neon-green), 0 0 40px var(--neon-green);
+    }
+  }
+
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  /* Scrollbar Styling */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--darker-gray);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--neon-green);
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--neon-cyan);
+  }
+
+  /* Custom gradient backgrounds */
+  .gradient-bg {
+    background: linear-gradient(135deg, var(--darker-gray) 0%, var(--dark-gray) 100%);
+  }
+
+  .gradient-text {
+    background: linear-gradient(135deg, var(--neon-green) 0%, var(--neon-cyan) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Card hover effects */
+  .card-hover {
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0, 255, 136, 0.2);
+  }
+
+  .card-hover:hover {
+    border-color: rgba(0, 255, 136, 0.6);
+    box-shadow: 0 0 30px rgba(0, 255, 136, 0.3);
+    transform: translateY(-2px);
+  }
+
+  /* Button glow effects */
+  .btn-glow {
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-glow::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+  }
+
+  .btn-glow:hover::before {
+    left: 100%;
+  }
+
+  /* Loading animations */
+  .loading-dots {
+    display: inline-block;
+    position: relative;
+    width: 80px;
+    height: 80px;
+  }
+
+  .loading-dots div {
+    position: absolute;
+    top: 33px;
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    background: var(--neon-green);
+    animation-timing-function: cubic-bezier(0, 1, 1, 0);
+  }
+
+  .loading-dots div:nth-child(1) {
+    left: 8px;
+    animation: loading-dots1 0.6s infinite;
+  }
+
+  .loading-dots div:nth-child(2) {
+    left: 8px;
+    animation: loading-dots2 0.6s infinite;
+  }
+
+  .loading-dots div:nth-child(3) {
+    left: 32px;
+    animation: loading-dots2 0.6s infinite;
+  }
+
+  .loading-dots div:nth-child(4) {
+    left: 56px;
+    animation: loading-dots3 0.6s infinite;
+  }
+
+  @keyframes loading-dots1 {
+    0% {
+      transform: scale(0);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+
+  @keyframes loading-dots3 {
+    0% {
+      transform: scale(1);
+    }
+    100% {
+      transform: scale(0);
+    }
+  }
+
+  @keyframes loading-dots2 {
+    0% {
+      transform: translate(0, 0);
+    }
+    100% {
+      transform: translate(24px, 0);
+    }
+  }
+
+  /* Responsive design helpers */
+  @media (max-width: 768px) {
+    .text-responsive {
+      font-size: clamp(1rem, 4vw, 1.5rem);
+    }
+    
+    .heading-responsive {
+      font-size: clamp(2rem, 8vw, 4rem);
+    }
+  }
+}
