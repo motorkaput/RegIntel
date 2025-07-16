@@ -4,8 +4,8 @@ import { Mail, ExternalLink } from "lucide-react";
 export default function Footer() {
   return (
     <footer className="bg-surface-white border-t border-light section-divider">
-      <div className="container-section py-16">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+      <div className="container-section py-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           {/* Company Info */}
           <div className="space-y-4">
             <div className="flex items-center space-x-2 text-secondary">
@@ -22,7 +22,7 @@ export default function Footer() {
           {/* Products */}
           <div>
             <h4 className="font-semibold text-primary mb-4 text-sm">Products</h4>
-            <ul className="space-y-3">
+            <ul className="space-y-2">
               <li>
                 <Link href="/fetch-patterns" className="text-secondary hover:text-accent-blue transition-colors text-sm">
                   Fetch Patterns
@@ -44,7 +44,7 @@ export default function Footer() {
           {/* Company */}
           <div>
             <h4 className="font-semibold text-primary mb-4 text-sm">Company</h4>
-            <ul className="space-y-3">
+            <ul className="space-y-2">
               <li>
                 <Link href="/about" className="text-secondary hover:text-accent-blue transition-colors text-sm">
                   About Us
@@ -75,7 +75,7 @@ export default function Footer() {
           {/* Connect */}
           <div>
             <h4 className="font-semibold text-primary mb-4 text-sm">Connect</h4>
-            <ul className="space-y-3">
+            <ul className="space-y-2">
               <li>
                 <a 
                   href="mailto:hello@darkstreet.org" 
@@ -100,7 +100,7 @@ export default function Footer() {
         </div>
         
         {/* Bottom Bar */}
-        <div className="mt-16 pt-8 border-t border-light">
+        <div className="mt-6 pt-6 border-t border-light">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <p className="text-secondary text-sm">
               © 2025 Dark Street Tech. All rights reserved.
