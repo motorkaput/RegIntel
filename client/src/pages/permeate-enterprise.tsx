@@ -47,7 +47,7 @@ export default function PerMeaTeEnterprise() {
                 It starts with a single outcome. From there, the system breaks it down, cleanly, logically, and fast, into projects, tasks, roles, and metrics.
               </p>
               
-              <h2 className="text-responsive-lg font-semibold text-primary">
+              <h2 className="text-lg font-semibold text-primary">
                 You get:
               </h2>
               
