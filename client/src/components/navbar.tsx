@@ -13,16 +13,18 @@ export default function Navbar() {
 
   const navigationItems = [
     { name: "Home", href: "/" },
-    { name: "Solutions", href: "/#solutions" },
-    { name: "Pricing", href: "/pricing" },
-    { name: "About", href: "/#about" },
+    { name: "Fetch Patterns", href: "/fetch-patterns" },
+    { name: "PerMeaTe Enterprise", href: "/permeate-enterprise" },
+    { name: "Next", href: "/next" },
+    { name: "About", href: "/about" },
   ];
 
   const authenticatedItems = [
-    { name: "Dashboard", href: "/" },
-    { name: "Document Analyzer", href: "/document-analyzer" },
-    { name: "Performance", href: "/performance-dashboard" },
-    { name: "Subscription", href: "/subscription" },
+    { name: "Home", href: "/" },
+    { name: "Fetch Patterns", href: "/fetch-patterns" },
+    { name: "PerMeaTe Enterprise", href: "/permeate-enterprise" },
+    { name: "Next", href: "/next" },
+    { name: "About", href: "/about" },
   ];
 
   const items = isAuthenticated ? authenticatedItems : navigationItems;

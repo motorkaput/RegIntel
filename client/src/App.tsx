@@ -11,6 +11,10 @@ import DocumentAnalyzer from "@/pages/document-analyzer";
 import PerformanceDashboard from "@/pages/performance-dashboard";
 import Pricing from "@/pages/pricing";
 import Subscription from "@/pages/subscription";
+import FetchPatterns from "@/pages/fetch-patterns";
+import PerMeaTeEnterprise from "@/pages/permeate-enterprise";
+import Next from "@/pages/next";
+import About from "@/pages/about";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -20,11 +24,19 @@ function Router() {
       {isLoading || !isAuthenticated ? (
         <>
           <Route path="/" component={Landing} />
+          <Route path="/fetch-patterns" component={FetchPatterns} />
+          <Route path="/permeate-enterprise" component={PerMeaTeEnterprise} />
+          <Route path="/next" component={Next} />
+          <Route path="/about" component={About} />
           <Route path="/pricing" component={Pricing} />
         </>
       ) : (
         <>
           <Route path="/" component={Home} />
+          <Route path="/fetch-patterns" component={FetchPatterns} />
+          <Route path="/permeate-enterprise" component={PerMeaTeEnterprise} />
+          <Route path="/next" component={Next} />
+          <Route path="/about" component={About} />
           <Route path="/document-analyzer" component={DocumentAnalyzer} />
           <Route path="/performance-dashboard" component={PerformanceDashboard} />
           <Route path="/subscription" component={Subscription} />

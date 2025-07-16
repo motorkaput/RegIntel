@@ -53,29 +53,24 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Solutions */}
+          {/* Products */}
           <div>
-            <h4 className="text-lg font-semibold mb-4 text-white">Solutions</h4>
+            <h4 className="text-lg font-semibold mb-4 text-white">Products</h4>
             <ul className="space-y-3 text-secondary">
               <li>
-                <Link href="/document-analyzer" className="hover:text-primary-blue transition-colors">
-                  Document Intelligence
+                <Link href="/fetch-patterns" className="hover:text-primary-blue transition-colors">
+                  Fetch Patterns
                 </Link>
               </li>
               <li>
-                <Link href="/performance-dashboard" className="hover:text-primary-blue transition-colors">
-                  Performance Analytics
+                <Link href="/permeate-enterprise" className="hover:text-primary-blue transition-colors">
+                  PerMeaTe Enterprise
                 </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-primary-blue transition-colors">
-                  Process Automation
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-primary-blue transition-colors">
-                  Enterprise AI
-                </a>
+                <Link href="/next" className="hover:text-primary-blue transition-colors">
+                  What's Next
+                </Link>
               </li>
             </ul>
           </div>
@@ -85,50 +80,35 @@ export default function Footer() {
             <h4 className="text-lg font-semibold mb-4 text-white">Company</h4>
             <ul className="space-y-3 text-secondary">
               <li>
-                <a href="#about" className="hover:text-primary-blue transition-colors">
+                <Link href="/about" className="hover:text-primary-blue transition-colors">
                   About Us
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-primary-blue transition-colors">
-                  Leadership
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-primary-blue transition-colors">
-                  Careers
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-primary-blue transition-colors">
+                <a href="mailto:hello@darkstreet.org" className="hover:text-primary-blue transition-colors">
                   Contact
+                </a>
+              </li>
+              <li>
+                <a href="https://darkstreet.consulting" target="_blank" rel="noopener noreferrer" className="hover:text-primary-blue transition-colors">
+                  Strategy & Consulting
                 </a>
               </li>
             </ul>
           </div>
 
-          {/* Resources */}
+          {/* Connect */}
           <div>
-            <h4 className="text-lg font-semibold mb-4 text-white">Resources</h4>
+            <h4 className="text-lg font-semibold mb-4 text-white">Connect</h4>
             <ul className="space-y-3 text-secondary">
               <li>
-                <a href="#" className="hover:text-primary-blue transition-colors">
-                  Documentation
+                <a href="mailto:hello@darkstreet.org" className="hover:text-primary-blue transition-colors">
+                  hello@darkstreet.org
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-primary-blue transition-colors">
-                  API Reference
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-primary-blue transition-colors">
-                  Support Center
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-primary-blue transition-colors">
-                  Status
+                <a href="https://darkstreet.consulting" target="_blank" rel="noopener noreferrer" className="hover:text-primary-blue transition-colors">
+                  darkstreet.consulting
                 </a>
               </li>
             </ul>
