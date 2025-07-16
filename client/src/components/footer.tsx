@@ -21,8 +21,8 @@ export default function Footer() {
 
           {/* Products */}
           <div>
-            <h4 className="font-semibold text-primary mb-4 text-sm">Products</h4>
-            <ul className="space-y-2">
+            <h4 className="font-semibold text-primary mb-2 text-sm">Products</h4>
+            <ul className="space-y-1">
               <li>
                 <Link href="/fetch-patterns" className="text-secondary hover:text-accent-blue transition-colors text-sm">
                   Fetch Patterns
@@ -43,8 +43,8 @@ export default function Footer() {
 
           {/* Company */}
           <div>
-            <h4 className="font-semibold text-primary mb-4 text-sm">Company</h4>
-            <ul className="space-y-2">
+            <h4 className="font-semibold text-primary mb-2 text-sm">Company</h4>
+            <ul className="space-y-1">
               <li>
                 <Link href="/about" className="text-secondary hover:text-accent-blue transition-colors text-sm">
                   About Us
@@ -74,8 +74,8 @@ export default function Footer() {
 
           {/* Connect */}
           <div>
-            <h4 className="font-semibold text-primary mb-4 text-sm">Connect</h4>
-            <ul className="space-y-2">
+            <h4 className="font-semibold text-primary mb-2 text-sm">Connect</h4>
+            <ul className="space-y-1">
               <li>
                 <a 
                   href="mailto:hello@darkstreet.org" 
