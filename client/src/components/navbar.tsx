@@ -45,7 +45,7 @@ export default function Navbar() {
             <img 
               src={logoPath} 
               alt="Dark Street Tech" 
-              className="h-10 w-auto"
+              className="h-9 w-auto"
             />
           </Link>
 

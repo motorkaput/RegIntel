@@ -83,8 +83,7 @@ export default function LoadingSpinner({
           <img 
             src={iconPath} 
             alt="Dark Street Tech"
-            className={cn("animate-spin", sizeClasses[size])}
-            style={{ animationDuration: "2s" }}
+            className={cn("animate-peek", sizeClasses[size])}
           />
         </div>
         {text && (

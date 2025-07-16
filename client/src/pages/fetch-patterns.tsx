@@ -1,43 +1,10 @@
-import { useEffect } from "react";
-import { useAuth } from "@/hooks/useAuth";
-import { useToast } from "@/hooks/use-toast";
+import Navbar from "@/components/navbar";
+import Footer from "@/components/footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { FileText, Search, Brain, BarChart3, Target, MessageCircle } from "lucide-react";
 
 export default function FetchPatterns() {
-  const { toast } = useToast();
-  const { isAuthenticated, isLoading } = useAuth();
-
-  // Redirect to login if not authenticated
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      toast({
-        title: "Authentication Required",
-        description: "Please sign in to access Fetch Patterns.",
-        variant: "destructive",
-      });
-      setTimeout(() => {
-        window.location.href = "/api/login";
-      }, 500);
-      return;
-    }
-  }, [isAuthenticated, isLoading, toast]);
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-surface-darkest flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-blue mx-auto mb-4"></div>
-          <p className="text-secondary">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return null;
-  }
 
   const features = [
     {
@@ -73,50 +40,53 @@ export default function FetchPatterns() {
   ];
 
   return (
-    <div className="min-h-screen bg-surface-darkest">
-      {/* Hero Section */}
-      <section className="pt-20 pb-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-6xl mx-auto text-center">
-          <h1 className="text-5xl md:text-6xl font-bold mb-6 text-white">
-            Fetch <span className="gradient-text">Patterns</span>
-          </h1>
-          <p className="text-2xl text-primary-blue mb-8 font-semibold">
-            What your documents are trying to tell you.
-          </p>
-          <div className="max-w-4xl mx-auto text-secondary leading-relaxed space-y-6">
-            <p className="text-lg">
-              Most teams are sitting on a goldmine of insight, locked in decks, docs, transcripts, and notes that no one has time to process.
+    <div className="min-h-screen bg-surface-white">
+      <Navbar />
+      
+      <main className="pt-16">
+        {/* Hero Section */}
+        <section className="py-20 section-divider">
+          <div className="container-section text-center">
+            <h1 className="text-responsive-xl font-bold mb-6 text-primary">
+              Fetch <span className="text-gradient">Patterns</span>
+            </h1>
+            <p className="text-xl text-accent-blue mb-8 font-medium">
+              What your documents are trying to tell you.
             </p>
-            <p className="text-lg font-semibold text-white">
-              Fetch Patterns makes that insight visible.
-            </p>
+            <div className="max-w-4xl mx-auto text-secondary leading-relaxed space-y-6">
+              <p className="text-lg">
+                Most teams are sitting on a goldmine of insight, locked in decks, docs, transcripts, and notes that no one has time to process.
+              </p>
+              <p className="text-lg font-medium text-primary">
+                Fetch Patterns makes that insight visible.
+              </p>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Features Section */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {features.map((feature, index) => {
-              const IconComponent = feature.icon;
-              return (
-                <Card key={index} className="card-hover">
-                  <CardHeader>
-                    <div className="w-12 h-12 bg-primary-blue/20 rounded-xl flex items-center justify-center mb-4">
-                      <IconComponent className="w-6 h-6 text-primary-blue" />
-                    </div>
-                    <CardTitle className="text-white">{feature.title}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-secondary leading-relaxed">{feature.description}</p>
-                  </CardContent>
-                </Card>
-              );
-            })}
+        {/* Features Section */}
+        <section className="py-16 section-divider">
+          <div className="container-section">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {features.map((feature, index) => {
+                const IconComponent = feature.icon;
+                return (
+                  <Card key={index} className="card-minimal">
+                    <CardHeader>
+                      <div className="w-12 h-12 bg-accent-blue-light rounded-sm flex items-center justify-center mb-4">
+                        <IconComponent className="w-6 h-6 text-accent-blue" />
+                      </div>
+                      <CardTitle className="text-primary">{feature.title}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-secondary leading-relaxed">{feature.description}</p>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
       {/* What You Get Section */}
       <section className="py-16 px-4 sm:px-6 lg:px-8 bg-surface-dark">
@@ -183,6 +153,9 @@ export default function FetchPatterns() {
           </div>
         </div>
       </section>
+      </main>
+      
+      <Footer />
     </div>
   );
 }
