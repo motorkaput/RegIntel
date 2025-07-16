@@ -43,7 +43,7 @@ export default function PerMeaTeEnterprise() {
         <section className="py-6 section-divider">
           <div className="container-section">
             <div className="space-y-12">
-              <p className="text-responsive-lg text-secondary leading-relaxed">
+              <p className="text-lg text-secondary leading-relaxed">
                 It starts with a single outcome. From there, the system breaks it down, cleanly, logically, and fast, into projects, tasks, roles, and metrics.
               </p>
               
