@@ -40,7 +40,7 @@ export default function Next() {
         {/* Upcoming Products */}
         <section className="py-6 section-divider">
           <div className="container-section">
-            <div className="space-y-16">
+            <div className="space-y-6">
               
               {/* Enterprise Mind */}
               <div className="card-minimal p-8 space-y-6">

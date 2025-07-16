@@ -1,6 +1,8 @@
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import { User, Building } from "lucide-react";
+import barshaPandaPhoto from "@assets/BarshaPanda_1752666897513.jpeg";
+import davidJairajPhoto from "@assets/DavidJairaj_1752666897514.jpeg";
 
 export default function About() {
   return (
@@ -53,8 +55,12 @@ export default function About() {
                 {/* Barsha Panda */}
                 <div className="card-minimal p-8 space-y-6">
                   <div className="flex items-start space-x-4">
-                    <div className="w-12 h-12 bg-accent-blue-light rounded-sm flex items-center justify-center flex-shrink-0">
-                      <User className="w-6 h-6 text-accent-blue" />
+                    <div className="w-12 h-12 rounded-sm flex items-center justify-center flex-shrink-0 overflow-hidden">
+                      <img 
+                        src={barshaPandaPhoto} 
+                        alt="Barsha Panda" 
+                        className="w-12 h-12 object-cover"
+                      />
                     </div>
                     <div>
                       <h3 className="text-xl font-semibold text-primary">
@@ -70,8 +76,12 @@ export default function About() {
                 {/* David Jairaj */}
                 <div className="card-minimal p-8 space-y-6">
                   <div className="flex items-start space-x-4">
-                    <div className="w-12 h-12 bg-accent-blue-light rounded-sm flex items-center justify-center flex-shrink-0">
-                      <User className="w-6 h-6 text-accent-blue" />
+                    <div className="w-12 h-12 rounded-sm flex items-center justify-center flex-shrink-0 overflow-hidden">
+                      <img 
+                        src={davidJairajPhoto} 
+                        alt="David Jairaj" 
+                        className="w-12 h-12 object-cover"
+                      />
                     </div>
                     <div>
                       <h3 className="text-xl font-semibold text-primary">
