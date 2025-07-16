@@ -12,10 +12,10 @@ export default function About() {
         <section className="py-24 section-divider">
           <div className="container-section">
             <div className="space-y-8">
-              <h1 className="text-responsive-xl font-semibold text-primary">
+              <h1 className="text-responsive-md font-semibold text-primary">
                 About Dark Street Tech
               </h1>
-              <p className="text-responsive-md text-secondary font-light">
+              <p className="text-responsive-xl text-secondary font-light">
                 A product company born from real enterprise experience.
               </p>
             </div>

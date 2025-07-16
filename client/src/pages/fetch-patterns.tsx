@@ -2,6 +2,7 @@ import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import { Button } from "@/components/ui/button";
 import { FileText, ArrowRight } from "lucide-react";
+import fetchPatternsIcon from "@assets/FetchPatterns_Icon_1752663550310.png";
 
 export default function FetchPatterns() {
   return (
@@ -13,10 +14,10 @@ export default function FetchPatterns() {
         <section className="py-24 section-divider">
           <div className="container-section">
             <div className="space-y-8">
-              <h1 className="text-responsive-xl font-semibold text-primary">
+              <h1 className="text-responsive-md font-semibold text-primary">
                 Fetch Patterns
               </h1>
-              <p className="text-responsive-md text-secondary font-light">
+              <p className="text-responsive-xl text-secondary font-light">
                 What your documents are trying to tell you.
               </p>
             </div>

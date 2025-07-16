@@ -2,6 +2,8 @@ import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import { Button } from "@/components/ui/button";
 import { FileText, Target, Brain, Shield, BarChart3, ArrowRight } from "lucide-react";
+import fetchPatternsIcon from "@assets/FetchPatterns_Icon_1752663550310.png";
+import permeateIcon from "@assets/PerMeaTeEnterprise_Icon_1752663550323.png";
 
 export default function Landing() {
   return (
@@ -13,10 +15,10 @@ export default function Landing() {
         <section className="py-24 section-divider">
           <div className="container-section">
             <div className="space-y-8">
-              <h1 className="text-responsive-xl font-semibold text-primary">
+              <h1 className="text-responsive-md font-semibold text-primary">
                 Dark Street Tech
               </h1>
-              <p className="text-responsive-md text-secondary font-light">
+              <p className="text-responsive-xl text-secondary font-light">
                 Intelligent tech for growing enterprises.
               </p>
             </div>
@@ -55,7 +57,7 @@ export default function Landing() {
                 <div className="card-minimal p-8 space-y-6">
                   <div className="flex items-start space-x-4">
                     <div className="w-12 h-12 bg-accent-blue-light rounded-sm flex items-center justify-center flex-shrink-0">
-                      <FileText className="w-6 h-6 text-accent-blue" />
+                      <img src={fetchPatternsIcon} alt="Fetch Patterns" className="w-6 h-6" />
                     </div>
                     <div>
                       <h3 className="text-xl font-semibold text-primary">
@@ -79,7 +81,7 @@ export default function Landing() {
                 <div className="card-minimal p-8 space-y-6">
                   <div className="flex items-start space-x-4">
                     <div className="w-12 h-12 bg-accent-blue-light rounded-sm flex items-center justify-center flex-shrink-0">
-                      <Target className="w-6 h-6 text-accent-blue" />
+                      <img src={permeateIcon} alt="PerMeaTe Enterprise" className="w-6 h-6" />
                     </div>
                     <div>
                       <h3 className="text-xl font-semibold text-primary">

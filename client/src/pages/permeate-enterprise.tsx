@@ -2,6 +2,7 @@ import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import { Button } from "@/components/ui/button";
 import { Target, ArrowRight } from "lucide-react";
+import permeateIcon from "@assets/PerMeaTeEnterprise_Icon_1752663550323.png";
 
 export default function PerMeaTeEnterprise() {
   return (
@@ -13,10 +14,10 @@ export default function PerMeaTeEnterprise() {
         <section className="py-24 section-divider">
           <div className="container-section">
             <div className="space-y-8">
-              <h1 className="text-responsive-xl font-semibold text-primary">
+              <h1 className="text-responsive-md font-semibold text-primary">
                 PerMeaTe Enterprise
               </h1>
-              <p className="text-responsive-md text-secondary font-light">
+              <p className="text-responsive-xl text-secondary font-light">
                 Where goals turn into real work.
               </p>
             </div>
