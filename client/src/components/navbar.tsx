@@ -22,7 +22,6 @@ export default function Navbar() {
     { name: "PerMeaTe Enterprise", href: "/permeate-enterprise" },
     { name: "Next", href: "/next" },
     { name: "About", href: "/about" },
-    { name: "Loading Demo", href: "/loading-demo" },
   ];
 
   const authenticatedItems = [
@@ -31,7 +30,6 @@ export default function Navbar() {
     { name: "PerMeaTe Enterprise", href: "/permeate-enterprise" },
     { name: "Next", href: "/next" },
     { name: "About", href: "/about" },
-    { name: "Loading Demo", href: "/loading-demo" },
   ];
 
   const items = isAuthenticated ? authenticatedItems : navigationItems;
