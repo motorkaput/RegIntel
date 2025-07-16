@@ -12,7 +12,7 @@ export default function PerMeaTeEnterprise() {
         {/* Hero Section */}
         <section className="py-24 section-divider">
           <div className="container-section">
-            <div className="max-w-4xl mx-auto text-center space-y-8">
+            <div className="space-y-8">
               <h1 className="text-responsive-xl font-semibold text-primary">
                 PerMeaTe Enterprise
               </h1>
@@ -26,7 +26,7 @@ export default function PerMeaTeEnterprise() {
         {/* Problem Statement */}
         <section className="py-16 bg-surface-light section-divider">
           <div className="container-section">
-            <div className="max-w-4xl mx-auto space-y-8">
+            <div className="space-y-8">
               <p className="text-lg text-secondary leading-relaxed">
                 Enterprises don't fail from lack of ambition. They fail from weak translation, between the intent of leaders and the action of teams.
               </p>
@@ -41,7 +41,7 @@ export default function PerMeaTeEnterprise() {
         {/* How It Works */}
         <section className="py-20 section-divider">
           <div className="container-section">
-            <div className="max-w-4xl mx-auto space-y-12">
+            <div className="space-y-12">
               <p className="text-lg text-secondary leading-relaxed">
                 It starts with a single outcome. From there, the system breaks it down, cleanly, logically, and fast, into projects, tasks, roles, and metrics.
               </p>
@@ -75,7 +75,7 @@ export default function PerMeaTeEnterprise() {
         {/* Benefits */}
         <section className="py-16 bg-surface-light section-divider">
           <div className="container-section">
-            <div className="max-w-4xl mx-auto space-y-8">
+            <div className="space-y-8">
               <p className="text-lg text-secondary leading-relaxed">
                 Leaders see the full picture. Project leads gain precision and control. Team members know what matters and how their work is measured.
               </p>
@@ -90,12 +90,12 @@ export default function PerMeaTeEnterprise() {
         {/* Final Message */}
         <section className="py-20 section-divider">
           <div className="container-section">
-            <div className="max-w-4xl mx-auto space-y-8">
+            <div className="space-y-8">
               <p className="text-lg text-primary font-medium">
                 PerMeaTe doesn't replace your workflows. It strengthens the foundation they sit on.
               </p>
               
-              <div className="text-center">
+              <div>
                 <Button 
                   onClick={() => window.location.href = '#'} 
                   className="btn-primary px-8 py-4 text-lg"

@@ -12,7 +12,7 @@ export default function Landing() {
         {/* Hero Section */}
         <section className="py-24 section-divider">
           <div className="container-section">
-            <div className="max-w-4xl mx-auto text-center space-y-8">
+            <div className="space-y-8">
               <h1 className="text-responsive-xl font-semibold text-primary">
                 Dark Street Tech
               </h1>
@@ -26,7 +26,7 @@ export default function Landing() {
         {/* Company Description */}
         <section className="py-16 bg-surface-light section-divider">
           <div className="container-section">
-            <div className="max-w-4xl mx-auto space-y-8">
+            <div className="space-y-8">
               <p className="text-lg text-secondary leading-relaxed">
                 At Dark Street, we are building AI-powered tech for growing enterprises.
               </p>
@@ -45,7 +45,7 @@ export default function Landing() {
         {/* Current Products */}
         <section className="py-20 section-divider">
           <div className="container-section">
-            <div className="max-w-4xl mx-auto">
+            <div>
               <h2 className="text-responsive-lg font-semibold text-primary mb-12">
                 Two products are now live:
               </h2>

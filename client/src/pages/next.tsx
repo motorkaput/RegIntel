@@ -11,7 +11,7 @@ export default function Next() {
         {/* Hero Section */}
         <section className="py-24 section-divider">
           <div className="container-section">
-            <div className="max-w-4xl mx-auto text-center space-y-8">
+            <div className="space-y-8">
               <h1 className="text-responsive-xl font-semibold text-primary">
                 What's coming next
               </h1>
@@ -25,7 +25,7 @@ export default function Next() {
         {/* Introduction */}
         <section className="py-16 bg-surface-light section-divider">
           <div className="container-section">
-            <div className="max-w-4xl mx-auto space-y-8">
+            <div className="space-y-8">
               <p className="text-lg text-secondary leading-relaxed">
                 At Dark Street Tech, we don't chase feature sets. We follow real patterns of friction inside growing enterprises. And we build what resolves them, cleanly and intelligently.
               </p>
@@ -40,7 +40,7 @@ export default function Next() {
         {/* Upcoming Products */}
         <section className="py-20 section-divider">
           <div className="container-section">
-            <div className="max-w-4xl mx-auto space-y-16">
+            <div className="space-y-16">
               
               {/* Enterprise Mind */}
               <div className="card-minimal p-8 space-y-6">
@@ -100,7 +100,7 @@ export default function Next() {
         {/* Contact */}
         <section className="py-16 bg-surface-light section-divider">
           <div className="container-section">
-            <div className="max-w-4xl mx-auto text-center">
+            <div>
               <p className="text-lg text-secondary leading-relaxed">
                 Each of these is under active development. Write to{" "}
                 <a 

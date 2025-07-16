@@ -85,14 +85,7 @@ export default function Navbar() {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-            ) : (
-              <Button
-                onClick={() => window.location.href = '/api/login'}
-                className="btn-primary h-10"
-              >
-                Sign In
-              </Button>
-            )}
+            ) : null}
           </div>
 
           {/* Mobile menu button */}
@@ -124,8 +117,8 @@ export default function Navbar() {
               ))}
               
               {/* Mobile Auth */}
-              <div className="pt-3 border-t border-light mt-3">
-                {isAuthenticated ? (
+              {isAuthenticated && (
+                <div className="pt-3 border-t border-light mt-3">
                   <div className="space-y-1">
                     <Link
                       href="/subscription"
@@ -143,15 +136,8 @@ export default function Navbar() {
                       <span>Sign out</span>
                     </a>
                   </div>
-                ) : (
-                  <Button
-                    onClick={() => window.location.href = '/api/login'}
-                    className="btn-primary w-full"
-                  >
-                    Sign In
-                  </Button>
-                )}
-              </div>
+                </div>
+              )}
             </div>
           </div>
         )}

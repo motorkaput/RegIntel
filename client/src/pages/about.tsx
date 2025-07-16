@@ -11,7 +11,7 @@ export default function About() {
         {/* Hero Section */}
         <section className="py-24 section-divider">
           <div className="container-section">
-            <div className="max-w-4xl mx-auto text-center space-y-8">
+            <div className="space-y-8">
               <h1 className="text-responsive-xl font-semibold text-primary">
                 About Dark Street Tech
               </h1>
@@ -25,7 +25,7 @@ export default function About() {
         {/* Company Background */}
         <section className="py-16 bg-surface-light section-divider">
           <div className="container-section">
-            <div className="max-w-4xl mx-auto space-y-8">
+            <div className="space-y-8">
               <p className="text-lg text-secondary leading-relaxed">
                 Dark Street Tech is the software venture of Dark Street, a strategy firm known for its clarity of thinking, refusal to follow trends, and deep work with leadership teams inside growing enterprises.
               </p>
@@ -44,7 +44,7 @@ export default function About() {
         {/* Leadership */}
         <section className="py-20 section-divider">
           <div className="container-section">
-            <div className="max-w-4xl mx-auto">
+            <div>
               <h2 className="text-responsive-lg font-semibold text-primary mb-12">
                 Leadership
               </h2>
@@ -91,7 +91,7 @@ export default function About() {
         {/* Philosophy */}
         <section className="py-16 bg-surface-light section-divider">
           <div className="container-section">
-            <div className="max-w-4xl mx-auto space-y-8">
+            <div className="space-y-8">
               <p className="text-lg text-primary font-medium">
                 We operate like we expect our customers to: with precision, thoughtfulness, and an eye on what's truly needed.
               </p>
@@ -102,7 +102,7 @@ export default function About() {
         {/* Links */}
         <section className="py-20 section-divider">
           <div className="container-section">
-            <div className="max-w-4xl mx-auto text-center space-y-4">
+            <div className="space-y-4">
               <p className="text-lg text-secondary">
                 For strategy and advisory, visit{" "}
                 <a 

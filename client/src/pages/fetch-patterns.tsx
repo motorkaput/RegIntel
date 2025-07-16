@@ -12,7 +12,7 @@ export default function FetchPatterns() {
         {/* Hero Section */}
         <section className="py-24 section-divider">
           <div className="container-section">
-            <div className="max-w-4xl mx-auto text-center space-y-8">
+            <div className="space-y-8">
               <h1 className="text-responsive-xl font-semibold text-primary">
                 Fetch Patterns
               </h1>
@@ -26,7 +26,7 @@ export default function FetchPatterns() {
         {/* Problem Statement */}
         <section className="py-16 bg-surface-light section-divider">
           <div className="container-section">
-            <div className="max-w-4xl mx-auto space-y-8">
+            <div className="space-y-8">
               <p className="text-lg text-secondary leading-relaxed">
                 Most teams are sitting on a goldmine of insight, locked in decks, docs, transcripts, and notes that no one has time to process.
               </p>
@@ -41,7 +41,7 @@ export default function FetchPatterns() {
         {/* What You Get */}
         <section className="py-20 section-divider">
           <div className="container-section">
-            <div className="max-w-4xl mx-auto">
+            <div>
               <h2 className="text-responsive-lg font-semibold text-primary mb-12">
                 Upload a single document or a batch. The system reads them, classifies them, and surfaces what matters:
               </h2>
@@ -84,7 +84,7 @@ export default function FetchPatterns() {
         {/* Use Cases */}
         <section className="py-16 bg-surface-light section-divider">
           <div className="container-section">
-            <div className="max-w-4xl mx-auto space-y-8">
+            <div className="space-y-8">
               <p className="text-lg text-secondary leading-relaxed">
                 You can analyze by context: product quality, customer sentiment, competitive strategy, team feedback. Or simply explore what emerges. Whether you're working on a pitch, reviewing field reports, or onboarding a new hire, Fetch Patterns helps you focus attention where it counts.
               </p>
@@ -99,7 +99,7 @@ export default function FetchPatterns() {
         {/* CTA Section */}
         <section className="py-20 section-divider">
           <div className="container-section">
-            <div className="max-w-4xl mx-auto text-center">
+            <div>
               <Button 
                 onClick={() => window.location.href = '#'} 
                 className="btn-primary px-8 py-4 text-lg"

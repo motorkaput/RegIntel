@@ -1,5 +1,4 @@
 import { Link } from "wouter";
-import logoPath from "@assets/DarkStreetTech_Logo_1752659608844.png";
 import { Mail, ExternalLink } from "lucide-react";
 
 export default function Footer() {
@@ -9,16 +8,6 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Company Info */}
           <div className="space-y-4">
-            <div className="flex items-center">
-              <img 
-                src={logoPath} 
-                alt="Dark Street Tech" 
-                className="h-8 w-auto"
-              />
-            </div>
-            <p className="text-secondary text-sm leading-relaxed">
-              Intelligent tech for growing enterprises. Precise instruments for teams that think and perform better.
-            </p>
             <div className="flex items-center space-x-2 text-secondary">
               <Mail className="w-4 h-4" />
               <a 
@@ -117,9 +106,6 @@ export default function Footer() {
               © 2025 Dark Street Tech. All rights reserved.
             </p>
             <div className="flex items-center space-x-6">
-              <p className="text-secondary text-xs">
-                Built with precision for enterprise teams
-              </p>
             </div>
           </div>
         </div>
