@@ -21,28 +21,24 @@ function Router() {
 
   return (
     <Switch>
-      {isLoading || !isAuthenticated ? (
+      {/* Public routes - accessible without authentication */}
+      <Route path="/" component={Landing} />
+      <Route path="/fetch-patterns" component={FetchPatterns} />
+      <Route path="/permeate-enterprise" component={PerMeaTeEnterprise} />
+      <Route path="/next" component={Next} />
+      <Route path="/about" component={About} />
+      <Route path="/pricing" component={Pricing} />
+      
+      {/* Protected routes - require authentication */}
+      {isAuthenticated && (
         <>
-          <Route path="/" component={Landing} />
-          <Route path="/fetch-patterns" component={FetchPatterns} />
-          <Route path="/permeate-enterprise" component={PerMeaTeEnterprise} />
-          <Route path="/next" component={Next} />
-          <Route path="/about" component={About} />
-          <Route path="/pricing" component={Pricing} />
-        </>
-      ) : (
-        <>
-          <Route path="/" component={Home} />
-          <Route path="/fetch-patterns" component={FetchPatterns} />
-          <Route path="/permeate-enterprise" component={PerMeaTeEnterprise} />
-          <Route path="/next" component={Next} />
-          <Route path="/about" component={About} />
+          <Route path="/home" component={Home} />
           <Route path="/document-analyzer" component={DocumentAnalyzer} />
           <Route path="/performance-dashboard" component={PerformanceDashboard} />
           <Route path="/subscription" component={Subscription} />
-          <Route path="/pricing" component={Pricing} />
         </>
       )}
+      
       <Route component={NotFound} />
     </Switch>
   );
