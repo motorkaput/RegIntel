@@ -2,7 +2,7 @@ import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import { Button } from "@/components/ui/button";
 import { Target, ArrowRight } from "lucide-react";
-import permeateIcon from "@assets/PerMeaTeEnterprise_Icon_1752663550323.png";
+import permeateIcon from "@assets/PerMeaTeEnterprise_Icon_1752664675820.png";
 
 export default function PerMeaTeEnterprise() {
   return (
