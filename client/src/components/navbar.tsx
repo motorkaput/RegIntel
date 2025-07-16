@@ -43,7 +43,7 @@ export default function Navbar() {
             <img 
               src={logoPath} 
               alt="Dark Street Tech" 
-              className="h-9 w-auto"
+              className="h-10 w-auto"
             />
           </Link>
 
@@ -88,7 +88,7 @@ export default function Navbar() {
             ) : (
               <Button
                 onClick={() => window.location.href = '/api/login'}
-                className="btn-primary"
+                className="btn-primary h-10"
               >
                 Sign In
               </Button>
