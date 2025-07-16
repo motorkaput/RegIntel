@@ -11,13 +11,13 @@ export default function FetchPatterns() {
       
       <main className="pt-16">
         {/* Hero Section */}
-        <section className="py-24 section-divider">
+        <section className="py-6 section-divider">
           <div className="container-section">
             <div className="space-y-8">
-              <h1 className="text-responsive-md font-semibold text-primary">
+              <h1 className="text-responsive-md text-primary">
                 Fetch Patterns
               </h1>
-              <p className="text-responsive-xl text-secondary font-light">
+              <p className="text-responsive-xxl text-secondary font-light">
                 What your documents are trying to tell you.
               </p>
             </div>
@@ -25,7 +25,7 @@ export default function FetchPatterns() {
         </section>
 
         {/* Problem Statement */}
-        <section className="py-16 bg-surface-light section-divider">
+        <section className="py-6 bg-surface-light section-divider">
           <div className="container-section">
             <div className="space-y-8">
               <p className="text-lg text-secondary leading-relaxed">
@@ -40,7 +40,7 @@ export default function FetchPatterns() {
         </section>
 
         {/* What You Get */}
-        <section className="py-20 section-divider">
+        <section className="py-6 section-divider">
           <div className="container-section">
             <div>
               <h2 className="text-responsive-lg font-semibold text-primary mb-12">
@@ -83,7 +83,7 @@ export default function FetchPatterns() {
         </section>
 
         {/* Use Cases */}
-        <section className="py-16 bg-surface-light section-divider">
+        <section className="py-6 bg-surface-light section-divider">
           <div className="container-section">
             <div className="space-y-8">
               <p className="text-lg text-secondary leading-relaxed">
