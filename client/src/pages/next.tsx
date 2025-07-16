@@ -1,6 +1,7 @@
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import { Brain, Shield, BarChart3, Mail } from "lucide-react";
+import darkStreetIcon from "@assets/DarkStreetTech_Icon_1752659608842.png";
 
 export default function Next() {
   return (
@@ -45,8 +46,12 @@ export default function Next() {
               {/* Enterprise Mind */}
               <div className="card-minimal p-8 space-y-6">
                 <div className="flex items-start space-x-4">
-                  <div className="w-12 h-12 bg-accent-blue-light rounded-sm flex items-center justify-center flex-shrink-0">
-                    <Brain className="w-6 h-6 text-accent-blue" />
+                  <div className="w-12 h-12 rounded-sm flex items-center justify-center flex-shrink-0 overflow-hidden">
+                    <img 
+                      src={darkStreetIcon} 
+                      alt="Dark Street Tech" 
+                      className="w-12 h-12 object-contain"
+                    />
                   </div>
                   <div>
                     <h3 className="text-xl font-semibold text-primary">
@@ -62,8 +67,12 @@ export default function Next() {
               {/* QOAN */}
               <div className="card-minimal p-8 space-y-6">
                 <div className="flex items-start space-x-4">
-                  <div className="w-12 h-12 bg-accent-blue-light rounded-sm flex items-center justify-center flex-shrink-0">
-                    <Shield className="w-6 h-6 text-accent-blue" />
+                  <div className="w-12 h-12 rounded-sm flex items-center justify-center flex-shrink-0 overflow-hidden">
+                    <img 
+                      src={darkStreetIcon} 
+                      alt="Dark Street Tech" 
+                      className="w-12 h-12 object-contain"
+                    />
                   </div>
                   <div>
                     <h3 className="text-xl font-semibold text-primary">
@@ -79,8 +88,12 @@ export default function Next() {
               {/* PCI Index */}
               <div className="card-minimal p-8 space-y-6">
                 <div className="flex items-start space-x-4">
-                  <div className="w-12 h-12 bg-accent-blue-light rounded-sm flex items-center justify-center flex-shrink-0">
-                    <BarChart3 className="w-6 h-6 text-accent-blue" />
+                  <div className="w-12 h-12 rounded-sm flex items-center justify-center flex-shrink-0 overflow-hidden">
+                    <img 
+                      src={darkStreetIcon} 
+                      alt="Dark Street Tech" 
+                      className="w-12 h-12 object-contain"
+                    />
                   </div>
                   <div>
                     <h3 className="text-xl font-semibold text-primary">
