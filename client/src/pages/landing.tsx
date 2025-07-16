@@ -25,6 +25,25 @@ export default function Landing() {
           </div>
         </section>
 
+        {/* Company Description */}
+        <section className="py-6 bg-surface-light section-divider">
+          <div className="container-section">
+            <div className="space-y-8">
+              <p className="text-lg text-secondary leading-relaxed">
+                At Dark Street, we are building AI-powered tech for growing enterprises.
+              </p>
+              
+              <p className="text-lg text-secondary leading-relaxed">
+                Our SaaS products are designed to solve hard, often invisible problems that stall momentum in scaling organizations: broken task ownership, weak feedback loops, hidden complexity in goals, and documents no one truly reads.
+              </p>
+              
+              <p className="text-lg text-secondary leading-relaxed">
+                We don't create generic tools. We create precise instruments, designed for teams that think and want to perform better. Backed by years of strategic consulting and enterprise insight, Dark Street Tech is the product arm of Dark Street. We combine systems thinking, cognitive design, and practical execution into tools that make work clearer, lighter, and more aligned.
+              </p>
+            </div>
+          </div>
+        </section>
+
         {/* Current Products */}
         <section className="py-6 section-divider">
           <div className="container-section">
