@@ -12,7 +12,10 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FileText, Upload, Clock, CheckCircle, XCircle, BarChart3, Brain, FileSearch } from "lucide-react";
-import LoadingSpinner from "@/components/loading-spinner";
+import LoadingSpinner from "@/components/ui/loading-spinner";
+import LoadingSkeleton from "@/components/ui/loading-skeleton";
+import LoadingButton from "@/components/ui/loading-button";
+import LoadingOverlay from "@/components/ui/loading-overlay";
 
 interface Document {
   id: number;
@@ -160,7 +163,7 @@ export default function DocumentAnalyzer() {
   };
 
   if (isLoading || documentsLoading) {
-    return <LoadingSpinner />;
+    return <LoadingSpinner variant="branded" text="Loading document analyzer..." />;
   }
 
   return (
@@ -210,13 +213,14 @@ export default function DocumentAnalyzer() {
                       onChange={handleFileSelect}
                     />
                     <label htmlFor="file-upload">
-                      <Button
+                      <LoadingButton
                         as="div"
                         className="bg-neon-green text-black hover:bg-neon-cyan cursor-pointer"
-                        disabled={uploadMutation.isPending}
+                        isLoading={uploadMutation.isPending}
+                        loadingText="Uploading..."
                       >
-                        {uploadMutation.isPending ? 'Uploading...' : 'Select File'}
-                      </Button>
+                        Select File
+                      </LoadingButton>
                     </label>
                   </div>
                   <p className="text-sm text-gray-400 mt-2">

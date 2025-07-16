@@ -15,6 +15,7 @@ import FetchPatterns from "@/pages/fetch-patterns";
 import PerMeaTeEnterprise from "@/pages/permeate-enterprise";
 import Next from "@/pages/next";
 import About from "@/pages/about";
+import LoadingDemo from "@/pages/loading-demo";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -28,6 +29,7 @@ function Router() {
       <Route path="/next" component={Next} />
       <Route path="/about" component={About} />
       <Route path="/pricing" component={Pricing} />
+      <Route path="/loading-demo" component={LoadingDemo} />
       
       {/* Protected routes - require authentication */}
       {isAuthenticated && (
