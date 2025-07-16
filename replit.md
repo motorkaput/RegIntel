@@ -7,6 +7,7 @@ Dark Street Tech is a full-stack AI-powered SaaS platform that provides document
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
+Design preference: Mature, professional look inspired by Palantir.com instead of quirky/neon design.
 
 ## System Architecture
 
@@ -16,7 +17,7 @@ Preferred communication style: Simple, everyday language.
 - **UI Framework**: Tailwind CSS with shadcn/ui components
 - **State Management**: TanStack Query for server state management
 - **Routing**: Wouter for client-side routing
-- **Styling**: Custom dark theme with neon green/cyan accent colors
+- **Styling**: Professional dark theme with sophisticated blue color palette and enterprise-focused design
 
 ### Backend Architecture
 - **Framework**: Express.js with TypeScript
@@ -109,3 +110,13 @@ Preferred communication style: Simple, everyday language.
 - Environment variable protection
 
 The application follows a modern full-stack architecture with emphasis on type safety, performance, and user experience while maintaining scalability for growth.
+
+## Recent Changes
+
+**Design Transformation (July 16, 2025)**
+- Redesigned entire application with mature, professional aesthetic inspired by Palantir.com
+- Replaced neon green/cyan color scheme with sophisticated blue palette
+- Updated messaging to focus on enterprise solutions and professional language
+- Removed quirky elements like NFT showcase in favor of clean, business-focused design
+- Enhanced typography and layout for better readability and professional appearance
+- Maintained all existing functionality while improving visual hierarchy and user experience

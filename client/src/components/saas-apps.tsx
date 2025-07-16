@@ -44,14 +44,14 @@ export default function SaaSApps() {
   };
 
   return (
-    <section className="py-20 bg-gradient-to-b from-black to-dark-gray">
+    <section className="py-24 bg-surface-darkest">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold mb-4">
-            AI-Powered <span className="text-neon-green">SaaS</span> Applications
+        <div className="text-center mb-20">
+          <h2 className="text-4xl md:text-5xl font-bold mb-6 text-white">
+            Enterprise <span className="gradient-text">Applications</span>
           </h2>
-          <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-            Experience the future of business automation with our suite of intelligent applications.
+          <p className="text-xl text-secondary max-w-3xl mx-auto leading-relaxed">
+            Powerful AI-driven applications designed for enterprise scalability and performance.
           </p>
         </div>
 
@@ -61,18 +61,18 @@ export default function SaaSApps() {
             return (
               <Card 
                 key={index}
-                className="bg-dark-gray rounded-2xl border border-neon-green/20 hover:border-neon-green/60 transition-all duration-300 hover:shadow-[0_0_30px_rgba(0,255,136,0.3)] group overflow-hidden"
+                className="card-hover group overflow-hidden"
               >
                 <CardHeader className="pb-4">
                   <div className="flex items-center mb-6">
-                    <div className="w-12 h-12 bg-neon-green/20 rounded-xl flex items-center justify-center mr-4 group-hover:bg-neon-green/30 transition-colors">
-                      <IconComponent className="w-6 h-6 text-neon-green" />
+                    <div className="w-12 h-12 bg-primary-blue/20 rounded-xl flex items-center justify-center mr-4 group-hover:bg-primary-blue/30 transition-colors">
+                      <IconComponent className="w-6 h-6 text-primary-blue" />
                     </div>
                     <div>
-                      <CardTitle className="text-2xl font-semibold text-neon-green">
+                      <CardTitle className="text-2xl font-semibold text-white">
                         {app.name}
                       </CardTitle>
-                      <p className="text-gray-400 text-sm">{app.subtitle}</p>
+                      <p className="text-muted text-sm">{app.subtitle}</p>
                     </div>
                   </div>
                 </CardHeader>
@@ -84,20 +84,20 @@ export default function SaaSApps() {
                       alt={app.name}
                       className="w-full h-48 object-cover rounded-xl group-hover:scale-105 transition-transform duration-300"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent rounded-xl"></div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-surface-darkest/80 to-transparent rounded-xl"></div>
                   </div>
 
-                  <p className="text-gray-300">
+                  <p className="text-secondary leading-relaxed">
                     {app.description}
                   </p>
 
                   <div className="grid grid-cols-2 gap-4">
                     {app.metrics.map((metric, metricIndex) => (
                       <div key={metricIndex} className="text-center">
-                        <div className="text-2xl font-bold text-neon-green">
+                        <div className="text-2xl font-bold text-primary-blue">
                           {metric.value}
                         </div>
-                        <div className="text-sm text-gray-400">
+                        <div className="text-sm text-muted">
                           {metric.label}
                         </div>
                       </div>
@@ -106,9 +106,9 @@ export default function SaaSApps() {
 
                   <Button
                     onClick={() => handleAppClick(app.link)}
-                    className="w-full bg-neon-green text-black hover:bg-neon-cyan transition-colors font-semibold py-3"
+                    className="w-full bg-primary-blue text-white hover:bg-primary-blue-dark transition-colors font-semibold py-3"
                   >
-                    {isAuthenticated ? `Try ${app.name}` : `Sign In to Use ${app.name}`}
+                    {isAuthenticated ? `Access ${app.name}` : `Sign In to Access ${app.name}`}
                   </Button>
                 </CardContent>
               </Card>

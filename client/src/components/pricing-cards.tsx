@@ -69,14 +69,15 @@ export default function PricingCards() {
   const displayPlans = plans || defaultPlans;
 
   return (
-    <section className="py-20 bg-dark-gray">
+    <section className="py-24 bg-surface-dark">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold mb-4">
-            Choose Your <span className="text-neon-green">Plan</span>
+        <div className="text-center mb-20">
+          <h2 className="text-4xl md:text-5xl font-bold mb-6 text-white">
+            Enterprise <span className="gradient-text">Pricing</span>
           </h2>
-          <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-            Start with a 30-day free trial and scale as your business grows.
+          <p className="text-xl text-secondary max-w-3xl mx-auto leading-relaxed">
+            Flexible pricing plans designed to scale with your enterprise needs. 
+            Start with a 30-day free trial and upgrade as you grow.
           </p>
         </div>
 
@@ -84,39 +85,39 @@ export default function PricingCards() {
           {displayPlans.map((plan) => (
             <Card 
               key={plan.id}
-              className={`bg-black rounded-2xl border transition-all duration-300 relative ${
+              className={`relative card-hover transition-all duration-300 ${
                 plan.popular 
-                  ? 'border-2 border-neon-green hover:shadow-[0_0_30px_rgba(0,255,136,0.3)]' 
-                  : 'border-gray-600 hover:border-neon-green/60'
+                  ? 'border-2 border-primary-blue' 
+                  : 'border border-subtle'
               }`}
             >
               {plan.popular && (
-                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-neon-green text-black px-4 py-1 rounded-full text-sm font-semibold">
+                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-primary-blue text-white px-4 py-1 rounded-full text-sm font-semibold">
                   Most Popular
                 </div>
               )}
               
               <CardHeader className="text-center pb-4">
-                <CardTitle className="text-2xl font-semibold mb-2">
+                <CardTitle className="text-2xl font-semibold mb-2 text-white">
                   {plan.name}
                 </CardTitle>
                 <div className="mb-2">
-                  <span className="text-4xl font-bold text-neon-green">
+                  <span className="text-4xl font-bold text-primary-blue">
                     {plan.price === 'Custom' ? 'Custom' : `$${plan.price}`}
                   </span>
                   {plan.price !== 'Custom' && (
-                    <span className="text-gray-400 text-sm ml-1">per month</span>
+                    <span className="text-muted text-sm ml-1">per month</span>
                   )}
                 </div>
-                <p className="text-gray-400 text-sm">{plan.description}</p>
+                <p className="text-muted text-sm">{plan.description}</p>
               </CardHeader>
               
               <CardContent className="space-y-6">
                 <ul className="space-y-4">
                   {plan.features.map((feature, index) => (
                     <li key={index} className="flex items-center space-x-3">
-                      <CheckCircle className="w-5 h-5 text-neon-green flex-shrink-0" />
-                      <span className="text-gray-300">{feature}</span>
+                      <CheckCircle className="w-5 h-5 text-primary-blue flex-shrink-0" />
+                      <span className="text-secondary">{feature}</span>
                     </li>
                   ))}
                 </ul>

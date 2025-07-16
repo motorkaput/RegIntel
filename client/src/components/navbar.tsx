@@ -38,7 +38,7 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="fixed top-0 w-full bg-black/80 backdrop-blur-md z-50 border-b border-neon-green/20">
+    <nav className="fixed top-0 w-full bg-surface-darkest/90 backdrop-blur-md z-50 border-b border-subtle">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
@@ -48,7 +48,7 @@ export default function Navbar() {
               alt="Dark Street Tech Logo" 
               className="h-8 w-auto"
             />
-            <span className="text-xl font-bold text-neon-green">
+            <span className="text-xl font-bold text-primary-blue">
               Dark Street Tech
             </span>
           </Link>
@@ -62,8 +62,8 @@ export default function Navbar() {
                   href={item.href}
                   className={`px-3 py-2 text-sm font-medium transition-colors ${
                     location === item.href
-                      ? "text-neon-green"
-                      : "text-white hover:text-neon-green"
+                      ? "text-primary-blue"
+                      : "text-white hover:text-primary-blue"
                   }`}
                   onClick={() => handleNavClick(item.href)}
                 >
@@ -77,14 +77,14 @@ export default function Navbar() {
           <div className="hidden md:flex items-center space-x-4">
             {isAuthenticated ? (
               <>
-                <div className="text-sm text-gray-300">
+                <div className="text-sm text-secondary">
                   Welcome, {user?.firstName || "User"}
                 </div>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => window.location.href = "/api/logout"}
-                  className="border-neon-green text-neon-green hover:bg-neon-green hover:text-black"
+                  className="border-primary-blue text-primary-blue hover:bg-primary-blue hover:text-white"
                 >
                   Sign Out
                 </Button>
@@ -95,14 +95,14 @@ export default function Navbar() {
                   variant="ghost"
                   size="sm"
                   onClick={() => window.location.href = "/api/login"}
-                  className="text-white hover:text-neon-green"
+                  className="text-white hover:text-primary-blue"
                 >
                   Sign In
                 </Button>
                 <Button
                   size="sm"
                   onClick={() => window.location.href = "/api/login"}
-                  className="bg-neon-green text-black hover:bg-neon-cyan"
+                  className="bg-primary-blue text-white hover:bg-primary-blue-dark"
                 >
                   Get Started
                 </Button>

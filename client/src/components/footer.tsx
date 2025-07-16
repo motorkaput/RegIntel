@@ -3,7 +3,7 @@ import logoPath from "@assets/DarkStreetTech_Logo_1752637328308.png";
 
 export default function Footer() {
   return (
-    <footer className="bg-darker-gray py-12 border-t border-neon-green/20">
+    <footer className="bg-surface-darkest py-16 border-t border-subtle">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Logo and Description */}
@@ -14,17 +14,18 @@ export default function Footer() {
                 alt="Dark Street Tech Logo" 
                 className="h-8 w-auto"
               />
-              <span className="ml-3 text-xl font-bold text-neon-green">
+              <span className="ml-3 text-xl font-bold text-primary-blue">
                 Dark Street Tech
               </span>
             </div>
-            <p className="text-gray-400 mb-4">
-              Transforming businesses through AI-powered solutions and cutting-edge technology.
+            <p className="text-secondary mb-6 leading-relaxed">
+              Empowering growing enterprises with intelligent AI solutions for data analysis, 
+              visualization, and strategic decision-making.
             </p>
             <div className="flex space-x-4">
               <a 
                 href="#" 
-                className="text-gray-400 hover:text-neon-green transition-colors"
+                className="text-muted hover:text-primary-blue transition-colors"
                 aria-label="Twitter"
               >
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -33,7 +34,7 @@ export default function Footer() {
               </a>
               <a 
                 href="#" 
-                className="text-gray-400 hover:text-neon-green transition-colors"
+                className="text-muted hover:text-primary-blue transition-colors"
                 aria-label="LinkedIn"
               >
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -42,7 +43,7 @@ export default function Footer() {
               </a>
               <a 
                 href="#" 
-                className="text-gray-400 hover:text-neon-green transition-colors"
+                className="text-muted hover:text-primary-blue transition-colors"
                 aria-label="GitHub"
               >
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -52,28 +53,28 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Products */}
+          {/* Solutions */}
           <div>
-            <h4 className="text-lg font-semibold mb-4 text-neon-green">Products</h4>
-            <ul className="space-y-2 text-gray-400">
+            <h4 className="text-lg font-semibold mb-4 text-white">Solutions</h4>
+            <ul className="space-y-3 text-secondary">
               <li>
-                <Link href="/document-analyzer" className="hover:text-neon-green transition-colors">
-                  DocuMind AI
+                <Link href="/document-analyzer" className="hover:text-primary-blue transition-colors">
+                  Document Intelligence
                 </Link>
               </li>
               <li>
-                <Link href="/performance-dashboard" className="hover:text-neon-green transition-colors">
-                  MetricsMaster
+                <Link href="/performance-dashboard" className="hover:text-primary-blue transition-colors">
+                  Performance Analytics
                 </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-neon-green transition-colors">
-                  AI Automation Suite
+                <a href="#" className="hover:text-primary-blue transition-colors">
+                  Process Automation
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-neon-green transition-colors">
-                  Custom Solutions
+                <a href="#" className="hover:text-primary-blue transition-colors">
+                  Enterprise AI
                 </a>
               </li>
             </ul>
@@ -81,52 +82,52 @@ export default function Footer() {
 
           {/* Company */}
           <div>
-            <h4 className="text-lg font-semibold mb-4 text-neon-green">Company</h4>
-            <ul className="space-y-2 text-gray-400">
+            <h4 className="text-lg font-semibold mb-4 text-white">Company</h4>
+            <ul className="space-y-3 text-secondary">
               <li>
-                <a href="#about" className="hover:text-neon-green transition-colors">
+                <a href="#about" className="hover:text-primary-blue transition-colors">
                   About Us
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-neon-green transition-colors">
+                <a href="#" className="hover:text-primary-blue transition-colors">
+                  Leadership
+                </a>
+              </li>
+              <li>
+                <a href="#" className="hover:text-primary-blue transition-colors">
                   Careers
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-neon-green transition-colors">
-                  Blog
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-neon-green transition-colors">
+                <a href="#" className="hover:text-primary-blue transition-colors">
                   Contact
                 </a>
               </li>
             </ul>
           </div>
 
-          {/* Support */}
+          {/* Resources */}
           <div>
-            <h4 className="text-lg font-semibold mb-4 text-neon-green">Support</h4>
-            <ul className="space-y-2 text-gray-400">
+            <h4 className="text-lg font-semibold mb-4 text-white">Resources</h4>
+            <ul className="space-y-3 text-secondary">
               <li>
-                <a href="#" className="hover:text-neon-green transition-colors">
-                  Help Center
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-neon-green transition-colors">
+                <a href="#" className="hover:text-primary-blue transition-colors">
                   Documentation
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-neon-green transition-colors">
+                <a href="#" className="hover:text-primary-blue transition-colors">
                   API Reference
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-neon-green transition-colors">
+                <a href="#" className="hover:text-primary-blue transition-colors">
+                  Support Center
+                </a>
+              </li>
+              <li>
+                <a href="#" className="hover:text-primary-blue transition-colors">
                   Status
                 </a>
               </li>
@@ -134,8 +135,8 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="border-t border-neon-green/20 mt-8 pt-8 text-center text-gray-400">
-          <p>&copy; 2024 Dark Street Tech. All rights reserved.</p>
+        <div className="border-t border-subtle mt-12 pt-8 text-center text-muted">
+          <p>&copy; 2024 Dark Street Tech. All rights reserved. | Privacy Policy | Terms of Service</p>
         </div>
       </div>
     </footer>
