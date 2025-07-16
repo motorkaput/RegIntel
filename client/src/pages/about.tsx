@@ -9,7 +9,7 @@ export default function About() {
       
       <main className="pt-16">
         {/* Hero Section */}
-        <section className="py-24 section-divider">
+        <section className="py-6 section-divider">
           <div className="container-section">
             <div className="space-y-8">
               <h1 className="text-responsive-md text-primary">
@@ -23,7 +23,7 @@ export default function About() {
         </section>
 
         {/* Company Background */}
-        <section className="py-16 bg-surface-light section-divider">
+        <section className="py-6 bg-surface-light section-divider">
           <div className="container-section">
             <div className="space-y-8">
               <p className="text-lg text-secondary leading-relaxed">
@@ -42,7 +42,7 @@ export default function About() {
         </section>
 
         {/* Leadership */}
-        <section className="py-20 section-divider">
+        <section className="py-6 section-divider">
           <div className="container-section">
             <div>
               <h2 className="text-responsive-lg font-semibold text-primary mb-12">
@@ -89,7 +89,7 @@ export default function About() {
         </section>
 
         {/* Philosophy */}
-        <section className="py-16 bg-surface-light section-divider">
+        <section className="py-6 bg-surface-light section-divider">
           <div className="container-section">
             <div className="space-y-8">
               <p className="text-lg text-primary font-medium">
@@ -100,7 +100,7 @@ export default function About() {
         </section>
 
         {/* Links */}
-        <section className="py-20 section-divider">
+        <section className="py-6 section-divider">
           <div className="container-section">
             <div className="space-y-4">
               <p className="text-lg text-secondary">

@@ -25,7 +25,7 @@ export default function PerMeaTeEnterprise() {
         </section>
 
         {/* Problem Statement */}
-        <section className="py-16 bg-surface-light section-divider">
+        <section className="py-6 bg-surface-light section-divider">
           <div className="container-section">
             <div className="space-y-8">
               <p className="text-lg text-secondary leading-relaxed">
@@ -40,7 +40,7 @@ export default function PerMeaTeEnterprise() {
         </section>
 
         {/* How It Works */}
-        <section className="py-20 section-divider">
+        <section className="py-6 section-divider">
           <div className="container-section">
             <div className="space-y-12">
               <p className="text-lg text-secondary leading-relaxed">
@@ -74,7 +74,7 @@ export default function PerMeaTeEnterprise() {
         </section>
 
         {/* Benefits */}
-        <section className="py-16 bg-surface-light section-divider">
+        <section className="py-6 bg-surface-light section-divider">
           <div className="container-section">
             <div className="space-y-8">
               <p className="text-lg text-secondary leading-relaxed">
@@ -89,7 +89,7 @@ export default function PerMeaTeEnterprise() {
         </section>
 
         {/* Final Message */}
-        <section className="py-20 section-divider">
+        <section className="py-6 section-divider">
           <div className="container-section">
             <div className="space-y-8">
               <p className="text-lg text-primary font-medium">

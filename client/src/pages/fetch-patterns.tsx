@@ -98,7 +98,7 @@ export default function FetchPatterns() {
         </section>
 
         {/* CTA Section */}
-        <section className="py-20 section-divider">
+        <section className="py-6 section-divider">
           <div className="container-section">
             <div>
               <Button 
