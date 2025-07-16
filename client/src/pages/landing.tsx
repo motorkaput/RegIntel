@@ -48,11 +48,11 @@ export default function Landing() {
         <section className="py-6 section-divider">
           <div className="container-section">
             <div>
-              <h2 className="text-lg text-primary mb-12">
+              <h2 className="text-lg text-primary mb-6">
                 PRODUCTS IN BETA
               </h2>
               
-              <div className="space-y-12">
+              <div className="space-y-6">
                 {/* Fetch Patterns */}
                 <div className="card-minimal p-8 space-y-6">
                   <div className="flex items-start space-x-4">
