@@ -43,7 +43,7 @@ export default function FetchPatterns() {
         <section className="py-6 section-divider">
           <div className="container-section">
             <div>
-              <h2 className="text-responsive-lg font-semibold text-primary mb-12">
+              <h2 className="text-lg text-primary mb-12">
                 Upload a single document or a batch. The system reads them, classifies them, and surfaces what matters:
               </h2>
               
