@@ -42,12 +42,12 @@ export default function PerMeaTeEnterprise() {
         {/* How It Works */}
         <section className="py-6 section-divider">
           <div className="container-section">
-            <div className="space-y-12">
+            <div className="space-y-6">
               <p className="text-lg text-secondary leading-relaxed">
                 It starts with a single outcome. From there, the system breaks it down, cleanly, logically, and fast, into projects, tasks, roles, and metrics.
               </p>
               
-              <h2 className="text-lg font-semibold text-primary">
+              <h2 className="text-lg text-primary mb-6">
                 You get:
               </h2>
               
