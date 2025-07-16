@@ -3,6 +3,7 @@ import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Menu, X, User, LogOut } from "lucide-react";
+import logoPath from "@assets/DarkStreetTech_Logo_1752659608844.png";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -38,11 +39,12 @@ export default function Navbar() {
       <div className="container-section">
         <div className="flex justify-between items-center h-14">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2">
-            <div className="w-6 h-6 bg-accent-blue rounded-sm flex items-center justify-center">
-              <span className="text-white font-bold text-xs">D</span>
-            </div>
-            <span className="text-sm font-medium text-primary">Dark Street Tech</span>
+          <Link href="/" className="flex items-center">
+            <img 
+              src={logoPath} 
+              alt="Dark Street Tech" 
+              className="h-8 w-auto"
+            />
           </Link>
 
           {/* Desktop Navigation */}

@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Code, Terminal } from "lucide-react";
+import logoPath from "@assets/DarkStreetTech_Logo_1752659608844.png";
 
 export default function HeroSection() {
   return (
