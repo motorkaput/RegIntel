@@ -2,8 +2,7 @@ import Navbar from "@/components/navbar";
 import HeroSection from "@/components/hero-section";
 import Footer from "@/components/footer";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileText, Target, Brain, Shield, BarChart3, ArrowRight } from "lucide-react";
+import { FileText, Target, Brain, Shield, BarChart3, ArrowRight, Mail } from "lucide-react";
 
 export default function Landing() {
   const currentProducts = [
@@ -44,60 +43,59 @@ export default function Landing() {
   ];
 
   return (
-    <div className="min-h-screen bg-surface-darkest text-white">
+    <div className="min-h-screen bg-surface-white">
       <Navbar />
       <HeroSection />
       
       {/* Current Products Section */}
-      <section className="py-24 bg-surface-dark">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-24 bg-surface-light section-divider">
+        <div className="container-section">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 text-white">
-              Our <span className="gradient-text">Products</span>
+            <h2 className="text-responsive-lg font-semibold text-primary mb-6">
+              Our <span className="text-gradient">Products</span>
             </h2>
-            <p className="text-xl text-secondary max-w-3xl mx-auto leading-relaxed">
+            <p className="text-secondary max-w-3xl mx-auto leading-relaxed">
               Precise instruments designed for teams that think and want to perform better.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          <div className="layout-grid layout-grid-2 gap-12">
             {currentProducts.map((product, index) => {
               const IconComponent = product.icon;
               return (
-                <Card key={index} className="card-hover group">
-                  <CardHeader>
-                    <div className="flex items-center mb-6">
-                      <div className="w-12 h-12 bg-primary-blue/20 rounded-xl flex items-center justify-center mr-4">
-                        <IconComponent className="w-6 h-6 text-primary-blue" />
-                      </div>
-                      <div>
-                        <CardTitle className="text-2xl font-bold text-white">
-                          {product.title}
-                        </CardTitle>
-                        <p className="text-primary-blue font-medium">{product.subtitle}</p>
-                      </div>
+                <div key={index} className="card-minimal p-8 space-y-6 animate-fade-in">
+                  <div className="flex items-start space-x-4">
+                    <div className="w-12 h-12 bg-accent-blue-light rounded-sm flex items-center justify-center flex-shrink-0">
+                      <IconComponent className="w-6 h-6 text-accent-blue" />
                     </div>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    <p className="text-secondary leading-relaxed">
-                      {product.description}
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {product.features.map((feature, idx) => (
-                        <span key={idx} className="px-3 py-1 bg-primary-blue/10 text-primary-blue text-sm rounded-full">
-                          {feature}
-                        </span>
-                      ))}
+                    <div>
+                      <h3 className="text-xl font-semibold text-primary mb-2">
+                        {product.title}
+                      </h3>
+                      <p className="text-accent-blue text-sm font-medium">{product.subtitle}</p>
                     </div>
-                    <Button
-                      onClick={() => window.location.href = product.href}
-                      className="w-full bg-primary-blue text-white hover:bg-primary-blue-dark transition-colors font-semibold py-3 group-hover:bg-primary-blue-dark"
-                    >
-                      Explore {product.title}
-                      <ArrowRight className="ml-2 w-4 h-4" />
-                    </Button>
-                  </CardContent>
-                </Card>
+                  </div>
+                  
+                  <p className="text-secondary leading-relaxed">
+                    {product.description}
+                  </p>
+                  
+                  <div className="flex flex-wrap gap-2">
+                    {product.features.map((feature, idx) => (
+                      <span key={idx} className="status-indicator bg-accent-blue-light text-accent-blue">
+                        {feature}
+                      </span>
+                    ))}
+                  </div>
+                  
+                  <Button
+                    onClick={() => window.location.href = product.href}
+                    className="btn-primary w-full flex items-center justify-center gap-2"
+                  >
+                    Explore {product.title}
+                    <ArrowRight className="w-4 h-4" />
+                  </Button>
+                </div>
               );
             })}
           </div>
@@ -105,36 +103,32 @@ export default function Landing() {
       </section>
 
       {/* What's Next Preview */}
-      <section className="py-24 bg-surface-darkest">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-24 bg-surface-white section-divider">
+        <div className="container-section">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 text-white">
-              What's <span className="gradient-text">Coming Next</span>
+            <h2 className="text-responsive-lg font-semibold text-primary mb-6">
+              What's <span className="text-gradient">Coming Next</span>
             </h2>
-            <p className="text-xl text-secondary max-w-3xl mx-auto leading-relaxed">
+            <p className="text-secondary max-w-3xl mx-auto leading-relaxed">
               We follow real patterns of friction inside growing enterprises and build what resolves them.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="layout-grid layout-grid-3 gap-8">
             {upcomingProducts.map((product, index) => {
               const IconComponent = product.icon;
               return (
-                <Card key={index} className="card-hover">
-                  <CardHeader>
-                    <div className="w-12 h-12 bg-primary-blue/20 rounded-xl flex items-center justify-center mb-4">
-                      <IconComponent className="w-6 h-6 text-primary-blue" />
-                    </div>
-                    <CardTitle className="text-xl font-bold text-white">
-                      {product.title}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-secondary leading-relaxed">
-                      {product.description}
-                    </p>
-                  </CardContent>
-                </Card>
+                <div key={index} className="card-minimal p-6 space-y-4">
+                  <div className="w-10 h-10 bg-accent-blue-light rounded-sm flex items-center justify-center mb-4">
+                    <IconComponent className="w-5 h-5 text-accent-blue" />
+                  </div>
+                  <h3 className="font-semibold text-primary">
+                    {product.title}
+                  </h3>
+                  <p className="text-secondary text-sm leading-relaxed">
+                    {product.description}
+                  </p>
+                </div>
               );
             })}
           </div>
@@ -142,8 +136,7 @@ export default function Landing() {
           <div className="text-center mt-12">
             <Button
               onClick={() => window.location.href = '/next'}
-              variant="outline"
-              className="border-2 border-primary-blue text-primary-blue hover:bg-primary-blue hover:text-white transition-all duration-300"
+              className="btn-outline"
             >
               Learn More About Our Future
             </Button>
@@ -152,39 +145,41 @@ export default function Landing() {
       </section>
       
       {/* Contact Section */}
-      <section className="py-24 bg-surface-dark">
-        <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
-          <h2 className="text-4xl md:text-5xl font-bold mb-8 text-white">
-            Ready to <span className="gradient-text">Get Started</span>?
+      <section className="py-24 bg-surface-grey section-divider">
+        <div className="container-section text-center">
+          <h2 className="text-responsive-lg font-semibold text-primary mb-8">
+            Ready to <span className="text-gradient">Get Started</span>?
           </h2>
-          <p className="text-xl text-secondary mb-12 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-secondary mb-12 max-w-3xl mx-auto leading-relaxed">
             If your team is solving problems at the edge, we're likely building for you.
           </p>
-          <div className="flex flex-col sm:flex-row gap-6 justify-center">
+          
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
             <Button
               onClick={() => window.location.href = '/fetch-patterns'}
-              className="bg-primary-blue text-white px-10 py-4 rounded-lg text-lg font-semibold hover:bg-primary-blue-dark transition-all duration-300 shadow-lg hover:shadow-xl"
+              className="btn-primary flex items-center gap-2"
             >
               Try Fetch Patterns
+              <ArrowRight className="w-4 h-4" />
             </Button>
             <Button
               onClick={() => window.location.href = '/permeate-enterprise'}
-              variant="outline"
-              className="border-2 border-primary-blue text-primary-blue px-10 py-4 rounded-lg text-lg font-semibold hover:bg-primary-blue hover:text-white transition-all duration-300"
+              className="btn-outline"
             >
               Try PerMeaTe Enterprise
             </Button>
           </div>
           
-          <div className="mt-12 pt-8 border-t border-subtle">
-            <p className="text-secondary mb-4">
+          <div className="pt-8 border-t border-light">
+            <p className="text-secondary mb-4 text-sm">
               For questions or custom enterprise solutions
             </p>
             <Button
               onClick={() => window.location.href = 'mailto:hello@darkstreet.org'}
               variant="ghost"
-              className="text-primary-blue hover:text-primary-blue-dark hover:bg-primary-blue/10"
+              className="text-accent-blue hover:text-accent-blue-dark hover:bg-accent-blue-light text-sm flex items-center gap-2 mx-auto"
             >
+              <Mail className="w-4 h-4" />
               Contact us at hello@darkstreet.org
             </Button>
           </div>
