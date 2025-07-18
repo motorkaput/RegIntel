@@ -1,6 +1,6 @@
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
-import { User, Building } from "lucide-react";
+import { User, Building, Linkedin, Twitter, ExternalLink } from "lucide-react";
 import barshaPandaPhoto from "@assets/BarshaPanda_1752666897513.jpeg";
 import davidJairajPhoto from "@assets/DavidJairaj_1752666897514.jpeg";
 
@@ -63,9 +63,12 @@ export default function About() {
                       />
                     </div>
                     <div className="flex-1">
-                      <h3 className="text-xl font-semibold text-primary">
-                        Barsha Panda
-                      </h3>
+                      <div className="flex items-center space-x-2">
+                        <h3 className="text-xl font-semibold text-primary">
+                          Barsha Panda
+                        </h3>
+                        <span className="text-secondary">CEO</span>
+                      </div>
                       <div className="mt-4 space-y-3">
                         <p className="text-secondary">Advisor to CXOs on vision, leadership, culture, and crisis management</p>
                         <p className="text-secondary">Combines political economy with market strategy for sharper decisions</p>
@@ -75,17 +78,13 @@ export default function About() {
                         <p className="text-secondary">Holds a Master's in Communication; studied at LSE and IESE</p>
                         <p className="text-secondary">Writes on scalable patterns and counter-conventional thinking</p>
                         <p className="text-secondary">Speaker and mentor to women in tech and business</p>
-                        <div className="mt-4 space-y-2">
-                          <p className="text-secondary">
-                            <a href="https://www.linkedin.com/in/barshapanda/" target="_blank" rel="noopener noreferrer" className="text-accent-blue hover:underline">
-                              LinkedIn: https://www.linkedin.com/in/barshapanda/
-                            </a>
-                          </p>
-                          <p className="text-secondary">
-                            <a href="https://x.com/BarshaPanda" target="_blank" rel="noopener noreferrer" className="text-accent-blue hover:underline">
-                              X: https://x.com/BarshaPanda
-                            </a>
-                          </p>
+                        <div className="mt-4 flex space-x-3">
+                          <a href="https://www.linkedin.com/in/barshapanda/" target="_blank" rel="noopener noreferrer" className="text-accent-blue hover:text-accent-blue-dark transition-colors">
+                            <Linkedin className="w-5 h-5" />
+                          </a>
+                          <a href="https://x.com/BarshaPanda" target="_blank" rel="noopener noreferrer" className="text-accent-blue hover:text-accent-blue-dark transition-colors">
+                            <Twitter className="w-5 h-5" />
+                          </a>
                         </div>
                       </div>
                     </div>
@@ -103,9 +102,12 @@ export default function About() {
                       />
                     </div>
                     <div className="flex-1">
-                      <h3 className="text-xl font-semibold text-primary">
-                        David Jairaj
-                      </h3>
+                      <div className="flex items-center space-x-2">
+                        <h3 className="text-xl font-semibold text-primary">
+                          David Jairaj
+                        </h3>
+                        <span className="text-secondary">COO</span>
+                      </div>
                       <div className="mt-4 space-y-3">
                         <p className="text-secondary">Architect of process and tech systems for growing enterprises</p>
                         <p className="text-secondary">Integrates business philosophy, design, and tech into future-ready systems</p>
@@ -116,11 +118,9 @@ export default function About() {
                         <p className="text-secondary">Self-taught programmer, DJ, and street artist</p>
                         <p className="text-secondary">Makes music as SilverBachDJ</p>
                         <div className="mt-4">
-                          <p className="text-secondary">
-                            <a href="https://www.linkedin.com/in/davidjairaj/" target="_blank" rel="noopener noreferrer" className="text-accent-blue hover:underline">
-                              LinkedIn: https://www.linkedin.com/in/davidjairaj/
-                            </a>
-                          </p>
+                          <a href="https://www.linkedin.com/in/davidjairaj/" target="_blank" rel="noopener noreferrer" className="text-accent-blue hover:text-accent-blue-dark transition-colors">
+                            <Linkedin className="w-5 h-5" />
+                          </a>
                         </div>
                       </div>
                     </div>
