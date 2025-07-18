@@ -102,11 +102,10 @@ export default function FetchPatterns() {
           <div className="container-section">
             <div>
               <Button 
-                onClick={() => window.location.href = '#'} 
-                className="btn-primary px-8 py-4 text-lg"
+                disabled 
+                className="btn-primary px-8 py-4 text-lg opacity-50 cursor-not-allowed"
               >
-                Launch Fetch Patterns
-                <ArrowRight className="w-5 h-5 ml-2" />
+                App Launch Soon
               </Button>
             </div>
           </div>

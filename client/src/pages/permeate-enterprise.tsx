@@ -98,11 +98,10 @@ export default function PerMeaTeEnterprise() {
               
               <div>
                 <Button 
-                  onClick={() => window.location.href = '#'} 
-                  className="btn-primary px-8 py-4 text-lg"
+                  disabled 
+                  className="btn-primary px-8 py-4 text-lg opacity-50 cursor-not-allowed"
                 >
-                  Launch PerMeaTe Enterprise
-                  <ArrowRight className="w-5 h-5 ml-2" />
+                  App Launch Soon
                 </Button>
               </div>
             </div>

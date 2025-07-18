@@ -47,7 +47,7 @@ export default function About() {
         <section className="py-6 section-divider">
           <div className="container-section">
             <div>
-              <h2 className="text-responsive-lg font-semibold text-primary mb-12">
+              <h2 className="text-lg text-primary font-medium mb-12">
                 Leadership
               </h2>
               
@@ -62,13 +62,32 @@ export default function About() {
                         className="w-12 h-12 object-cover"
                       />
                     </div>
-                    <div>
+                    <div className="flex-1">
                       <h3 className="text-xl font-semibold text-primary">
                         Barsha Panda
                       </h3>
-                      <p className="text-secondary mt-2">
-                        CEO
-                      </p>
+                      <div className="mt-4 space-y-3">
+                        <p className="text-secondary">Advisor to CXOs on vision, leadership, culture, and crisis management</p>
+                        <p className="text-secondary">Combines political economy with market strategy for sharper decisions</p>
+                        <p className="text-secondary">Leads a tech incubator solving real-world problems through design and insight</p>
+                        <p className="text-secondary">20+ years in strategic roles at Oracle (Europe, MEA) and Yahoo (global)</p>
+                        <p className="text-secondary">Works across markets including India, US, Europe, and Singapore</p>
+                        <p className="text-secondary">Holds a Master's in Communication; studied at LSE and IESE</p>
+                        <p className="text-secondary">Writes on scalable patterns and counter-conventional thinking</p>
+                        <p className="text-secondary">Speaker and mentor to women in tech and business</p>
+                        <div className="mt-4 space-y-2">
+                          <p className="text-secondary">
+                            <a href="https://www.linkedin.com/in/barshapanda/" target="_blank" rel="noopener noreferrer" className="text-accent-blue hover:underline">
+                              LinkedIn: https://www.linkedin.com/in/barshapanda/
+                            </a>
+                          </p>
+                          <p className="text-secondary">
+                            <a href="https://x.com/BarshaPanda" target="_blank" rel="noopener noreferrer" className="text-accent-blue hover:underline">
+                              X: https://x.com/BarshaPanda
+                            </a>
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -83,13 +102,27 @@ export default function About() {
                         className="w-12 h-12 object-cover"
                       />
                     </div>
-                    <div>
+                    <div className="flex-1">
                       <h3 className="text-xl font-semibold text-primary">
                         David Jairaj
                       </h3>
-                      <p className="text-secondary mt-2">
-                        COO
-                      </p>
+                      <div className="mt-4 space-y-3">
+                        <p className="text-secondary">Architect of process and tech systems for growing enterprises</p>
+                        <p className="text-secondary">Integrates business philosophy, design, and tech into future-ready systems</p>
+                        <p className="text-secondary">25+ years spanning research, tech, design, and community outreach</p>
+                        <p className="text-secondary">Led strategy and comms at Microsoft India Development Center for 10+ years</p>
+                        <p className="text-secondary">Co-founder and COO of Dark Street; leads product at Dark Street Tech</p>
+                        <p className="text-secondary">Collaborates with developers, designers, and data scientists</p>
+                        <p className="text-secondary">Self-taught programmer, DJ, and street artist</p>
+                        <p className="text-secondary">Makes music as SilverBachDJ</p>
+                        <div className="mt-4">
+                          <p className="text-secondary">
+                            <a href="https://www.linkedin.com/in/davidjairaj/" target="_blank" rel="noopener noreferrer" className="text-accent-blue hover:underline">
+                              LinkedIn: https://www.linkedin.com/in/davidjairaj/
+                            </a>
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>

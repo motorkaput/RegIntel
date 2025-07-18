@@ -30,7 +30,7 @@ export default function Landing() {
           <div className="container-section">
             <div className="space-y-8">
               <p className="text-lg text-secondary leading-relaxed">
-                At Dark Street, we are building AI-powered tech for growing enterprises.
+                <span className="font-semibold">At Dark Street, we are building AI-powered tech for growing enterprises.</span>
               </p>
               
               <p className="text-lg text-secondary leading-relaxed">
