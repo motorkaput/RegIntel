@@ -7,7 +7,7 @@ export default function Privacy() {
   return (
     <div className="min-h-screen bg-surface-white">
       <Navbar />
-      <main className="pt-16">
+      <main className="pt-32">
         <div className="bg-white border-b border-gray-200 p-4">
           <div className="max-w-4xl mx-auto">
             <h1 className="text-2xl font-bold text-gray-900">Privacy Policy</h1>

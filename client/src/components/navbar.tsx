@@ -37,6 +37,7 @@ export default function Navbar() {
   return (
     <nav className="nav-minimal fixed top-0 left-0 right-0 z-50 backdrop-blur-sm section-divider">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Main navigation line */}
         <div className="flex justify-between items-center h-24">
           {/* Logo */}
           <Link href="/" className="flex items-center">
@@ -60,34 +61,6 @@ export default function Navbar() {
             ))}
           </div>
 
-          {/* Desktop Auth */}
-          <div className="hidden md:flex items-center space-x-4">
-            {isAuthenticated ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="flex items-center space-x-2 text-secondary hover:text-primary h-8 px-3 bg-gray-50 rounded-md border border-gray-200">
-                    <User className="w-4 h-4" />
-                    <span className="text-sm font-medium">David</span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuItem asChild>
-                    <Link href="/subscription" className="flex items-center space-x-2">
-                      <User className="w-3 h-3" />
-                      <span className="text-xs">Subscription</span>
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <a href="/api/logout" className="flex items-center space-x-2">
-                      <LogOut className="w-3 h-3" />
-                      <span className="text-xs">Sign out</span>
-                    </a>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : null}
-          </div>
-
           {/* Mobile menu button */}
           <button
             className="md:hidden p-2 rounded-sm text-secondary hover:text-primary hover:bg-surface-grey transition-colors"
@@ -96,6 +69,27 @@ export default function Navbar() {
             {isOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
           </button>
         </div>
+
+        {/* User authentication line - separate from main navigation */}
+        {isAuthenticated && (
+          <div className="hidden md:flex justify-end items-center py-2 border-t border-light bg-gray-50/50">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 px-3 py-1 bg-white rounded-md border border-gray-200 shadow-sm">
+                <User className="w-4 h-4 text-gray-500" />
+                <span className="text-sm font-medium text-gray-700">David</span>
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => window.location.href = "/api/logout"}
+                className="text-gray-600 border-gray-300 hover:bg-gray-50"
+              >
+                <LogOut className="w-4 h-4 mr-1" />
+                Sign Out
+              </Button>
+            </div>
+          </div>
+        )}
 
         {/* Mobile Navigation */}
         {isOpen && (

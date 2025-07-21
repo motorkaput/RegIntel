@@ -19,6 +19,8 @@ import {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import fetchPatternsLogo from "@assets/FetchPatterns_Logo_1752663550322.png";
+import Navbar from "@/components/navbar";
+import Footer from "@/components/footer";
 
 interface DocumentAnalysis {
   id: string;
@@ -330,38 +332,22 @@ export default function FetchPatternsApp() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 p-4">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-4">
+    <div className="min-h-screen bg-surface-white">
+      <Navbar />
+      
+      <main className="pt-32 pb-6">
+        {/* FetchPatterns specific header */}
+        <div className="bg-gray-50 border-b border-gray-200 py-6">
+          <div className="max-w-6xl mx-auto px-6 flex items-center gap-4">
             <img src={fetchPatternsLogo} alt="FetchPatterns" className="h-12 w-auto" />
             <div>
               <h1 className="text-2xl font-bold text-gray-900">FetchPatterns</h1>
               <p className="text-gray-600 text-sm">AI-Powered Document Analysis & Visualization</p>
             </div>
           </div>
-          
-          {/* User Info */}
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 px-3 py-1 bg-gray-50 rounded-md border">
-              <User className="w-4 h-4 text-gray-500" />
-              <span className="text-sm font-medium text-gray-700">David</span>
-            </div>
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => window.location.href = "/api/logout"}
-              className="text-gray-600 border-gray-300 hover:bg-gray-50"
-            >
-              <LogOut className="w-4 h-4 mr-1" />
-              Sign Out
-            </Button>
-          </div>
         </div>
-      </div>
 
-      <div className="max-w-6xl mx-auto p-6 space-y-6">
+        <div className="max-w-6xl mx-auto px-6 py-6 space-y-6">
         {/* Session Controls */}
         {sessionAnalyses.length > 0 && (
           <Card className="bg-blue-50 border-blue-200">
@@ -784,22 +770,9 @@ export default function FetchPatternsApp() {
           </CardContent>
         </Card>
 
-        {/* Footer */}
-        <footer className="bg-gray-50 border-t border-gray-200 mt-12">
-          <div className="max-w-6xl mx-auto py-8 px-6">
-            <div className="flex flex-wrap justify-center gap-8 text-sm text-gray-600 mb-4">
-              <a href="/privacy" target="_blank" rel="noopener noreferrer" className="hover:text-gray-900 transition-colors">Privacy Policy</a>
-              <a href="/terms" target="_blank" rel="noopener noreferrer" className="hover:text-gray-900 transition-colors">Terms of Service</a>
-              <a href="/about" target="_blank" rel="noopener noreferrer" className="hover:text-gray-900 transition-colors">About</a>
-              <a href="/contact" target="_blank" rel="noopener noreferrer" className="hover:text-gray-900 transition-colors">Contact</a>
-              <a href="/security" target="_blank" rel="noopener noreferrer" className="hover:text-gray-900 transition-colors">Security</a>
-            </div>
-            <div className="text-center text-gray-500 text-sm">
-              Copyright Dark Street. All rights reserved.
-            </div>
-          </div>
-        </footer>
-      </div>
+        </div>
+      </main>
+      <Footer />
     </div>
   );
 }
