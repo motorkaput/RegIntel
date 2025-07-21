@@ -339,7 +339,7 @@ export default function FetchPatternsApp() {
         {/* FetchPatterns specific header */}
         <div className="bg-gray-50 border-b border-gray-200 py-6">
           <div className="max-w-6xl mx-auto px-6 flex items-center gap-4">
-            <img src={fetchPatternsLogo} alt="FetchPatterns" className="h-12 w-auto" />
+            <img src={fetchPatternsLogo} alt="FetchPatterns" className="h-16 w-auto" />
             <div>
               <h1 className="text-2xl font-bold text-gray-900">FetchPatterns</h1>
               <p className="text-gray-600 text-sm">AI-Powered Document Analysis & Visualization</p>

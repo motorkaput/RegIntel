@@ -6,19 +6,6 @@ export default function Footer() {
     <footer className="bg-surface-white border-t border-light section-divider">
       <div className="container-section py-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          {/* Company Info */}
-          <div className="space-y-4">
-            <div className="flex items-center space-x-2 text-secondary">
-              <Mail className="w-4 h-4" />
-              <a 
-                href="mailto:hello@darkstreet.org" 
-                className="text-sm hover:text-accent-blue transition-colors"
-              >
-                hello@darkstreet.org
-              </a>
-            </div>
-          </div>
-
           {/* Products */}
           <div>
             <h4 className="font-semibold text-primary mb-2 text-sm">Products</h4>
@@ -51,10 +38,7 @@ export default function Footer() {
                 </a>
               </li>
               <li>
-                <a 
-                  href="mailto:hello@darkstreet.org" 
-                  className="text-secondary hover:text-accent-blue transition-colors text-sm"
-                >
+                <a href="/contact" target="_blank" rel="noopener noreferrer" className="text-secondary hover:text-accent-blue transition-colors text-sm">
                   Contact
                 </a>
               </li>
@@ -72,19 +56,42 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Connect */}
+          {/* Legal */}
           <div>
-            <h4 className="font-semibold text-primary mb-2 text-sm">Connect</h4>
+            <h4 className="font-semibold text-primary mb-2 text-sm">Legal</h4>
             <ul className="space-y-1">
               <li>
-                <a 
-                  href="mailto:hello@darkstreet.org" 
-                  className="text-secondary hover:text-accent-blue transition-colors text-sm"
-                >
-                  hello@darkstreet.org
+                <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-secondary hover:text-accent-blue transition-colors text-sm">
+                  Privacy Policy
                 </a>
               </li>
               <li>
+                <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-secondary hover:text-accent-blue transition-colors text-sm">
+                  Terms of Service
+                </a>
+              </li>
+              <li>
+                <a href="/security" target="_blank" rel="noopener noreferrer" className="text-secondary hover:text-accent-blue transition-colors text-sm">
+                  Security
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          {/* Contact */}
+          <div>
+            <h4 className="font-semibold text-primary mb-2 text-sm">Contact</h4>
+            <div className="space-y-2">
+              <div className="flex items-center space-x-2 text-secondary">
+                <Mail className="w-4 h-4" />
+                <a 
+                  href="mailto:hello@darkstreet.org" 
+                  className="text-sm hover:text-accent-blue transition-colors"
+                >
+                  hello@darkstreet.org
+                </a>
+              </div>
+              <div>
                 <a 
                   href="https://darkstreet.consulting" 
                   target="_blank" 
@@ -94,8 +101,8 @@ export default function Footer() {
                   darkstreet.consulting
                   <ExternalLink className="w-3 h-3" />
                 </a>
-              </li>
-            </ul>
+              </div>
+            </div>
           </div>
         </div>
         
