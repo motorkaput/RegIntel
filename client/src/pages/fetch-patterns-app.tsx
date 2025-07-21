@@ -706,89 +706,53 @@ export default function FetchPatternsApp() {
           </CardHeader>
           <CardContent>
             <div 
-              className="bg-gradient-to-br from-gray-50 to-white p-12 rounded-lg min-h-[500px] relative overflow-hidden"
+              className="bg-white p-8 rounded-lg min-h-[500px] flex flex-wrap items-center justify-center gap-4 leading-relaxed"
               style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '300' }}
             >
-              {topWords.length > 0 ? (
-                <div className="absolute inset-0 p-12">
-                  {topWords.map(([word, count], index) => {
-                    const maxCount = Math.max(...Object.values(wordCloudData));
-                    const normalizedSize = count / maxCount;
-                    
-                    // More dramatic size variations
-                    let fontSize;
-                    if (normalizedSize > 0.9) fontSize = 64;
-                    else if (normalizedSize > 0.7) fontSize = 52;
-                    else if (normalizedSize > 0.5) fontSize = 40;
-                    else if (normalizedSize > 0.3) fontSize = 28;
-                    else if (normalizedSize > 0.2) fontSize = 22;
-                    else fontSize = 18;
-                    
-                    // Vibrant artistic colors
-                    const colors = [
-                      '#2563eb', '#dc2626', '#059669', '#d97706', '#7c3aed', 
-                      '#db2777', '#0891b2', '#65a30d', '#dc2626', '#9333ea',
-                      '#0d9488', '#ea580c', '#4338ca', '#be123c', '#0369a1'
-                    ];
-                    
-                    // Random positioning for artistic layout
-                    const positions = [
-                      { top: '15%', left: '20%' },
-                      { top: '25%', left: '60%' },
-                      { top: '40%', left: '30%' },
-                      { top: '55%', left: '70%' },
-                      { top: '70%', left: '15%' },
-                      { top: '35%', left: '80%' },
-                      { top: '60%', left: '45%' },
-                      { top: '20%', left: '85%' },
-                      { top: '75%', left: '55%' },
-                      { top: '45%', left: '10%' },
-                      { top: '80%', left: '35%' },
-                      { top: '10%', left: '45%' },
-                      { top: '65%', left: '25%' },
-                      { top: '30%', left: '15%' },
-                      { top: '50%', left: '85%' },
-                      { top: '85%', left: '70%' },
-                      { top: '15%', left: '75%' },
-                      { top: '40%', left: '5%' },
-                      { top: '25%', left: '40%' },
-                      { top: '70%', left: '80%' }
-                    ];
-                    
-                    const position = positions[index % positions.length];
-                    const color = colors[index % colors.length];
-                    
-                    // Random slight rotation for artistic effect
-                    const rotation = (Math.random() - 0.5) * 20;
-                    
-                    return (
-                      <span
-                        key={word}
-                        className="absolute hover:opacity-80 cursor-pointer transition-all duration-300 hover:scale-110 select-none"
-                        style={{ 
-                          fontSize: `${fontSize}px`,
-                          color: color,
-                          fontWeight: normalizedSize > 0.6 ? '400' : '300',
-                          lineHeight: '1',
-                          top: position.top,
-                          left: position.left,
-                          transform: `translate(-50%, -50%) rotate(${rotation}deg)`,
-                          textShadow: '1px 1px 2px rgba(0,0,0,0.1)',
-                          zIndex: Math.floor(normalizedSize * 10)
-                        }}
-                        title={`${word}: ${count} occurrences`}
-                      >
-                        {word}
-                      </span>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="flex items-center justify-center h-full text-gray-400 text-center">
-                  <div>
-                    <div className="text-4xl mb-4">📊</div>
-                    <p>Upload and process documents to generate an artistic word cloud</p>
-                  </div>
+              {topWords.length > 0 ? topWords.map(([word, count], index) => {
+                const maxCount = Math.max(...Object.values(wordCloudData));
+                const normalizedSize = count / maxCount;
+                
+                // Clean, readable font sizes
+                let fontSize;
+                if (normalizedSize > 0.8) fontSize = 48;
+                else if (normalizedSize > 0.6) fontSize = 38;
+                else if (normalizedSize > 0.4) fontSize = 30;
+                else if (normalizedSize > 0.3) fontSize = 24;
+                else if (normalizedSize > 0.2) fontSize = 20;
+                else fontSize = 16;
+                
+                // Professional color palette
+                const colors = [
+                  '#2563eb', '#059669', '#d97706', '#7c3aed', '#dc2626',
+                  '#0891b2', '#65a30d', '#ea580c', '#4338ca', '#be123c',
+                  '#0d9488', '#9333ea', '#0369a1', '#db2777', '#6366f1'
+                ];
+                
+                const color = colors[index % colors.length];
+                
+                return (
+                  <span
+                    key={word}
+                    className="hover:opacity-80 cursor-pointer transition-all duration-200 hover:scale-105 select-none"
+                    style={{ 
+                      fontSize: `${fontSize}px`,
+                      color: color,
+                      fontWeight: normalizedSize > 0.5 ? '500' : '300',
+                      lineHeight: '1.2',
+                      margin: '4px 8px',
+                      textShadow: '1px 1px 2px rgba(0,0,0,0.1)',
+                      display: 'inline-block'
+                    }}
+                    title={`${word}: ${count} occurrences`}
+                  >
+                    {word}
+                  </span>
+                );
+              }) : (
+                <div className="text-gray-400 text-center">
+                  <div className="text-4xl mb-4">📊</div>
+                  <p>Upload and process documents to see word cloud visualization</p>
                 </div>
               )}
             </div>

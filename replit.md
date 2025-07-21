@@ -128,6 +128,15 @@ The application follows a modern full-stack architecture with emphasis on type s
 - Documents are automatically cleared on page refresh with proper user warnings to save exports first
 - Authentication configuration improved for better Replit environment compatibility
 
+**Latest User Experience Improvements (July 21, 2025)**
+- ✓ Fixed scroll-to-top functionality - app now loads at header position after document upload
+- ✓ Enhanced AI analysis quality with more specific document summaries and detailed insights extraction
+- ✓ Redesigned word cloud with clean, readable layout using Roboto Light font without rotation angles
+- ✓ Updated all contact information across all pages to hello@darkstreet.org and darkstreet.tech
+- ✓ Added Excel file support (.xlsx/.xls) to prevent unsupported file type errors during upload
+- ✓ Improved document processing with better error handling and content extraction
+- Word cloud now uses professional flex-wrap layout with proper spacing and hover effects
+
 **Phase 2 Complete - Fetch Patterns SaaS Integration (July 21, 2025)**
 - Successfully integrated complete Fetch Patterns AI-powered document analysis SaaS application
 - **Perfect UI Match**: Redesigned interface to exactly match original FetchPatterns design from user's GitHub repository
