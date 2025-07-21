@@ -109,10 +109,8 @@ export default function FetchPatternsApp() {
         };
       }
       
-      return await apiRequest(`/api/fetch-patterns/question`, {
-        method: "POST",
-        body: { question, documents }
-      });
+      const response = await apiRequest("POST", "/api/fetch-patterns/question", { question, documents });
+      return response.json();
     },
   });
 
@@ -135,10 +133,8 @@ export default function FetchPatternsApp() {
         };
       }
       
-      return await apiRequest(`/api/fetch-patterns/context-analysis`, {
-        method: "POST",
-        body: { context, documents }
-      });
+      const response = await apiRequest("POST", "/api/fetch-patterns/context-analysis", { context, documents });
+      return response.json();
     },
   });
 
@@ -250,7 +246,7 @@ export default function FetchPatternsApp() {
 
   // Calculate statistics
   const completedAnalyses = analyses.filter(a => a.status === 'completed');
-  const uniqueKeywords = [...new Set(completedAnalyses.flatMap(a => a.keywords || []))].length;
+  const uniqueKeywords = Array.from(new Set(completedAnalyses.flatMap(a => a.keywords || []))).length;
   const highConfidence = completedAnalyses.filter(a => 
     a.sentiment && a.sentiment.score > 0.8
   ).length;
@@ -597,7 +593,7 @@ export default function FetchPatternsApp() {
                       <div>
                         <div className="text-gray-900 font-semibold mb-2">Emotional Tone:</div>
                         <div className="flex gap-2">
-                          {contextMutation.data.emotionalTone.map((tone, index) => (
+                          {contextMutation.data.emotionalTone.map((tone: string, index: number) => (
                             <Badge key={index} className="bg-blue-100 text-blue-800 border-blue-200">
                               {tone}
                             </Badge>
@@ -610,7 +606,7 @@ export default function FetchPatternsApp() {
                       <div>
                         <div className="text-gray-900 font-semibold mb-2">Key Phrases:</div>
                         <div className="flex flex-wrap gap-2">
-                          {contextMutation.data.keyPhrases.map((phrase, index) => (
+                          {contextMutation.data.keyPhrases.map((phrase: string, index: number) => (
                             <Badge key={index} className="bg-pink-100 text-pink-800 border-pink-200">
                               "{phrase}"
                             </Badge>
