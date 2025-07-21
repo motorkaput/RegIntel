@@ -75,7 +75,7 @@ export default function Terms() {
             <CardTitle>Contact Information</CardTitle>
           </CardHeader>
           <CardContent>
-            <p>For questions about these Terms of Service, contact us at legal@darkstreet.tech</p>
+            <p>For questions about these Terms of Service, contact us at hello@darkstreet.org</p>
           </CardContent>
         </Card>
       </div>

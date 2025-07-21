@@ -22,19 +22,19 @@ export default function Contact() {
             <CardContent className="space-y-4">
               <div>
                 <h3 className="font-semibold text-gray-900">General Inquiries</h3>
-                <p className="text-gray-600">info@darkstreet.tech</p>
+                <p className="text-gray-600">hello@darkstreet.org</p>
               </div>
               <div>
                 <h3 className="font-semibold text-gray-900">Technical Support</h3>
-                <p className="text-gray-600">support@darkstreet.tech</p>
+                <p className="text-gray-600">hello@darkstreet.org</p>
               </div>
               <div>
                 <h3 className="font-semibold text-gray-900">Sales</h3>
-                <p className="text-gray-600">sales@darkstreet.tech</p>
+                <p className="text-gray-600">hello@darkstreet.org</p>
               </div>
               <div>
                 <h3 className="font-semibold text-gray-900">Partnership</h3>
-                <p className="text-gray-600">partnerships@darkstreet.tech</p>
+                <p className="text-gray-600">hello@darkstreet.org</p>
               </div>
             </CardContent>
           </Card>
@@ -86,7 +86,7 @@ export default function Contact() {
               <div>
                 <h3 className="font-semibold text-gray-900 mb-2">Emergency Support</h3>
                 <p className="text-gray-600">24/7 support available for enterprise customers</p>
-                <p className="text-gray-600">Contact: emergency@darkstreet.tech</p>
+                <p className="text-gray-600">Contact: hello@darkstreet.org</p>
               </div>
             </div>
           </CardContent>

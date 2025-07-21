@@ -69,8 +69,8 @@ export default function About() {
           </CardHeader>
           <CardContent>
             <p>
-              <strong>Email:</strong> info@darkstreet.tech<br/>
-              <strong>Support:</strong> support@darkstreet.tech<br/>
+              <strong>Email:</strong> hello@darkstreet.org<br/>
+              <strong>Support:</strong> hello@darkstreet.org<br/>
               <strong>Website:</strong> darkstreet.tech
             </p>
           </CardContent>

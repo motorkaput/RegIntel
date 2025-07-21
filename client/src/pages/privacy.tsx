@@ -58,7 +58,7 @@ export default function Privacy() {
             <CardTitle>Contact Us</CardTitle>
           </CardHeader>
           <CardContent>
-            <p>If you have any questions about this Privacy Policy, please contact us at privacy@darkstreet.tech</p>
+            <p>If you have any questions about this Privacy Policy, please contact us at hello@darkstreet.org</p>
           </CardContent>
         </Card>
       </div>
