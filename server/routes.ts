@@ -5,7 +5,7 @@ import { setupAuth, isAuthenticated } from "./replitAuth";
 import { initializeRazorpay, createSubscription, verifyPayment } from "./services/razorpay";
 import { processDocument } from "./services/documentProcessor";
 import { generatePerformanceAnalytics } from "./services/performanceAnalytics";
-import { processDocumentWithAI } from "./services/fetchPatternsAI";
+import { processDocumentWithAI, answerQuestion, analyzeContext } from "./services/fetchPatternsAI";
 import multer from "multer";
 import { insertDocumentSchema, insertSubscriptionSchema } from "@shared/schema";
 import { nanoid } from "nanoid";
@@ -340,6 +340,73 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting analysis:", error);
       res.status(500).json({ message: "Failed to delete analysis" });
+    }
+  });
+
+  // Question answering endpoint
+  app.post('/api/fetch-patterns/question', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { question } = req.body;
+      
+      if (!question) {
+        return res.status(400).json({ message: "Question is required" });
+      }
+
+      // Get user's documents
+      const analyses = await storage.getUserDocumentAnalyses(userId);
+      const documents = analyses
+        .filter(a => a.status === 'completed' && a.extractedText)
+        .map(a => ({ text: a.extractedText!, filename: a.originalName }));
+
+      if (documents.length === 0) {
+        return res.json({
+          answer: "No documents available to answer questions. Please upload some documents first.",
+          confidence: 0.0,
+          sources: []
+        });
+      }
+
+      const result = await answerQuestion(documents, question);
+      res.json(result);
+    } catch (error) {
+      console.error("Error answering question:", error);
+      res.status(500).json({ message: "Failed to answer question" });
+    }
+  });
+
+  // Context analysis endpoint
+  app.post('/api/fetch-patterns/context-analysis', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { context } = req.body;
+      
+      if (!context) {
+        return res.status(400).json({ message: "Context is required" });
+      }
+
+      // Get user's documents
+      const analyses = await storage.getUserDocumentAnalyses(userId);
+      const documents = analyses
+        .filter(a => a.status === 'completed' && a.extractedText)
+        .map(a => ({ text: a.extractedText!, filename: a.originalName }));
+
+      if (documents.length === 0) {
+        return res.json({
+          context,
+          mentions: 0,
+          sentimentBreakdown: { positive: 0, negative: 0, neutral: 100 },
+          emotionalTone: ['neutral'],
+          keyPhrases: [],
+          summary: "No documents available for context analysis."
+        });
+      }
+
+      const result = await analyzeContext(documents, context);
+      res.json(result);
+    } catch (error) {
+      console.error("Error analyzing context:", error);
+      res.status(500).json({ message: "Failed to analyze context" });
     }
   });
 
