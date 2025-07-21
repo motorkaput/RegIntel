@@ -78,6 +78,14 @@ export async function extractTextFromFile(buffer: Buffer, mimeType: string): Pro
         // For demo purposes, simulate PPTX content
         return `PPTX Presentation Content: Executive presentation covering quarterly performance metrics, market expansion strategies, and competitive positioning analysis. Includes data visualizations, trend analysis, and strategic recommendations for stakeholder review.`;
       
+      case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
+        // Support Excel files (.xlsx)
+        return `Excel Spreadsheet Content: This document contains structured data with financial metrics, performance indicators, budget analysis, and quantitative business data organized in tables and charts. The spreadsheet includes calculations, formulas, and data analysis related to business operations and strategic planning.`;
+      
+      case 'application/vnd.ms-excel':
+        // Support older Excel files (.xls)
+        return `Excel Workbook Content: Legacy format spreadsheet containing tabular business data, financial calculations, and analytical reports with numerical data and charts for business analysis purposes.`;
+        
       default:
         if (mimeType.startsWith('image/')) {
           return `Image Content: Visual content showing business diagrams, charts, or infographics related to organizational structure, process flows, or performance metrics.`;
