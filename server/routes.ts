@@ -243,18 +243,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "No files uploaded" });
       }
 
-      // Check user's document limit
-      const documentCount = await storage.getUserDocumentAnalysisCount(userId);
-      const subscription = await storage.getUserSubscription(userId);
+      // For session-based usage, use a generous session limit instead of subscription limits
+      // This allows users to work with reasonable document sets per session
+      const sessionLimit = 20; // Allow up to 20 documents per session
       
-      let limit = 10; // Default for trial users
-      if (subscription?.planId) {
-        const plan = await storage.getSubscriptionPlan(subscription.planId);
-        limit = plan?.documentsLimit || 10;
-      }
-
-      if (documentCount + files.length > limit) {
-        return res.status(429).json({ message: "Document limit exceeded for your subscription" });
+      if (files.length > sessionLimit) {
+        return res.status(429).json({ message: `Please upload no more than ${sessionLimit} documents at once` });
       }
 
       const analysisPromises = files.map(async (file) => {
