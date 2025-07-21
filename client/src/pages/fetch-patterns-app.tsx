@@ -63,6 +63,8 @@ export default function FetchPatternsApp() {
   const [question, setQuestion] = useState("");
   const [contextQuery, setContextQuery] = useState("");
   const [wordCount, setWordCount] = useState(50);
+  const [questionHistory, setQuestionHistory] = useState<{question: string, data: any}[]>([]);
+  const [contextHistory, setContextHistory] = useState<{query: string, data: any}[]>([]);
   const [sessionAnalyses, setSessionAnalyses] = useState<DocumentAnalysis[]>([]);
   const [pollInterval, setPollInterval] = useState<NodeJS.Timeout | null>(null);
 
@@ -112,6 +114,11 @@ export default function FetchPatternsApp() {
       const response = await apiRequest("POST", "/api/fetch-patterns/question", { question, documents });
       return response.json();
     },
+    onSuccess: (data, variables) => {
+      // Add to history instead of replacing
+      setQuestionHistory(prev => [{ question: variables, data }, ...prev]);
+      setQuestion(""); // Clear input after successful submission
+    },
   });
 
   // Context analysis mutation
@@ -135,6 +142,11 @@ export default function FetchPatternsApp() {
       
       const response = await apiRequest("POST", "/api/fetch-patterns/context-analysis", { context, documents });
       return response.json();
+    },
+    onSuccess: (data, variables) => {
+      // Add to history instead of replacing
+      setContextHistory(prev => [{ query: variables, data }, ...prev]);
+      setContextQuery(""); // Clear input after successful submission
     },
   });
 
@@ -165,6 +177,10 @@ export default function FetchPatternsApp() {
       });
       setSelectedFiles(null);
       setUploadProgress(0);
+      
+      // Scroll to top of app
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      
       // Add new analyses to session state
       if (data.analyses) {
         setSessionAnalyses(prev => [...prev, ...data.analyses]);
@@ -422,7 +438,7 @@ export default function FetchPatternsApp() {
               <Input
                 value={question}
                 onChange={(e) => setQuestion(e.target.value)}
-                placeholder="What is c:pesa's positioning strategy?"
+                placeholder="Type in a question about the documents uploaded"
                 className="flex-1"
                 onKeyPress={(e) => e.key === 'Enter' && handleAskQuestion()}
               />
@@ -435,21 +451,25 @@ export default function FetchPatternsApp() {
               </Button>
             </div>
 
-            {questionMutation.data && (
-              <Card className="bg-gray-50 border-gray-200">
-                <CardContent className="p-4">
-                  <div className="text-sm text-gray-700 mb-2">
-                    <strong>Question:</strong> {questionMutation.variables}
-                  </div>
-                  <div className="text-sm text-gray-700 mb-2">
-                    <strong>Answer:</strong>
-                  </div>
-                  <div className="text-gray-900 mb-2">{questionMutation.data.answer}</div>
-                  <div className="text-sm text-gray-600">
-                    <strong>Confidence:</strong> {(questionMutation.data.confidence * 100).toFixed(1)}%
-                  </div>
-                </CardContent>
-              </Card>
+            {questionHistory.length > 0 && (
+              <div className="space-y-4">
+                {questionHistory.map((item, index) => (
+                  <Card key={index} className="bg-gray-50 border-gray-200">
+                    <CardContent className="p-4">
+                      <div className="text-sm text-gray-700 mb-2">
+                        <strong>Question:</strong> {item.question}
+                      </div>
+                      <div className="text-sm text-gray-700 mb-2">
+                        <strong>Answer:</strong>
+                      </div>
+                      <div className="text-gray-900 mb-2">{item.data.answer}</div>
+                      <div className="text-sm text-gray-600">
+                        <strong>Confidence:</strong> {(item.data.confidence * 100).toFixed(1)}%
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
             )}
           </CardContent>
         </Card>
@@ -532,99 +552,106 @@ export default function FetchPatternsApp() {
               </Button>
             </div>
 
-            {contextMutation.data && (
+            {contextHistory.length > 0 && (
               <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <div className="text-lg font-semibold text-gray-900">
-                    {contextMutation.variables}
-                  </div>
-                  <Badge variant="outline" className="text-gray-600 border-gray-300">
-                    {contextMutation.data.mentions} mentions
-                  </Badge>
-                </div>
-                
-                {/* Sentiment bars */}
-                <div className="space-y-3">
-                  <div className="flex items-center gap-4">
-                    <div className="w-20 text-sm font-medium text-gray-700">Positive</div>
-                    <div className="flex-1 bg-gray-200 rounded-full h-6 relative">
-                      <div 
-                        className="bg-green-500 h-6 rounded-full flex items-center justify-end pr-2"
-                        style={{ width: `${contextMutation.data.sentimentBreakdown.positive}%` }}
-                      >
-                        <span className="text-white text-sm font-medium">
-                          {contextMutation.data.sentimentBreakdown.positive}%
-                        </span>
+                {contextHistory.map((item, index) => (
+                  <div key={index}>
+                    {index > 0 && <hr className="border-gray-200 my-6" />}
+                    <div className="space-y-6">
+                      <div className="flex items-center justify-between">
+                        <div className="text-lg font-semibold text-gray-900">
+                          {item.query}
+                        </div>
+                        <Badge variant="outline" className="text-gray-600 border-gray-300">
+                          {item.data.mentions} mentions
+                        </Badge>
                       </div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <div className="w-20 text-sm font-medium text-gray-700">Negative</div>
-                    <div className="flex-1 bg-gray-200 rounded-full h-6 relative">
-                      <div 
-                        className="bg-red-500 h-6 rounded-full flex items-center justify-end pr-2"
-                        style={{ width: `${contextMutation.data.sentimentBreakdown.negative}%` }}
-                      >
-                        <span className="text-white text-sm font-medium">
-                          {contextMutation.data.sentimentBreakdown.negative}%
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <div className="w-20 text-sm font-medium text-gray-700">Neutral</div>
-                    <div className="flex-1 bg-gray-200 rounded-full h-6 relative">
-                      <div 
-                        className="bg-gray-500 h-6 rounded-full flex items-center justify-end pr-2"
-                        style={{ width: `${contextMutation.data.sentimentBreakdown.neutral}%` }}
-                      >
-                        <span className="text-white text-sm font-medium">
-                          {contextMutation.data.sentimentBreakdown.neutral}%
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Details in blue box */}
-                <Card className="bg-blue-50 border-blue-200 border-l-4 border-l-blue-500">
-                  <CardContent className="p-4 space-y-4">
-                    {contextMutation.data.emotionalTone && (
-                      <div>
-                        <div className="text-gray-900 font-semibold mb-2">Emotional Tone:</div>
-                        <div className="flex gap-2">
-                          {contextMutation.data.emotionalTone.map((tone: string, index: number) => (
-                            <Badge key={index} className="bg-blue-100 text-blue-800 border-blue-200">
-                              {tone}
-                            </Badge>
-                          ))}
+                      
+                      {/* Sentiment bars */}
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-4">
+                          <div className="w-20 text-sm font-medium text-gray-700">Positive</div>
+                          <div className="flex-1 bg-gray-200 rounded-full h-6 relative">
+                            <div 
+                              className="bg-green-500 h-6 rounded-full flex items-center justify-end pr-2"
+                              style={{ width: `${item.data.sentimentBreakdown.positive}%` }}
+                            >
+                              <span className="text-white text-sm font-medium">
+                                {item.data.sentimentBreakdown.positive}%
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <div className="w-20 text-sm font-medium text-gray-700">Negative</div>
+                          <div className="flex-1 bg-gray-200 rounded-full h-6 relative">
+                            <div 
+                              className="bg-red-500 h-6 rounded-full flex items-center justify-end pr-2"
+                              style={{ width: `${item.data.sentimentBreakdown.negative}%` }}
+                            >
+                              <span className="text-white text-sm font-medium">
+                                {item.data.sentimentBreakdown.negative}%
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <div className="w-20 text-sm font-medium text-gray-700">Neutral</div>
+                          <div className="flex-1 bg-gray-200 rounded-full h-6 relative">
+                            <div 
+                              className="bg-gray-500 h-6 rounded-full flex items-center justify-end pr-2"
+                              style={{ width: `${item.data.sentimentBreakdown.neutral}%` }}
+                            >
+                              <span className="text-white text-sm font-medium">
+                                {item.data.sentimentBreakdown.neutral}%
+                              </span>
+                            </div>
+                          </div>
                         </div>
                       </div>
-                    )}
 
-                    {contextMutation.data.keyPhrases && (
-                      <div>
-                        <div className="text-gray-900 font-semibold mb-2">Key Phrases:</div>
-                        <div className="flex flex-wrap gap-2">
-                          {contextMutation.data.keyPhrases.map((phrase: string, index: number) => (
-                            <Badge key={index} className="bg-pink-100 text-pink-800 border-pink-200">
-                              "{phrase}"
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                    )}
+                      {/* Details in blue box */}
+                      <Card className="bg-blue-50 border-blue-200 border-l-4 border-l-blue-500">
+                        <CardContent className="p-4 space-y-4">
+                          {item.data.emotionalTone && (
+                            <div>
+                              <div className="text-gray-900 font-semibold mb-2">Emotional Tone:</div>
+                              <div className="flex gap-2">
+                                {item.data.emotionalTone.map((tone: string, toneIndex: number) => (
+                                  <Badge key={toneIndex} className="bg-blue-100 text-blue-800 border-blue-200">
+                                    {tone}
+                                  </Badge>
+                                ))}
+                              </div>
+                            </div>
+                          )}
 
-                    {contextMutation.data.summary && (
-                      <div>
-                        <div className="text-gray-900 font-semibold mb-2">Context Summary:</div>
-                        <div className="text-gray-700 text-sm leading-relaxed bg-white p-3 rounded border border-blue-200">
-                          {contextMutation.data.summary}
-                        </div>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
+                          {item.data.keyPhrases && (
+                            <div>
+                              <div className="text-gray-900 font-semibold mb-2">Key Phrases:</div>
+                              <div className="flex flex-wrap gap-2">
+                                {item.data.keyPhrases.map((phrase: string, phraseIndex: number) => (
+                                  <Badge key={phraseIndex} className="bg-pink-100 text-pink-800 border-pink-200">
+                                    "{phrase}"
+                                  </Badge>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {item.data.summary && (
+                            <div>
+                              <div className="text-gray-900 font-semibold mb-2">Context Summary:</div>
+                              <div className="text-gray-700 text-sm leading-relaxed bg-white p-3 rounded border border-blue-200">
+                                {item.data.summary}
+                              </div>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </CardContent>
@@ -674,28 +701,51 @@ export default function FetchPatternsApp() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="bg-gray-50 p-8 rounded-lg min-h-[400px] flex flex-wrap items-center justify-center gap-1 leading-tight" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '300' }}>
-              {topWords.map(([word, count], index) => {
+            <div className="bg-white p-8 rounded-lg min-h-[400px] flex flex-wrap items-center justify-center gap-2 leading-tight" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '300' }}>
+              {topWords.length > 0 ? topWords.map(([word, count], index) => {
                 const maxCount = Math.max(...Object.values(wordCloudData));
-                const size = Math.max(14, Math.min(48, (count / maxCount) * 48));
+                const normalizedSize = count / maxCount;
+                
+                // Create more varied font sizes like in your screenshot
+                let fontSize;
+                if (normalizedSize > 0.8) fontSize = 48;
+                else if (normalizedSize > 0.6) fontSize = 36; 
+                else if (normalizedSize > 0.4) fontSize = 28;
+                else if (normalizedSize > 0.3) fontSize = 24;
+                else if (normalizedSize > 0.2) fontSize = 20;
+                else fontSize = 16;
+                
+                // Beautiful color palette similar to your screenshot
                 const colors = [
-                  'text-blue-600', 'text-green-600', 'text-yellow-600', 
-                  'text-red-600', 'text-purple-600', 'text-pink-600',
-                  'text-indigo-600', 'text-orange-600', 'text-teal-600'
+                  '#4285F4', '#34A853', '#FBBC04', '#EA4335', '#9C27B0', 
+                  '#FF6F00', '#795548', '#607D8B', '#E91E63', '#00BCD4',
+                  '#8BC34A', '#FFC107', '#FF9800', '#673AB7', '#3F51B5',
+                  '#009688', '#4CAF50', '#FF5722', '#9E9E9E', '#2196F3'
                 ];
+                
                 const color = colors[index % colors.length];
                 
                 return (
                   <span
                     key={word}
-                    className={`${color} font-semibold hover:opacity-80 cursor-pointer transition-opacity`}
-                    style={{ fontSize: `${size}px` }}
+                    className="hover:opacity-80 cursor-pointer transition-all duration-200 hover:scale-105"
+                    style={{ 
+                      fontSize: `${fontSize}px`,
+                      color: color,
+                      fontWeight: normalizedSize > 0.5 ? 'bold' : normalizedSize > 0.3 ? '500' : '300',
+                      lineHeight: '1.1',
+                      margin: '2px 4px'
+                    }}
                     title={`${word}: ${count} occurrences`}
                   >
                     {word}
                   </span>
                 );
-              })}
+              }) : (
+                <div className="text-gray-400 text-center">
+                  <p>Upload and process some documents to see the word cloud</p>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
