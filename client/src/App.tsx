@@ -13,9 +13,13 @@ import Pricing from "@/pages/pricing";
 import Subscription from "@/pages/subscription";
 import FetchPatterns from "@/pages/fetch-patterns";
 import FetchPatternsApp from "@/pages/fetch-patterns-app";
+import Privacy from "@/pages/privacy";
+import Terms from "@/pages/terms";
+import AboutPage from "@/pages/about";
+import Contact from "@/pages/contact";
+import Security from "@/pages/security";
 import PerMeaTeEnterprise from "@/pages/permeate-enterprise";
 import Next from "@/pages/next";
-import About from "@/pages/about";
 
 
 function Router() {
@@ -28,7 +32,7 @@ function Router() {
       <Route path="/fetch-patterns" component={FetchPatterns} />
       <Route path="/permeate-enterprise" component={PerMeaTeEnterprise} />
       <Route path="/next" component={Next} />
-      <Route path="/about" component={About} />
+      <Route path="/about" component={AboutPage} />
       <Route path="/pricing" component={Pricing} />
       
       {/* Protected routes - require authentication */}
@@ -43,6 +47,12 @@ function Router() {
       
       {/* SaaS Application routes */}
       <Route path="/app/fetch-patterns" component={FetchPatternsApp} />
+      
+      {/* Legal and info pages */}
+      <Route path="/privacy" component={Privacy} />
+      <Route path="/terms" component={Terms} />
+      <Route path="/contact" component={Contact} />
+      <Route path="/security" component={Security} />
       
       <Route component={NotFound} />
     </Switch>

@@ -62,6 +62,8 @@ export default function FetchPatternsApp() {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [question, setQuestion] = useState("");
   const [contextQuery, setContextQuery] = useState("");
+  const [wordCount, setWordCount] = useState(50);
+  const [sessionAnalyses, setSessionAnalyses] = useState<DocumentAnalysis[]>([]);
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -78,18 +80,28 @@ export default function FetchPatternsApp() {
     }
   }, [isAuthenticated, isLoading, toast]);
 
-  // Fetch user's document analyses
-  const { data: analyses = [], refetch } = useQuery<DocumentAnalysis[]>({
-    queryKey: ["/api/fetch-patterns/analyses"],
-    enabled: isAuthenticated,
-  });
+  // Use session-based analyses instead of cumulative
+  const analyses = sessionAnalyses;
 
   // Question answering mutation
   const questionMutation = useMutation({
     mutationFn: async (question: string) => {
+      // Use session analyses for question answering
+      const documents = sessionAnalyses
+        .filter(a => a.status === 'completed' && a.extractedText)
+        .map(a => ({ text: a.extractedText!, filename: a.originalName }));
+      
+      if (documents.length === 0) {
+        return {
+          answer: "No documents available to answer questions. Please upload some documents first.",
+          confidence: 0.0,
+          sources: []
+        };
+      }
+      
       return await apiRequest(`/api/fetch-patterns/question`, {
         method: "POST",
-        body: { question }
+        body: { question, documents }
       });
     },
   });
@@ -97,9 +109,25 @@ export default function FetchPatternsApp() {
   // Context analysis mutation
   const contextMutation = useMutation({
     mutationFn: async (context: string) => {
+      // Use session analyses for context analysis
+      const documents = sessionAnalyses
+        .filter(a => a.status === 'completed' && a.extractedText)
+        .map(a => ({ text: a.extractedText!, filename: a.originalName }));
+      
+      if (documents.length === 0) {
+        return {
+          context,
+          mentions: 0,
+          sentimentBreakdown: { positive: 0, negative: 0, neutral: 100 },
+          emotionalTone: ['neutral'],
+          keyPhrases: [],
+          summary: "No documents available for context analysis."
+        };
+      }
+      
       return await apiRequest(`/api/fetch-patterns/context-analysis`, {
         method: "POST",
-        body: { context }
+        body: { context, documents }
       });
     },
   });
@@ -124,14 +152,17 @@ export default function FetchPatternsApp() {
 
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast({
         title: "Upload Successful",
         description: "Your documents are being processed.",
       });
       setSelectedFiles(null);
       setUploadProgress(0);
-      queryClient.invalidateQueries({ queryKey: ["/api/fetch-patterns/analyses"] });
+      // Add new analyses to session state
+      if (data.analyses) {
+        setSessionAnalyses(prev => [...prev, ...data.analyses]);
+      }
     },
     onError: (error: Error) => {
       toast({
@@ -195,7 +226,7 @@ export default function FetchPatternsApp() {
 
   const topWords = Object.entries(wordCloudData)
     .sort(([,a], [,b]) => b - a)
-    .slice(0, 50);
+    .slice(0, wordCount);
 
   // Export functions
   const exportCSV = (data: any, filename: string) => {
@@ -237,16 +268,39 @@ export default function FetchPatternsApp() {
               <p className="text-gray-600 text-sm">AI-Powered Document Analysis & Visualization</p>
             </div>
           </div>
-          <div className="text-sm text-gray-500">React App</div>
+
         </div>
       </div>
 
       <div className="max-w-6xl mx-auto p-6 space-y-6">
+        {/* Session Controls */}
+        {sessionAnalyses.length > 0 && (
+          <Card className="bg-blue-50 border-blue-200">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-blue-800">
+                  <strong>Session Active:</strong> {sessionAnalyses.length} documents analyzed. 
+                  <span className="text-blue-600 ml-2">
+                    To start fresh, refresh the page (previous analysis will be lost - save CSVs/PNGs first).
+                  </span>
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => window.location.reload()}
+                  className="text-blue-700 border-blue-300 hover:bg-blue-100"
+                >
+                  Refresh Session
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Upload Section */}
         <Card className="bg-white">
           <CardHeader>
-            <CardTitle className="text-gray-900 flex items-center gap-2">
-              <Upload className="h-5 w-5" />
+            <CardTitle className="text-gray-900">
               Upload Documents
             </CardTitle>
           </CardHeader>
@@ -315,8 +369,7 @@ export default function FetchPatternsApp() {
         {/* Ask Questions Section */}
         <Card className="bg-white">
           <CardHeader>
-            <CardTitle className="text-gray-900 flex items-center gap-2">
-              <MessageSquare className="h-5 w-5" />
+            <CardTitle className="text-gray-900">
               Ask Questions About Your Documents
             </CardTitle>
           </CardHeader>
@@ -360,8 +413,7 @@ export default function FetchPatternsApp() {
         {/* Document Summaries */}
         <Card className="bg-white">
           <CardHeader>
-            <CardTitle className="text-gray-900 flex items-center gap-2">
-              <FileText className="h-5 w-5" />
+            <CardTitle className="text-gray-900">
               Document Summaries
             </CardTitle>
             <CardDescription className="text-gray-600">
@@ -402,8 +454,7 @@ export default function FetchPatternsApp() {
         <Card className="bg-white">
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle className="text-gray-900 flex items-center gap-2">
-                <BarChart3 className="h-5 w-5" />
+              <CardTitle className="text-gray-900">
                 Context-Based Sentiment Analysis
               </CardTitle>
               <Button 
@@ -539,12 +590,21 @@ export default function FetchPatternsApp() {
         <Card className="bg-white" id="word-cloud">
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle className="text-gray-900 flex items-center gap-2">
-                <Brain className="h-5 w-5" />
+              <CardTitle className="text-gray-900">
                 Word Cloud
               </CardTitle>
               <div className="flex items-center gap-4">
-                <span className="text-gray-500 text-sm">Words: {topWords.length}</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-gray-500 text-sm">Words:</span>
+                  <Input
+                    type="number"
+                    value={wordCount}
+                    onChange={(e) => setWordCount(Math.max(1, Math.min(100, parseInt(e.target.value) || 50)))}
+                    className="w-20 h-8"
+                    min="1"
+                    max="100"
+                  />
+                </div>
                 <div className="flex gap-2">
                   <Button 
                     variant="outline" 
@@ -570,7 +630,7 @@ export default function FetchPatternsApp() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="bg-gray-50 p-8 rounded-lg min-h-[400px] flex flex-wrap items-center justify-center gap-3">
+            <div className="bg-gray-50 p-8 rounded-lg min-h-[400px] flex flex-wrap items-center justify-center gap-1 leading-tight" style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '300' }}>
               {topWords.map(([word, count], index) => {
                 const maxCount = Math.max(...Object.values(wordCloudData));
                 const size = Math.max(14, Math.min(48, (count / maxCount) * 48));
@@ -597,9 +657,20 @@ export default function FetchPatternsApp() {
         </Card>
 
         {/* Footer */}
-        <div className="text-center text-gray-500 text-sm py-8">
-          Copyright Dark Street. All rights reserved.
-        </div>
+        <footer className="bg-gray-50 border-t border-gray-200 mt-12">
+          <div className="max-w-6xl mx-auto py-8 px-6">
+            <div className="flex flex-wrap justify-center gap-8 text-sm text-gray-600 mb-4">
+              <a href="/privacy" className="hover:text-gray-900 transition-colors">Privacy Policy</a>
+              <a href="/terms" className="hover:text-gray-900 transition-colors">Terms of Service</a>
+              <a href="/about" className="hover:text-gray-900 transition-colors">About</a>
+              <a href="/contact" className="hover:text-gray-900 transition-colors">Contact</a>
+              <a href="/security" className="hover:text-gray-900 transition-colors">Security</a>
+            </div>
+            <div className="text-center text-gray-500 text-sm">
+              Copyright © 2025 Dark Street Tech. All rights reserved.
+            </div>
+          </div>
+        </footer>
       </div>
     </div>
   );

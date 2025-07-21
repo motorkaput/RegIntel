@@ -346,20 +346,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Question answering endpoint
   app.post('/api/fetch-patterns/question', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const { question } = req.body;
+      const { question, documents } = req.body;
       
       if (!question) {
         return res.status(400).json({ message: "Question is required" });
       }
 
-      // Get user's documents
-      const analyses = await storage.getUserDocumentAnalyses(userId);
-      const documents = analyses
-        .filter(a => a.status === 'completed' && a.extractedText)
-        .map(a => ({ text: a.extractedText!, filename: a.originalName }));
-
-      if (documents.length === 0) {
+      if (!documents || documents.length === 0) {
         return res.json({
           answer: "No documents available to answer questions. Please upload some documents first.",
           confidence: 0.0,
@@ -378,20 +371,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Context analysis endpoint
   app.post('/api/fetch-patterns/context-analysis', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const { context } = req.body;
+      const { context, documents } = req.body;
       
       if (!context) {
         return res.status(400).json({ message: "Context is required" });
       }
 
-      // Get user's documents
-      const analyses = await storage.getUserDocumentAnalyses(userId);
-      const documents = analyses
-        .filter(a => a.status === 'completed' && a.extractedText)
-        .map(a => ({ text: a.extractedText!, filename: a.originalName }));
-
-      if (documents.length === 0) {
+      if (!documents || documents.length === 0) {
         return res.json({
           context,
           mentions: 0,
