@@ -4,7 +4,6 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { 
@@ -13,11 +12,11 @@ import {
   BarChart3, 
   Brain, 
   MessageSquare,
-  Download,
-  TrendingUp
+  Download
 } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import fetchPatternsLogo from "@assets/FetchPatterns_Logo_1752663550322.png";
 
 interface DocumentAnalysis {
   id: string;
@@ -198,29 +197,55 @@ export default function FetchPatternsApp() {
     .sort(([,a], [,b]) => b - a)
     .slice(0, 50);
 
+  // Export functions
+  const exportCSV = (data: any, filename: string) => {
+    const csv = typeof data === 'string' ? data : JSON.stringify(data);
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
+
+  const exportPNG = (elementId: string, filename: string) => {
+    // Simple screenshot functionality - in production use html2canvas
+    toast({
+      title: "Export Feature",
+      description: "PNG export would be implemented with html2canvas in production",
+    });
+  };
+
   if (!isAuthenticated || isLoading) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="text-white text-xl">Loading...</div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-gray-600 text-xl">Loading...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
+    <div className="min-h-screen bg-gray-100">
       {/* Header */}
-      <div className="bg-gray-800 border-b border-gray-700 p-6">
-        <div className="max-w-7xl mx-auto">
-          <h1 className="text-3xl font-bold text-center mb-2">FetchPatterns</h1>
-          <p className="text-gray-300 text-center">AI-Powered Document Analysis & Visualization</p>
+      <div className="bg-white border-b border-gray-200 p-4">
+        <div className="max-w-6xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <img src={fetchPatternsLogo} alt="FetchPatterns" className="h-12 w-auto" />
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">FetchPatterns</h1>
+              <p className="text-gray-600 text-sm">AI-Powered Document Analysis & Visualization</p>
+            </div>
+          </div>
+          <div className="text-sm text-gray-500">React App</div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto p-6 space-y-8">
+      <div className="max-w-6xl mx-auto p-6 space-y-6">
         {/* Upload Section */}
-        <Card className="bg-gray-800 border-gray-700">
+        <Card className="bg-white">
           <CardHeader>
-            <CardTitle className="text-white flex items-center gap-2">
+            <CardTitle className="text-gray-900 flex items-center gap-2">
               <Upload className="h-5 w-5" />
               Upload Documents
             </CardTitle>
@@ -228,14 +253,14 @@ export default function FetchPatternsApp() {
           <CardContent>
             <div className="space-y-4">
               <div className="flex items-center justify-center w-full">
-                <label className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-600 border-dashed rounded-lg cursor-pointer bg-gray-700 hover:bg-gray-600">
+                <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
                   <div className="flex flex-col items-center justify-center pt-5 pb-6">
                     <Upload className="w-10 h-10 mb-3 text-gray-400" />
-                    <p className="mb-2 text-sm text-gray-400">
+                    <p className="mb-2 text-sm text-gray-500">
                       {selectedFiles ? (
-                        <span className="font-semibold">{selectedFiles.length} files selected</span>
+                        <span className="font-semibold">Choose files {selectedFiles.length} files</span>
                       ) : (
-                        <span><span className="font-semibold">Click to upload</span> or drag and drop</span>
+                        <span><span className="font-semibold">Choose files</span></span>
                       )}
                     </p>
                     <p className="text-xs text-gray-400">Select multiple files (PDF, DOCX, PPTX, XLSX, TXT, Images)</p>
@@ -249,17 +274,6 @@ export default function FetchPatternsApp() {
                   />
                 </label>
               </div>
-              
-              {selectedFiles && (
-                <div className="space-y-2">
-                  <div className="text-sm text-gray-300">Selected files:</div>
-                  {Array.from(selectedFiles).map((file, index) => (
-                    <div key={index} className="text-sm text-gray-400 bg-gray-700 p-2 rounded">
-                      {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
-                    </div>
-                  ))}
-                </div>
-              )}
 
               {uploadProgress > 0 && (
                 <Progress value={uploadProgress} className="w-full" />
@@ -268,7 +282,7 @@ export default function FetchPatternsApp() {
               <Button 
                 onClick={handleUpload}
                 disabled={!selectedFiles || uploadMutation.isPending}
-                className="w-full bg-blue-600 hover:bg-blue-700"
+                className="w-full bg-gray-700 hover:bg-gray-800 text-white"
               >
                 {uploadMutation.isPending ? "Uploading..." : "Upload & Analyze"}
               </Button>
@@ -278,123 +292,132 @@ export default function FetchPatternsApp() {
 
         {/* Statistics Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card className="bg-gray-800 border-gray-700">
-            <CardContent className="p-6 text-center">
-              <div className="text-3xl font-bold text-blue-400">{completedAnalyses.length}</div>
-              <div className="text-sm text-gray-400">Documents Processed</div>
-            </CardContent>
+          <Card className="bg-white text-center p-6">
+            <div className="text-4xl font-bold text-gray-700 mb-2">{completedAnalyses.length}</div>
+            <div className="text-sm text-gray-500">Documents Processed</div>
           </Card>
-          <Card className="bg-gray-800 border-gray-700">
-            <CardContent className="p-6 text-center">
-              <div className="text-3xl font-bold text-green-400">{uniqueKeywords}</div>
-              <div className="text-sm text-gray-400">Unique Keywords</div>
-            </CardContent>
+          <Card className="bg-white text-center p-6">
+            <div className="text-4xl font-bold text-gray-700 mb-2">{uniqueKeywords}</div>
+            <div className="text-sm text-gray-500">Unique Keywords</div>
           </Card>
-          <Card className="bg-gray-800 border-gray-700">
-            <CardContent className="p-6 text-center">
-              <div className="text-3xl font-bold text-yellow-400">{highConfidence}</div>
-              <div className="text-sm text-gray-400">High Confidence</div>
-              <div className="text-xs text-gray-500">Sentiment confidence &gt; 80%</div>
-            </CardContent>
+          <Card className="bg-white text-center p-6">
+            <div className="text-4xl font-bold text-gray-700 mb-2">{highConfidence}</div>
+            <div className="text-sm text-gray-500">High Confidence</div>
+            <div className="text-xs text-gray-400">Sentiment confidence &gt; 80%</div>
           </Card>
-          <Card className="bg-gray-800 border-gray-700">
-            <CardContent className="p-6 text-center">
-              <div className="text-3xl font-bold text-red-400">{highRisk}</div>
-              <div className="text-sm text-gray-400">High Risk Documents</div>
-              <div className="text-xs text-gray-500">Negative sentiment documents</div>
-            </CardContent>
+          <Card className="bg-white text-center p-6">
+            <div className="text-4xl font-bold text-gray-700 mb-2">{highRisk}</div>
+            <div className="text-sm text-gray-500">High Risk Documents</div>
+            <div className="text-xs text-gray-400">Negative sentiment documents</div>
           </Card>
         </div>
 
         {/* Ask Questions Section */}
-        <Card className="bg-gray-800 border-gray-700">
+        <Card className="bg-white">
           <CardHeader>
-            <CardTitle className="text-white flex items-center gap-2">
+            <CardTitle className="text-gray-900 flex items-center gap-2">
               <MessageSquare className="h-5 w-5" />
               Ask Questions About Your Documents
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex gap-4">
+            <div className="flex gap-4 mb-4">
               <Input
                 value={question}
                 onChange={(e) => setQuestion(e.target.value)}
                 placeholder="What is c:pesa's positioning strategy?"
-                className="flex-1 bg-gray-700 border-gray-600 text-white"
+                className="flex-1"
                 onKeyPress={(e) => e.key === 'Enter' && handleAskQuestion()}
               />
               <Button 
                 onClick={handleAskQuestion}
                 disabled={!question.trim() || questionMutation.isPending}
-                className="bg-blue-600 hover:bg-blue-700"
+                className="bg-gray-600 hover:bg-gray-700"
               >
                 Ask Question
               </Button>
             </div>
 
             {questionMutation.data && (
-              <div className="mt-6 p-4 bg-gray-700 rounded-lg">
-                <div className="text-sm text-gray-300 mb-2">
-                  <strong>Question:</strong> {questionMutation.variables}
-                </div>
-                <div className="text-sm text-gray-300 mb-2">
-                  <strong>Answer:</strong>
-                </div>
-                <div className="text-white mb-2">{questionMutation.data.answer}</div>
-                <div className="text-sm text-gray-400">
-                  <strong>Confidence:</strong> {(questionMutation.data.confidence * 100).toFixed(1)}%
-                </div>
-              </div>
+              <Card className="bg-gray-50 border-gray-200">
+                <CardContent className="p-4">
+                  <div className="text-sm text-gray-700 mb-2">
+                    <strong>Question:</strong> {questionMutation.variables}
+                  </div>
+                  <div className="text-sm text-gray-700 mb-2">
+                    <strong>Answer:</strong>
+                  </div>
+                  <div className="text-gray-900 mb-2">{questionMutation.data.answer}</div>
+                  <div className="text-sm text-gray-600">
+                    <strong>Confidence:</strong> {(questionMutation.data.confidence * 100).toFixed(1)}%
+                  </div>
+                </CardContent>
+              </Card>
             )}
           </CardContent>
         </Card>
 
         {/* Document Summaries */}
-        <Card className="bg-gray-800 border-gray-700">
+        <Card className="bg-white">
           <CardHeader>
-            <CardTitle className="text-white flex items-center gap-2">
+            <CardTitle className="text-gray-900 flex items-center gap-2">
               <FileText className="h-5 w-5" />
               Document Summaries
             </CardTitle>
-            <CardDescription className="text-gray-400">
+            <CardDescription className="text-gray-600">
               AI-generated summaries and insights from your uploaded documents
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {completedAnalyses.map((analysis) => (
-                <div key={analysis.id} className="bg-gray-700 p-4 rounded-lg">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-semibold text-white">{analysis.originalName}</h3>
-                    {analysis.classification && (
-                      <Badge variant="secondary" className="bg-blue-600 text-white">
-                        {analysis.classification}
-                      </Badge>
-                    )}
-                  </div>
-                  
-                  {analysis.summary && (
-                    <p className="text-gray-300 text-sm mb-3">{analysis.summary}</p>
-                  )}
-                  
-                  {analysis.wordCount && (
-                    <div className="text-xs text-gray-400">
-                      Word Count: {analysis.wordCount} words
+                <Card key={analysis.id} className="bg-gray-50 border-gray-200">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="font-semibold text-gray-900">{analysis.originalName}</h3>
+                      {analysis.classification && (
+                        <Badge className="bg-green-100 text-green-800 border-green-200">
+                          {analysis.classification}
+                        </Badge>
+                      )}
                     </div>
-                  )}
-                </div>
+                    
+                    {analysis.summary && (
+                      <p className="text-gray-700 text-sm mb-3 leading-relaxed">{analysis.summary}</p>
+                    )}
+                    
+                    {analysis.wordCount && (
+                      <div className="text-xs text-gray-500">
+                        <strong>Word Count:</strong> {analysis.wordCount} words
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
               ))}
             </div>
           </CardContent>
         </Card>
 
         {/* Context-Based Sentiment Analysis */}
-        <Card className="bg-gray-800 border-gray-700">
+        <Card className="bg-white">
           <CardHeader>
-            <CardTitle className="text-white flex items-center gap-2">
-              <BarChart3 className="h-5 w-5" />
-              Context-Based Sentiment Analysis
-            </CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-gray-900 flex items-center gap-2">
+                <BarChart3 className="h-5 w-5" />
+                Context-Based Sentiment Analysis
+              </CardTitle>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => contextMutation.data && exportCSV(
+                  `Context,Positive %,Negative %,Neutral %,Total Mentions,Emotional Tone,Key Phrases,Context Summary\n"${contextMutation.data.context}","${contextMutation.data.sentimentBreakdown.positive}","${contextMutation.data.sentimentBreakdown.negative}","${contextMutation.data.sentimentBreakdown.neutral}","${contextMutation.data.mentions}","${contextMutation.data.emotionalTone.join('; ')}","${contextMutation.data.keyPhrases.join('; ')}","${contextMutation.data.summary}"`,
+                  `Fetch_Patterns_Context_Analysis_${new Date().toISOString().slice(0,10)}.csv`
+                )}
+                className="text-gray-600 border-gray-300"
+              >
+                CSV
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="flex gap-4 mb-6">
@@ -402,110 +425,166 @@ export default function FetchPatternsApp() {
                 value={contextQuery}
                 onChange={(e) => setContextQuery(e.target.value)}
                 placeholder="Enter a context to analyze (e.g., 'customer satisfaction', 'product quality', 'financial performance')"
-                className="flex-1 bg-gray-700 border-gray-600 text-white"
+                className="flex-1"
                 onKeyPress={(e) => e.key === 'Enter' && handleContextAnalysis()}
               />
               <Button 
                 onClick={handleContextAnalysis}
                 disabled={!contextQuery.trim() || contextMutation.isPending}
-                className="bg-blue-600 hover:bg-blue-700"
+                className="bg-gray-600 hover:bg-gray-700"
               >
                 Analyze Context
-              </Button>
-              <Button variant="outline" className="border-gray-600 text-gray-300">
-                CSV
               </Button>
             </div>
 
             {contextMutation.data && (
-              <div className="space-y-4">
-                <div className="text-lg font-semibold text-white flex items-center justify-between">
-                  {contextMutation.variables}
-                  <span className="text-sm text-gray-400">{contextMutation.data.mentions} mentions</span>
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <div className="text-lg font-semibold text-gray-900">
+                    {contextMutation.variables}
+                  </div>
+                  <Badge variant="outline" className="text-gray-600 border-gray-300">
+                    {contextMutation.data.mentions} mentions
+                  </Badge>
                 </div>
                 
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="bg-green-600 p-3 rounded text-center">
-                    <div className="text-white font-semibold">Positive</div>
-                    <div className="text-2xl font-bold">{contextMutation.data.sentimentBreakdown.positive}%</div>
+                {/* Sentiment bars */}
+                <div className="space-y-3">
+                  <div className="flex items-center gap-4">
+                    <div className="w-20 text-sm font-medium text-gray-700">Positive</div>
+                    <div className="flex-1 bg-gray-200 rounded-full h-6 relative">
+                      <div 
+                        className="bg-green-500 h-6 rounded-full flex items-center justify-end pr-2"
+                        style={{ width: `${contextMutation.data.sentimentBreakdown.positive}%` }}
+                      >
+                        <span className="text-white text-sm font-medium">
+                          {contextMutation.data.sentimentBreakdown.positive}%
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                  <div className="bg-red-600 p-3 rounded text-center">
-                    <div className="text-white font-semibold">Negative</div>
-                    <div className="text-2xl font-bold">{contextMutation.data.sentimentBreakdown.negative}%</div>
+                  <div className="flex items-center gap-4">
+                    <div className="w-20 text-sm font-medium text-gray-700">Negative</div>
+                    <div className="flex-1 bg-gray-200 rounded-full h-6 relative">
+                      <div 
+                        className="bg-red-500 h-6 rounded-full flex items-center justify-end pr-2"
+                        style={{ width: `${contextMutation.data.sentimentBreakdown.negative}%` }}
+                      >
+                        <span className="text-white text-sm font-medium">
+                          {contextMutation.data.sentimentBreakdown.negative}%
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                  <div className="bg-gray-600 p-3 rounded text-center">
-                    <div className="text-white font-semibold">Neutral</div>
-                    <div className="text-2xl font-bold">{contextMutation.data.sentimentBreakdown.neutral}%</div>
+                  <div className="flex items-center gap-4">
+                    <div className="w-20 text-sm font-medium text-gray-700">Neutral</div>
+                    <div className="flex-1 bg-gray-200 rounded-full h-6 relative">
+                      <div 
+                        className="bg-gray-500 h-6 rounded-full flex items-center justify-end pr-2"
+                        style={{ width: `${contextMutation.data.sentimentBreakdown.neutral}%` }}
+                      >
+                        <span className="text-white text-sm font-medium">
+                          {contextMutation.data.sentimentBreakdown.neutral}%
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
-                {contextMutation.data.emotionalTone && (
-                  <div>
-                    <div className="text-white font-semibold mb-2">Emotional Tone:</div>
-                    <div className="flex gap-2">
-                      {contextMutation.data.emotionalTone.map((tone, index) => (
-                        <Badge key={index} variant="outline" className="border-gray-600 text-gray-300">
-                          {tone}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                {/* Details in blue box */}
+                <Card className="bg-blue-50 border-blue-200 border-l-4 border-l-blue-500">
+                  <CardContent className="p-4 space-y-4">
+                    {contextMutation.data.emotionalTone && (
+                      <div>
+                        <div className="text-gray-900 font-semibold mb-2">Emotional Tone:</div>
+                        <div className="flex gap-2">
+                          {contextMutation.data.emotionalTone.map((tone, index) => (
+                            <Badge key={index} className="bg-blue-100 text-blue-800 border-blue-200">
+                              {tone}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
 
-                {contextMutation.data.keyPhrases && (
-                  <div>
-                    <div className="text-white font-semibold mb-2">Key Phrases:</div>
-                    <div className="flex flex-wrap gap-2">
-                      {contextMutation.data.keyPhrases.map((phrase, index) => (
-                        <Badge key={index} className="bg-blue-600 text-white">
-                          "{phrase}"
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                    {contextMutation.data.keyPhrases && (
+                      <div>
+                        <div className="text-gray-900 font-semibold mb-2">Key Phrases:</div>
+                        <div className="flex flex-wrap gap-2">
+                          {contextMutation.data.keyPhrases.map((phrase, index) => (
+                            <Badge key={index} className="bg-pink-100 text-pink-800 border-pink-200">
+                              "{phrase}"
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
 
-                {contextMutation.data.summary && (
-                  <div>
-                    <div className="text-white font-semibold mb-2">Context Summary:</div>
-                    <div className="text-gray-300 text-sm">{contextMutation.data.summary}</div>
-                  </div>
-                )}
+                    {contextMutation.data.summary && (
+                      <div>
+                        <div className="text-gray-900 font-semibold mb-2">Context Summary:</div>
+                        <div className="text-gray-700 text-sm leading-relaxed bg-white p-3 rounded border border-blue-200">
+                          {contextMutation.data.summary}
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
               </div>
             )}
           </CardContent>
         </Card>
 
         {/* Word Cloud */}
-        <Card className="bg-gray-800 border-gray-700">
+        <Card className="bg-white" id="word-cloud">
           <CardHeader>
-            <CardTitle className="text-white flex items-center gap-2">
-              <Brain className="h-5 w-5" />
-              Word Cloud
-            </CardTitle>
-            <div className="flex items-center gap-4">
-              <span className="text-gray-400">Words: {topWords.length}</span>
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm" className="border-gray-600 text-gray-300">
-                  PNG
-                </Button>
-                <Button variant="outline" size="sm" className="border-gray-600 text-gray-300">
-                  CSV
-                </Button>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-gray-900 flex items-center gap-2">
+                <Brain className="h-5 w-5" />
+                Word Cloud
+              </CardTitle>
+              <div className="flex items-center gap-4">
+                <span className="text-gray-500 text-sm">Words: {topWords.length}</span>
+                <div className="flex gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => exportPNG('word-cloud', `Fetch_Patterns_WordCloud_${new Date().toISOString().slice(0,10)}.png`)}
+                    className="text-gray-600 border-gray-300"
+                  >
+                    PNG
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => exportCSV(
+                      `Word,Frequency\n${topWords.map(([word, count]) => `"${word}","${count}"`).join('\n')}`,
+                      `Fetch_Patterns_WordCloud_${new Date().toISOString().slice(0,10)}.csv`
+                    )}
+                    className="text-gray-600 border-gray-300"
+                  >
+                    CSV
+                  </Button>
+                </div>
               </div>
             </div>
           </CardHeader>
           <CardContent>
-            <div className="bg-gray-700 p-6 rounded-lg min-h-[400px] flex flex-wrap items-center justify-center gap-2">
+            <div className="bg-gray-50 p-8 rounded-lg min-h-[400px] flex flex-wrap items-center justify-center gap-3">
               {topWords.map(([word, count], index) => {
-                const size = Math.max(12, Math.min(32, (count / Math.max(...Object.values(wordCloudData))) * 32));
-                const colors = ['text-blue-400', 'text-green-400', 'text-yellow-400', 'text-red-400', 'text-purple-400', 'text-pink-400'];
+                const maxCount = Math.max(...Object.values(wordCloudData));
+                const size = Math.max(14, Math.min(48, (count / maxCount) * 48));
+                const colors = [
+                  'text-blue-600', 'text-green-600', 'text-yellow-600', 
+                  'text-red-600', 'text-purple-600', 'text-pink-600',
+                  'text-indigo-600', 'text-orange-600', 'text-teal-600'
+                ];
                 const color = colors[index % colors.length];
                 
                 return (
                   <span
                     key={word}
-                    className={`${color} font-semibold hover:opacity-80 cursor-pointer`}
+                    className={`${color} font-semibold hover:opacity-80 cursor-pointer transition-opacity`}
                     style={{ fontSize: `${size}px` }}
                     title={`${word}: ${count} occurrences`}
                   >

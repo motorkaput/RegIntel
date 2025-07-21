@@ -157,7 +157,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Process document asynchronously
       processDocument(document.id.toString(), file.buffer, file.mimetype)
         .then(async (analysis) => {
-          await storage.updateDocument(document.id, {
+          await storage.updateDocument(document.id.toString(), {
             status: 'completed',
             extractedText: analysis.text,
             analysis: analysis.insights,
@@ -170,11 +170,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
             userId,
             metricType: 'document_processed',
             value: 1,
-            metadata: { documentId: document.id },
+            metadata: { documentId: document.id.toString() },
           });
         })
         .catch(async (error) => {
-          await storage.updateDocument(document.id, {
+          await storage.updateDocument(document.id.toString(), {
             status: 'failed',
             processingError: error.message,
           });
