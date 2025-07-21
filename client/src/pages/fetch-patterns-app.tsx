@@ -64,6 +64,7 @@ export default function FetchPatternsApp() {
   const [contextQuery, setContextQuery] = useState("");
   const [wordCount, setWordCount] = useState(50);
   const [sessionAnalyses, setSessionAnalyses] = useState<DocumentAnalysis[]>([]);
+  const [pollInterval, setPollInterval] = useState<NodeJS.Timeout | null>(null);
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -79,6 +80,15 @@ export default function FetchPatternsApp() {
       return;
     }
   }, [isAuthenticated, isLoading, toast]);
+
+  // Cleanup polling on unmount
+  useEffect(() => {
+    return () => {
+      if (pollInterval) {
+        clearInterval(pollInterval);
+      }
+    };
+  }, [pollInterval]);
 
   // Use session-based analyses instead of cumulative
   const analyses = sessionAnalyses;
@@ -162,6 +172,44 @@ export default function FetchPatternsApp() {
       // Add new analyses to session state
       if (data.analyses) {
         setSessionAnalyses(prev => [...prev, ...data.analyses]);
+        
+        // Start polling for completion
+        if (pollInterval) clearInterval(pollInterval);
+        const interval = setInterval(async () => {
+          try {
+            const updatedAnalyses = await Promise.all(
+              data.analyses.map(async (analysis: any) => {
+                const response = await fetch(`/api/fetch-patterns/analysis/${analysis.id}`);
+                if (response.ok) {
+                  return await response.json();
+                }
+                return analysis;
+              })
+            );
+            
+            setSessionAnalyses(prev => {
+              const newAnalyses = [...prev];
+              updatedAnalyses.forEach(updated => {
+                const index = newAnalyses.findIndex(a => a.id === updated.id);
+                if (index !== -1) {
+                  newAnalyses[index] = updated;
+                }
+              });
+              return newAnalyses;
+            });
+            
+            // Stop polling if all analyses are completed or have errors
+            const allDone = updatedAnalyses.every(a => a.status === 'completed' || a.status === 'error');
+            if (allDone) {
+              clearInterval(interval);
+              setPollInterval(null);
+            }
+          } catch (error) {
+            console.error('Error polling for analysis updates:', error);
+          }
+        }, 2000); // Poll every 2 seconds
+        
+        setPollInterval(interval);
       }
     },
     onError: (error: Error) => {
