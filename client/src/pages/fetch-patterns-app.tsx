@@ -339,7 +339,21 @@ export default function FetchPatternsApp() {
               <p className="text-gray-600 text-sm">AI-Powered Document Analysis & Visualization</p>
             </div>
           </div>
-
+          
+          {/* User Info */}
+          <div className="flex items-center gap-4">
+            <div className="text-sm text-gray-600">
+              Signed in as: <span className="font-medium text-gray-900">{isAuthenticated ? 'David' : 'Guest'}</span>
+            </div>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => window.location.href = "/api/logout"}
+              className="text-gray-600 border-gray-300 hover:bg-gray-50"
+            >
+              Sign Out
+            </Button>
+          </div>
         </div>
       </div>
 

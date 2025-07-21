@@ -24,19 +24,19 @@ export default function Footer() {
             <h4 className="font-semibold text-primary mb-2 text-sm">Products</h4>
             <ul className="space-y-1">
               <li>
-                <Link href="/fetch-patterns" className="text-secondary hover:text-accent-blue transition-colors text-sm">
+                <a href="/fetch-patterns" target="_blank" rel="noopener noreferrer" className="text-secondary hover:text-accent-blue transition-colors text-sm">
                   Fetch Patterns
-                </Link>
+                </a>
               </li>
               <li>
-                <Link href="/permeate-enterprise" className="text-secondary hover:text-accent-blue transition-colors text-sm">
+                <a href="/permeate-enterprise" target="_blank" rel="noopener noreferrer" className="text-secondary hover:text-accent-blue transition-colors text-sm">
                   PerMeaTe Enterprise
-                </Link>
+                </a>
               </li>
               <li>
-                <Link href="/next" className="text-secondary hover:text-accent-blue transition-colors text-sm">
+                <a href="/next" target="_blank" rel="noopener noreferrer" className="text-secondary hover:text-accent-blue transition-colors text-sm">
                   What's Next
-                </Link>
+                </a>
               </li>
             </ul>
           </div>
@@ -46,9 +46,9 @@ export default function Footer() {
             <h4 className="font-semibold text-primary mb-2 text-sm">Company</h4>
             <ul className="space-y-1">
               <li>
-                <Link href="/about" className="text-secondary hover:text-accent-blue transition-colors text-sm">
+                <a href="/about" target="_blank" rel="noopener noreferrer" className="text-secondary hover:text-accent-blue transition-colors text-sm">
                   About Us
-                </Link>
+                </a>
               </li>
               <li>
                 <a 
