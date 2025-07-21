@@ -1,17 +1,21 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import Navbar from "@/components/navbar";
+import Footer from "@/components/footer";
 
 export default function Security() {
   return (
-    <div className="min-h-screen bg-gray-100">
-      <div className="bg-white border-b border-gray-200 p-4">
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-2xl font-bold text-gray-900">Security & Compliance</h1>
-          <p className="text-gray-600 text-sm">Your data security is our top priority</p>
+    <div className="min-h-screen bg-surface-white">
+      <Navbar />
+      <main className="pt-16">
+        <div className="bg-white border-b border-gray-200 p-4">
+          <div className="max-w-4xl mx-auto">
+            <h1 className="text-2xl font-bold text-gray-900">Security & Compliance</h1>
+            <p className="text-gray-600 text-sm">Your data security is our top priority</p>
+          </div>
         </div>
-      </div>
 
-      <div className="max-w-4xl mx-auto p-6 space-y-6">
+        <div className="max-w-4xl mx-auto p-6 space-y-6">
         <Card className="bg-white">
           <CardHeader>
             <CardTitle>Data Protection</CardTitle>
@@ -129,14 +133,16 @@ export default function Security() {
           </CardHeader>
           <CardContent>
             <p>If you discover a security vulnerability, please report it to:</p>
-            <p className="font-semibold text-gray-900 mt-2">security@darkstreet.tech</p>
+            <p className="font-semibold text-gray-900 mt-2">hello@darkstreet.org</p>
             <p className="text-sm text-gray-600 mt-2">
               We take all security reports seriously and will respond within 24 hours. 
               For urgent security matters, please include "URGENT" in your subject line.
             </p>
           </CardContent>
         </Card>
-      </div>
+        </div>
+      </main>
+      <Footer />
     </div>
   );
 }

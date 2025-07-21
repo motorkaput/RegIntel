@@ -2,20 +2,24 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import Navbar from "@/components/navbar";
+import Footer from "@/components/footer";
 
 export default function Contact() {
   return (
-    <div className="min-h-screen bg-gray-100">
-      <div className="bg-white border-b border-gray-200 p-4">
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-2xl font-bold text-gray-900">Contact Us</h1>
-          <p className="text-gray-600 text-sm">Get in touch with our team</p>
+    <div className="min-h-screen bg-surface-white">
+      <Navbar />
+      <main className="pt-16">
+        <div className="bg-white border-b border-gray-200 p-4">
+          <div className="max-w-4xl mx-auto">
+            <h1 className="text-2xl font-bold text-gray-900">Contact Us</h1>
+            <p className="text-gray-600 text-sm">Get in touch with our team</p>
+          </div>
         </div>
-      </div>
 
-      <div className="max-w-4xl mx-auto p-6 space-y-6">
-        <div className="grid md:grid-cols-2 gap-6">
-          <Card className="bg-white">
+        <div className="max-w-4xl mx-auto p-6 space-y-6">
+          <div className="grid md:grid-cols-2 gap-6">
+            <Card className="bg-white">
             <CardHeader>
               <CardTitle>Contact Information</CardTitle>
             </CardHeader>
@@ -37,9 +41,9 @@ export default function Contact() {
                 <p className="text-gray-600">hello@darkstreet.org</p>
               </div>
             </CardContent>
-          </Card>
+            </Card>
 
-          <Card className="bg-white">
+            <Card className="bg-white">
             <CardHeader>
               <CardTitle>Send us a Message</CardTitle>
             </CardHeader>
@@ -69,10 +73,10 @@ export default function Contact() {
                 </Button>
               </form>
             </CardContent>
-          </Card>
-        </div>
+            </Card>
+          </div>
 
-        <Card className="bg-white">
+          <Card className="bg-white">
           <CardHeader>
             <CardTitle>Office Hours</CardTitle>
           </CardHeader>
@@ -91,7 +95,9 @@ export default function Contact() {
             </div>
           </CardContent>
         </Card>
-      </div>
+        </div>
+      </main>
+      <Footer />
     </div>
   );
 }

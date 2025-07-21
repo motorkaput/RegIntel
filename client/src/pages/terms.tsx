@@ -1,16 +1,20 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import Navbar from "@/components/navbar";
+import Footer from "@/components/footer";
 
 export default function Terms() {
   return (
-    <div className="min-h-screen bg-gray-100">
-      <div className="bg-white border-b border-gray-200 p-4">
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-2xl font-bold text-gray-900">Terms of Service</h1>
-          <p className="text-gray-600 text-sm">Last updated: July 21, 2025</p>
+    <div className="min-h-screen bg-surface-white">
+      <Navbar />
+      <main className="pt-16">
+        <div className="bg-white border-b border-gray-200 p-4">
+          <div className="max-w-4xl mx-auto">
+            <h1 className="text-2xl font-bold text-gray-900">Terms of Service</h1>
+            <p className="text-gray-600 text-sm">Last updated: July 21, 2025</p>
+          </div>
         </div>
-      </div>
 
-      <div className="max-w-4xl mx-auto p-6 space-y-6">
+        <div className="max-w-4xl mx-auto p-6 space-y-6">
         <Card className="bg-white">
           <CardHeader>
             <CardTitle>Acceptance of Terms</CardTitle>
@@ -78,7 +82,9 @@ export default function Terms() {
             <p>For questions about these Terms of Service, contact us at hello@darkstreet.org</p>
           </CardContent>
         </Card>
-      </div>
+        </div>
+      </main>
+      <Footer />
     </div>
   );
 }

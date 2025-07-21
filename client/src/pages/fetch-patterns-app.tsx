@@ -784,14 +784,14 @@ export default function FetchPatternsApp() {
         <footer className="bg-gray-50 border-t border-gray-200 mt-12">
           <div className="max-w-6xl mx-auto py-8 px-6">
             <div className="flex flex-wrap justify-center gap-8 text-sm text-gray-600 mb-4">
-              <a href="/privacy" className="hover:text-gray-900 transition-colors">Privacy Policy</a>
-              <a href="/terms" className="hover:text-gray-900 transition-colors">Terms of Service</a>
-              <a href="/about" className="hover:text-gray-900 transition-colors">About</a>
-              <a href="/contact" className="hover:text-gray-900 transition-colors">Contact</a>
-              <a href="/security" className="hover:text-gray-900 transition-colors">Security</a>
+              <a href="/privacy" target="_blank" rel="noopener noreferrer" className="hover:text-gray-900 transition-colors">Privacy Policy</a>
+              <a href="/terms" target="_blank" rel="noopener noreferrer" className="hover:text-gray-900 transition-colors">Terms of Service</a>
+              <a href="/about" target="_blank" rel="noopener noreferrer" className="hover:text-gray-900 transition-colors">About</a>
+              <a href="/contact" target="_blank" rel="noopener noreferrer" className="hover:text-gray-900 transition-colors">Contact</a>
+              <a href="/security" target="_blank" rel="noopener noreferrer" className="hover:text-gray-900 transition-colors">Security</a>
             </div>
             <div className="text-center text-gray-500 text-sm">
-              Copyright © 2025 Dark Street Tech. All rights reserved.
+              Copyright Dark Street. All rights reserved.
             </div>
           </div>
         </footer>

@@ -1,17 +1,21 @@
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import Navbar from "@/components/navbar";
+import Footer from "@/components/footer";
 
 export default function Privacy() {
   return (
-    <div className="min-h-screen bg-gray-100">
-      <div className="bg-white border-b border-gray-200 p-4">
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-2xl font-bold text-gray-900">Privacy Policy</h1>
-          <p className="text-gray-600 text-sm">Last updated: July 21, 2025</p>
+    <div className="min-h-screen bg-surface-white">
+      <Navbar />
+      <main className="pt-16">
+        <div className="bg-white border-b border-gray-200 p-4">
+          <div className="max-w-4xl mx-auto">
+            <h1 className="text-2xl font-bold text-gray-900">Privacy Policy</h1>
+            <p className="text-gray-600 text-sm">Last updated: July 21, 2025</p>
+          </div>
         </div>
-      </div>
 
-      <div className="max-w-4xl mx-auto p-6 space-y-6">
+        <div className="max-w-4xl mx-auto p-6 space-y-6">
         <Card className="bg-white">
           <CardHeader>
             <CardTitle>Information We Collect</CardTitle>
@@ -61,7 +65,9 @@ export default function Privacy() {
             <p>If you have any questions about this Privacy Policy, please contact us at hello@darkstreet.org</p>
           </CardContent>
         </Card>
-      </div>
+        </div>
+      </main>
+      <Footer />
     </div>
   );
 }

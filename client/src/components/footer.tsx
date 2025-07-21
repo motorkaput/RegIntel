@@ -103,7 +103,7 @@ export default function Footer() {
         <div className="mt-6 pt-6 border-t border-light">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <p className="text-secondary text-sm">
-              © 2025 Dark Street Tech. All rights reserved.
+              Copyright Dark Street. All rights reserved.
             </p>
             <div className="flex items-center space-x-6">
             </div>
