@@ -12,6 +12,7 @@ import PerformanceDashboard from "@/pages/performance-dashboard";
 import Pricing from "@/pages/pricing";
 import Subscription from "@/pages/subscription";
 import FetchPatterns from "@/pages/fetch-patterns";
+import FetchPatternsApp from "@/pages/fetch-patterns-app";
 import PerMeaTeEnterprise from "@/pages/permeate-enterprise";
 import Next from "@/pages/next";
 import About from "@/pages/about";
@@ -39,6 +40,9 @@ function Router() {
           <Route path="/subscription" component={Subscription} />
         </>
       )}
+      
+      {/* SaaS Application routes */}
+      <Route path="/app/fetch-patterns" component={FetchPatternsApp} />
       
       <Route component={NotFound} />
     </Switch>

@@ -2,6 +2,7 @@ import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import { Button } from "@/components/ui/button";
 import { FileText, ArrowRight } from "lucide-react";
+import { Link } from "wouter";
 import fetchPatternsIcon from "@assets/FetchPatterns_Icon_1752663550310.png";
 
 export default function FetchPatterns() {
@@ -101,12 +102,12 @@ export default function FetchPatterns() {
         <section className="py-6 section-divider">
           <div className="container-section">
             <div>
-              <Button 
-                disabled 
-                className="btn-primary px-8 py-4 text-lg opacity-50 cursor-not-allowed"
-              >
-                App Launch Soon
-              </Button>
+              <Link href="/app/fetch-patterns">
+                <Button className="btn-primary px-8 py-4 text-lg flex items-center gap-2">
+                  Launch Fetch Patterns
+                  <ArrowRight className="w-5 h-5" />
+                </Button>
+              </Link>
             </div>
           </div>
         </section>
