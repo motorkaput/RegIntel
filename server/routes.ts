@@ -5,6 +5,7 @@ import { setupAuth, isAuthenticated } from "./replitAuth";
 import { initializeRazorpay, createSubscription, verifyPayment } from "./services/razorpay";
 import { processDocument } from "./services/documentProcessor";
 import { generatePerformanceAnalytics } from "./services/performanceAnalytics";
+import { processDocumentWithAI } from "./services/fetchPatternsAI";
 import multer from "multer";
 import { insertDocumentSchema, insertSubscriptionSchema } from "@shared/schema";
 import { nanoid } from "nanoid";
@@ -73,7 +74,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         id: nanoid(),
         userId,
         planId,
-        razorpaySubscriptionId: razorpaySubscription.id,
+        razorpaySubscriptionId: (razorpaySubscription as any)?.id || '',
         status: 'active',
         currentPeriodStart: new Date(),
         currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
@@ -135,7 +136,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Default limits for trial users
       let limit = 10;
-      if (subscription) {
+      if (subscription?.planId) {
         const plan = await storage.getSubscriptionPlan(subscription.planId);
         limit = plan?.documentsLimit || 10;
       }
@@ -154,7 +155,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       // Process document asynchronously
-      processDocument(document.id, file.buffer, file.mimetype)
+      processDocument(document.id.toString(), file.buffer, file.mimetype)
         .then(async (analysis) => {
           await storage.updateDocument(document.id, {
             status: 'completed',
@@ -218,6 +219,127 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting document:", error);
       res.status(500).json({ message: "Failed to delete document" });
+    }
+  });
+
+  // Fetch Patterns API routes
+  app.get('/api/fetch-patterns/analyses', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const analyses = await storage.getUserDocumentAnalyses(userId);
+      res.json(analyses);
+    } catch (error) {
+      console.error("Error fetching document analyses:", error);
+      res.status(500).json({ message: "Failed to fetch document analyses" });
+    }
+  });
+
+  app.post('/api/fetch-patterns/upload', isAuthenticated, upload.array('files'), async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const files = req.files as Express.Multer.File[];
+      
+      if (!files || files.length === 0) {
+        return res.status(400).json({ message: "No files uploaded" });
+      }
+
+      // Check user's document limit
+      const documentCount = await storage.getUserDocumentAnalysisCount(userId);
+      const subscription = await storage.getUserSubscription(userId);
+      
+      let limit = 10; // Default for trial users
+      if (subscription?.planId) {
+        const plan = await storage.getSubscriptionPlan(subscription.planId);
+        limit = plan?.documentsLimit || 10;
+      }
+
+      if (documentCount + files.length > limit) {
+        return res.status(429).json({ message: "Document limit exceeded for your subscription" });
+      }
+
+      const analysisPromises = files.map(async (file) => {
+        const analysisId = nanoid();
+        
+        const analysis = await storage.createDocumentAnalysis({
+          id: analysisId,
+          userId,
+          filename: `${nanoid()}_${file.originalname}`,
+          originalName: file.originalname,
+          mimeType: file.mimetype,
+          size: file.size,
+          status: 'processing',
+          uploadDate: new Date(),
+        });
+
+        // Process document asynchronously with AI analysis
+        setImmediate(async () => {
+          try {
+            const result = await processDocumentWithAI(file.buffer, file.mimetype);
+            
+            await storage.updateDocumentAnalysis(analysisId, {
+              status: 'completed',
+              extractedText: result.extractedText,
+              classification: result.classification,
+              sentiment: result.sentiment,
+              keywords: result.keywords,
+              insights: result.insights,
+              riskFlags: result.riskFlags,
+              summary: result.summary,
+              wordCloud: result.wordCloud,
+              completedAt: new Date(),
+            });
+          } catch (error) {
+            console.error(`Error processing document ${file.originalname}:`, error);
+            await storage.updateDocumentAnalysis(analysisId, {
+              status: 'error',
+              processingError: (error as Error).message,
+            });
+          }
+        });
+
+        return analysis;
+      });
+
+      const analyses = await Promise.all(analysisPromises);
+      res.json({ message: `${files.length} files uploaded successfully`, analyses });
+    } catch (error) {
+      console.error("Error uploading files:", error);
+      res.status(500).json({ message: "Failed to upload files" });
+    }
+  });
+
+  app.get('/api/fetch-patterns/analysis/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const analysisId = req.params.id;
+      
+      const analysis = await storage.getDocumentAnalysis(analysisId);
+      if (!analysis || analysis.userId !== userId) {
+        return res.status(404).json({ message: "Analysis not found" });
+      }
+
+      res.json(analysis);
+    } catch (error) {
+      console.error("Error fetching analysis:", error);
+      res.status(500).json({ message: "Failed to fetch analysis" });
+    }
+  });
+
+  app.delete('/api/fetch-patterns/analysis/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const analysisId = req.params.id;
+      
+      const analysis = await storage.getDocumentAnalysis(analysisId);
+      if (!analysis || analysis.userId !== userId) {
+        return res.status(404).json({ message: "Analysis not found" });
+      }
+
+      await storage.deleteDocumentAnalysis(analysisId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting analysis:", error);
+      res.status(500).json({ message: "Failed to delete analysis" });
     }
   });
 

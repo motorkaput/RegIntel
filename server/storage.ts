@@ -4,6 +4,7 @@ import {
   subscriptions,
   documents,
   performanceMetrics,
+  documentAnalyses,
   type User,
   type UpsertUser,
   type SubscriptionPlan,
@@ -14,6 +15,8 @@ import {
   type InsertDocument,
   type PerformanceMetric,
   type InsertPerformanceMetric,
+  type DocumentAnalysis,
+  type InsertDocumentAnalysis,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, gte, lte, count } from "drizzle-orm";
@@ -43,6 +46,14 @@ export interface IStorage {
   createPerformanceMetric(metric: InsertPerformanceMetric): Promise<PerformanceMetric>;
   getUserMetrics(userId: string, type?: string): Promise<PerformanceMetric[]>;
   getMetricsByDateRange(userId: string, startDate: Date, endDate: Date): Promise<PerformanceMetric[]>;
+
+  // Fetch Patterns document analysis operations
+  createDocumentAnalysis(analysis: InsertDocumentAnalysis): Promise<DocumentAnalysis>;
+  getUserDocumentAnalyses(userId: string, limit?: number): Promise<DocumentAnalysis[]>;
+  getDocumentAnalysis(id: string): Promise<DocumentAnalysis | undefined>;
+  updateDocumentAnalysis(id: string, updates: Partial<DocumentAnalysis>): Promise<DocumentAnalysis>;
+  deleteDocumentAnalysis(id: string): Promise<void>;
+  getUserDocumentAnalysisCount(userId: string): Promise<number>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -190,6 +201,55 @@ export class DatabaseStorage implements IStorage {
         )
       )
       .orderBy(desc(performanceMetrics.recordedAt));
+  }
+
+  // Fetch Patterns document analysis operations
+  async createDocumentAnalysis(analysis: InsertDocumentAnalysis): Promise<DocumentAnalysis> {
+    const [created] = await db
+      .insert(documentAnalyses)
+      .values(analysis)
+      .returning();
+    return created;
+  }
+
+  async getUserDocumentAnalyses(userId: string, limit: number = 50): Promise<DocumentAnalysis[]> {
+    return await db
+      .select()
+      .from(documentAnalyses)
+      .where(eq(documentAnalyses.userId, userId))
+      .orderBy(desc(documentAnalyses.uploadDate))
+      .limit(limit);
+  }
+
+  async getDocumentAnalysis(id: string): Promise<DocumentAnalysis | undefined> {
+    const [analysis] = await db
+      .select()
+      .from(documentAnalyses)
+      .where(eq(documentAnalyses.id, id));
+    return analysis;
+  }
+
+  async updateDocumentAnalysis(id: string, updates: Partial<DocumentAnalysis>): Promise<DocumentAnalysis> {
+    const [updated] = await db
+      .update(documentAnalyses)
+      .set(updates)
+      .where(eq(documentAnalyses.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteDocumentAnalysis(id: string): Promise<void> {
+    await db
+      .delete(documentAnalyses)
+      .where(eq(documentAnalyses.id, id));
+  }
+
+  async getUserDocumentAnalysisCount(userId: string): Promise<number> {
+    const [result] = await db
+      .select({ count: count() })
+      .from(documentAnalyses)
+      .where(eq(documentAnalyses.userId, userId));
+    return result.count;
   }
 }
 

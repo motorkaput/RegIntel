@@ -95,6 +95,28 @@ export const performanceMetrics = pgTable("performance_metrics", {
   recordedAt: timestamp("recorded_at").defaultNow(),
 });
 
+// Fetch Patterns document analyses
+export const documentAnalyses = pgTable("document_analyses", {
+  id: varchar("id").primaryKey(),
+  userId: varchar("user_id").references(() => users.id).notNull(),
+  filename: varchar("filename").notNull(),
+  originalName: varchar("original_name").notNull(),
+  mimeType: varchar("mime_type"),
+  size: integer("size"),
+  status: varchar("status").default("processing"), // processing, completed, error
+  extractedText: text("extracted_text"),
+  classification: varchar("classification"),
+  sentiment: jsonb("sentiment"), // {label, score, reasoning}
+  keywords: jsonb("keywords"), // string[]
+  insights: jsonb("insights"), // string[]
+  riskFlags: jsonb("risk_flags"), // string[]
+  summary: text("summary"),
+  wordCloud: jsonb("word_cloud"), // {text: string, value: number}[]
+  processingError: text("processing_error"),
+  uploadDate: timestamp("upload_date").defaultNow(),
+  completedAt: timestamp("completed_at"),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many, one }) => ({
   documents: many(documents),
@@ -130,12 +152,20 @@ export const performanceMetricsRelations = relations(performanceMetrics, ({ one 
   }),
 }));
 
+export const documentAnalysesRelations = relations(documentAnalyses, ({ one }) => ({
+  user: one(users, {
+    fields: [documentAnalyses.userId],
+    references: [users.id],
+  }),
+}));
+
 // Zod schemas
 export const insertUserSchema = createInsertSchema(users);
 export const insertSubscriptionPlanSchema = createInsertSchema(subscriptionPlans);
 export const insertSubscriptionSchema = createInsertSchema(subscriptions);
 export const insertDocumentSchema = createInsertSchema(documents);
 export const insertPerformanceMetricSchema = createInsertSchema(performanceMetrics);
+export const insertDocumentAnalysisSchema = createInsertSchema(documentAnalyses);
 
 // Types
 export type UpsertUser = typeof users.$inferInsert;
@@ -148,3 +178,5 @@ export type Document = typeof documents.$inferSelect;
 export type InsertDocument = typeof documents.$inferInsert;
 export type PerformanceMetric = typeof performanceMetrics.$inferSelect;
 export type InsertPerformanceMetric = typeof performanceMetrics.$inferInsert;
+export type DocumentAnalysis = typeof documentAnalyses.$inferSelect;
+export type InsertDocumentAnalysis = typeof documentAnalyses.$inferInsert;
