@@ -9,13 +9,13 @@ export default function Privacy() {
       <Navbar />
       <main className="pt-32">
         <div className="bg-white border-b border-gray-200 p-4">
-          <div className="max-w-4xl mx-auto">
+          <div className="max-w-6xl mx-auto">
             <h1 className="text-2xl font-bold text-gray-900">Privacy Policy</h1>
             <p className="text-gray-600 text-sm">Last updated: July 21, 2025</p>
           </div>
         </div>
 
-        <div className="max-w-4xl mx-auto p-6 space-y-6">
+        <div className="max-w-6xl mx-auto p-6 space-y-6">
         <Card className="bg-white">
           <CardHeader>
             <CardTitle>Information We Collect</CardTitle>

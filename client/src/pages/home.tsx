@@ -46,7 +46,7 @@ export default function Home() {
       <main className="pt-16">
         {/* Welcome Section */}
         <section className="py-20 bg-gradient-to-br from-black via-dark-gray to-darker-gray">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
               <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
                 Welcome back, <span className="text-neon-green">{user?.firstName || 'User'}</span>

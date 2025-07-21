@@ -11,13 +11,13 @@ export default function Contact() {
       <Navbar />
       <main className="pt-32">
         <div className="bg-white border-b border-gray-200 p-4">
-          <div className="max-w-4xl mx-auto">
+          <div className="max-w-6xl mx-auto">
             <h1 className="text-2xl font-bold text-gray-900">Contact Us</h1>
             <p className="text-gray-600 text-sm">Get in touch with our team</p>
           </div>
         </div>
 
-        <div className="max-w-4xl mx-auto p-6 space-y-6">
+        <div className="max-w-6xl mx-auto p-6 space-y-6">
           <div className="grid md:grid-cols-2 gap-6">
             <Card className="bg-white">
             <CardHeader>
