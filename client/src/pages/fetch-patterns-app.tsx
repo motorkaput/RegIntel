@@ -12,7 +12,9 @@ import {
   BarChart3, 
   Brain, 
   MessageSquare,
-  Download
+  Download,
+  User,
+  LogOut
 } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -341,9 +343,10 @@ export default function FetchPatternsApp() {
           </div>
           
           {/* User Info */}
-          <div className="flex items-center gap-4">
-            <div className="text-sm text-gray-600">
-              Signed in as: <span className="font-medium text-gray-900">{isAuthenticated ? 'David' : 'Guest'}</span>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 px-3 py-1 bg-gray-50 rounded-md border">
+              <User className="w-4 h-4 text-gray-500" />
+              <span className="text-sm font-medium text-gray-700">David</span>
             </div>
             <Button 
               variant="outline" 
@@ -351,6 +354,7 @@ export default function FetchPatternsApp() {
               onClick={() => window.location.href = "/api/logout"}
               className="text-gray-600 border-gray-300 hover:bg-gray-50"
             >
+              <LogOut className="w-4 h-4 mr-1" />
               Sign Out
             </Button>
           </div>

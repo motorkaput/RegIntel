@@ -65,9 +65,9 @@ export default function Navbar() {
             {isAuthenticated ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="flex items-center space-x-2 text-secondary hover:text-primary h-8 px-3">
-                    <User className="w-3 h-3" />
-                    <span className="text-xs">{user?.firstName || user?.email || "User"}</span>
+                  <Button variant="ghost" className="flex items-center space-x-2 text-secondary hover:text-primary h-8 px-3 bg-gray-50 rounded-md border border-gray-200">
+                    <User className="w-4 h-4" />
+                    <span className="text-sm font-medium">David</span>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
