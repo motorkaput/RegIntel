@@ -68,6 +68,13 @@ export default function FetchPatternsApp() {
   const [sessionAnalyses, setSessionAnalyses] = useState<DocumentAnalysis[]>([]);
   const [pollInterval, setPollInterval] = useState<NodeJS.Timeout | null>(null);
 
+  // Scroll to top when component loads
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }, []);
+
   // Redirect to login if not authenticated
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
