@@ -72,17 +72,17 @@ export default function Navbar() {
 
         {/* User authentication line - separate from main navigation */}
         {isAuthenticated && (
-          <div className="hidden md:flex justify-end items-center py-2 border-t border-light bg-gray-50/50">
+          <div className="hidden md:flex justify-start items-center py-2 border-t border-light bg-gray-50/50">
             <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2 px-3 py-1 bg-white rounded-md border border-gray-200 shadow-sm">
+              <div className="flex items-center gap-2 px-3 py-2 bg-white rounded-md border border-gray-200 shadow-sm h-10">
                 <User className="w-4 h-4 text-gray-500" />
-                <span className="text-sm font-medium text-gray-700">David</span>
+                <span className="text-sm font-medium text-gray-700">{user?.firstName || user?.email || 'User'}</span>
               </div>
               <Button 
                 variant="outline" 
                 size="sm" 
                 onClick={() => window.location.href = "/api/logout"}
-                className="text-gray-600 border-gray-300 hover:bg-gray-50"
+                className="text-gray-600 border-gray-300 hover:bg-gray-50 h-10"
               >
                 <LogOut className="w-4 h-4 mr-1" />
                 Sign Out

@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import mammoth from "mammoth";
 
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
 const openai = new OpenAI({
@@ -84,42 +85,20 @@ Future Outlook
 Management expects continued growth driven by market expansion, product innovation, and operational efficiency improvements. Projected revenue growth of 15-20% for the upcoming fiscal year.`;
       
       case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
-        // For DOCX files, simulate realistic document content since we can't actually extract from binary
-        // In a real application, you would use a library like mammoth.js or docx2txt
-        return `Strategic Business Analysis Document
-
-Executive Summary
-This comprehensive business strategy document outlines our organization's current market position, competitive landscape analysis, and strategic recommendations for the upcoming fiscal year. Our research indicates significant growth opportunities in emerging markets while highlighting key operational challenges that require immediate attention.
-
-Market Analysis
-Current market conditions show a 15% growth in our primary sector, with competitors gaining market share through digital transformation initiatives. Customer satisfaction metrics have improved by 8% quarter-over-quarter, indicating positive reception to our recent product enhancements.
-
-Key Performance Indicators
-- Revenue growth: 12% YoY
-- Market share expansion: 3.2% increase
-- Customer retention rate: 89%
-- Operational efficiency improvements: 18%
-
-Strategic Recommendations
-1. Accelerate digital transformation initiatives to maintain competitive advantage
-2. Expand operations in Southeast Asian markets based on market research findings  
-3. Invest in customer experience enhancement programs
-4. Optimize supply chain management to reduce operational costs by 10%
-5. Develop strategic partnerships with technology vendors
-
-Risk Assessment
-Primary risks include market volatility, supply chain disruptions, and increased competition from new market entrants. Mitigation strategies focus on diversification and operational resilience.
-
-Financial Projections
-Based on current market trends and strategic initiatives, we project 18-22% revenue growth over the next 24 months, with improved profit margins through operational efficiency gains.
-
-Implementation Timeline
-Q1: Market expansion planning and partner identification
-Q2: Technology infrastructure upgrades and system integration
-Q3: Pilot program launch in target markets
-Q4: Performance evaluation and strategy refinement
-
-This strategic framework positions our organization for sustainable growth while addressing market challenges and capitalizing on emerging opportunities.`;
+        // Extract real text from DOCX files using mammoth.js
+        try {
+          const result = await mammoth.extractRawText({ buffer });
+          const extractedText = result.value.trim();
+          
+          if (extractedText && extractedText.length > 10) {
+            return extractedText;
+          } else {
+            return `DOCX document appears to be empty or contains primarily formatting. Raw content length: ${extractedText.length} characters.`;
+          }
+        } catch (error) {
+          console.error('DOCX extraction error:', error);
+          return `ERROR: Failed to extract text from DOCX document: ${(error as Error).message}`;
+        }
       
       case 'application/vnd.openxmlformats-officedocument.presentationml.presentation':
         // For demo purposes, simulate PPTX content
