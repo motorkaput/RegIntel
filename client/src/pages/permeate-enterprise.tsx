@@ -9,7 +9,7 @@ export default function PerMeaTeEnterprise() {
     <div className="min-h-screen bg-surface-white">
       <Navbar />
       
-      <main className="pt-16">
+      <main className="pt-20">
         {/* Hero Section */}
         <section className="py-6 section-divider">
           <div className="container-section">

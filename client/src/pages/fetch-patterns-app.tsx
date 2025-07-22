@@ -335,9 +335,9 @@ export default function FetchPatternsApp() {
     <div className="min-h-screen bg-surface-white">
       <Navbar />
       
-      <main className="pt-32 pb-6">
+      <main className="pt-24 pb-6">
         {/* FetchPatterns specific header */}
-        <div className="bg-gray-50 border-b border-gray-200 py-6 mt-6">
+        <div className="bg-gray-50 border-b border-gray-200 py-6">
           <div className="max-w-6xl mx-auto px-6 flex items-center gap-4">
             <img src={fetchPatternsLogo} alt="FetchPatterns" className="h-10 w-auto" />
             <div>
@@ -744,7 +744,7 @@ export default function FetchPatternsApp() {
                     else if (normalizedSize > 0.2) fontSize = 20;
                     else fontSize = 16;
                     
-                    // Spiral positioning: highest frequency words in center, others spiraling outward
+                    // Enhanced spiral positioning to prevent overlaps
                     const centerX = 50; // Center X percentage
                     const centerY = 50; // Center Y percentage
                     
@@ -754,15 +754,15 @@ export default function FetchPatternsApp() {
                       x = centerX;
                       y = centerY;
                     } else {
-                      // Spiral formula for positioning
-                      const angle = index * 0.5; // Angle in radians
-                      const radius = Math.sqrt(index) * 8; // Distance from center
+                      // Improved spiral formula with better spacing
+                      const angle = index * 0.8; // Increased angle step for more spacing
+                      const radius = Math.sqrt(index) * 12; // Increased radius multiplier for better spacing
                       x = centerX + Math.cos(angle) * radius;
                       y = centerY + Math.sin(angle) * radius;
                       
-                      // Keep words within bounds
-                      x = Math.max(5, Math.min(95, x));
-                      y = Math.max(10, Math.min(90, y));
+                      // Enhanced bounds checking with better padding
+                      x = Math.max(8, Math.min(92, x));
+                      y = Math.max(15, Math.min(85, y));
                     }
                     
                     // Professional color palette
@@ -784,7 +784,7 @@ export default function FetchPatternsApp() {
                           fontSize: `${fontSize}px`,
                           color: color,
                           fontWeight: index < 3 ? '600' : (normalizedSize > 0.5 ? '500' : '300'),
-                          textShadow: fontSize > 30 ? '2px 2px 4px rgba(0,0,0,0.15)' : '1px 1px 2px rgba(0,0,0,0.1)',
+                          textShadow: 'none',
                           zIndex: Math.max(1, Math.round(normalizedSize * 10))
                         }}
                         title={`${word}: ${count} occurrences`}
