@@ -774,8 +774,13 @@ export default function FetchPatternsApp() {
             <div 
               className="bg-white p-8 rounded-lg min-h-[500px] relative overflow-hidden"
               style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '300' }}
+              onLoad={() => sessionStorage.removeItem('tempWordPositions')} // Clear on load
             >
-              {topWords.length > 0 ? (
+              {(() => {
+                // Clear previous positions for fresh calculation
+                sessionStorage.removeItem('tempWordPositions');
+                return topWords.length > 0;
+              })() ? (
                 <div className="relative w-full h-[450px]">
                   {topWords.map(([word, count], index) => {
                     const maxCount = Math.max(...Object.values(wordCloudData));
@@ -790,48 +795,135 @@ export default function FetchPatternsApp() {
                     else if (normalizedSize > 0.2) fontSize = 18;
                     else fontSize = 14;
                     
-                    // Improved positioning with grid-based collision avoidance
+                    // Professional collision detection algorithm
+                    const placedWords = topWords.slice(0, index);
+                    
+                    // Estimate word dimensions based on font size and text length
+                    const wordWidth = word.length * fontSize * 0.6;
+                    const wordHeight = fontSize * 1.2;
+                    const padding = Math.max(4, fontSize * 0.2); // Dynamic padding based on font size
+                    
+                    // Collision detection function
+                    const hasCollision = (testX: number, testY: number) => {
+                      for (let i = 0; i < placedWords.length; i++) {
+                        const placed = placedWords[i];
+                        const [placedWord, placedCount] = placed;
+                        
+                        // Get placed word dimensions
+                        const placedMaxCount = Math.max(...Object.values(wordCloudData));
+                        const placedNormalizedSize = placedCount / placedMaxCount;
+                        let placedFontSize;
+                        if (placedNormalizedSize > 0.8) placedFontSize = 48;
+                        else if (placedNormalizedSize > 0.6) placedFontSize = 36;
+                        else if (placedNormalizedSize > 0.4) placedFontSize = 28;
+                        else if (placedNormalizedSize > 0.3) placedFontSize = 22;
+                        else if (placedNormalizedSize > 0.2) placedFontSize = 18;
+                        else placedFontSize = 14;
+                        
+                        const placedWidth = placedWord.length * placedFontSize * 0.6;
+                        const placedHeight = placedFontSize * 1.2;
+                        const placedPadding = Math.max(4, placedFontSize * 0.2);
+                        
+                        // Get placed position (stored in a temporary array for this calculation)
+                        const placedPositions = JSON.parse(sessionStorage.getItem('tempWordPositions') || '[]');
+                        if (placedPositions[i]) {
+                          const placedX = placedPositions[i].x;
+                          const placedY = placedPositions[i].y;
+                          
+                          // Check rectangle collision with padding
+                          const left1 = testX - wordWidth/2 - padding;
+                          const right1 = testX + wordWidth/2 + padding;
+                          const top1 = testY - wordHeight/2 - padding;
+                          const bottom1 = testY + wordHeight/2 + padding;
+                          
+                          const left2 = placedX - placedWidth/2 - placedPadding;
+                          const right2 = placedX + placedWidth/2 + placedPadding;
+                          const top2 = placedY - placedHeight/2 - placedPadding;
+                          const bottom2 = placedY + placedHeight/2 + placedPadding;
+                          
+                          if (!(right1 < left2 || left1 > right2 || bottom1 < top2 || top1 > bottom2)) {
+                            return true; // Collision detected
+                          }
+                        }
+                      }
+                      return false;
+                    };
+                    
+                    // Find optimal position using spiral search
+                    let x, y;
                     const centerX = 50;
                     const centerY = 50;
                     
-                    let x, y;
                     if (index === 0) {
-                      // Place highest frequency word at center
+                      // Place first word at center
                       x = centerX;
                       y = centerY;
                     } else {
-                      // Use uniform grid-based positioning for consistent spacing throughout
-                      const uniformSpacing = 15; // Consistent spacing between all words
-                      const goldenAngle = 137.508; // Golden angle in degrees for natural distribution
+                      // Spiral search for collision-free position
+                      let placed = false;
+                      let radius = 8; // Start closer to center
+                      const maxRadius = 45;
+                      const goldenAngle = 137.508; // Golden angle for natural distribution
                       
-                      // Calculate position using linear progression for uniform spacing
-                      const angle = (index * goldenAngle) * (Math.PI / 180);
-                      const radius = uniformSpacing * (index + 1) * 0.8; // Linear progression for uniform spacing
-                      
-                      x = centerX + Math.cos(angle) * radius;
-                      y = centerY + Math.sin(angle) * radius;
-                      
-                      // Ensure bounds with margin
-                      const margin = 10;
-                      x = Math.max(margin, Math.min(100 - margin, x));
-                      y = Math.max(margin, Math.min(100 - margin, y));
-                      
-                      // If linear spiral goes out of bounds, use uniform concentric circles
-                      if (x < margin || x > 100 - margin || y < margin || y > 100 - margin) {
-                        const wordsPerCircle = Math.max(6, Math.floor(index / 3)); // Increase words per circle as we go out
-                        const circleIndex = Math.floor(index / wordsPerCircle);
-                        const positionInCircle = index % wordsPerCircle;
-                        const circleRadius = 20 + (circleIndex * uniformSpacing); // Uniform circle spacing
-                        const angleInCircle = (positionInCircle / wordsPerCircle) * 2 * Math.PI;
+                      while (radius <= maxRadius && !placed) {
+                        const steps = Math.max(12, Math.floor(radius * 1.5)); // More dense checking
                         
-                        x = centerX + Math.cos(angleInCircle) * circleRadius;
-                        y = centerY + Math.sin(angleInCircle) * circleRadius;
+                        for (let step = 0; step < steps; step++) {
+                          const angle = (step / steps) * 2 * Math.PI;
+                          const testX = centerX + Math.cos(angle) * radius;
+                          const testY = centerY + Math.sin(angle) * radius;
+                          
+                          // Check bounds with margin
+                          const margin = Math.max(5, wordWidth/2 + 2);
+                          if (testX - wordWidth/2 >= margin && 
+                              testX + wordWidth/2 <= 100 - margin && 
+                              testY - wordHeight/2 >= margin && 
+                              testY + wordHeight/2 <= 100 - margin) {
+                            
+                            if (!hasCollision(testX, testY)) {
+                              x = testX;
+                              y = testY;
+                              placed = true;
+                              break;
+                            }
+                          }
+                        }
+                        radius += 4; // Increment radius for next spiral ring
+                      }
+                      
+                      // Fallback if spiral search fails
+                      if (!placed) {
+                        // Grid fallback with systematic placement
+                        const gridSpacing = Math.max(fontSize + 8, 20);
+                        let found = false;
                         
-                        // Final bounds check
-                        x = Math.max(margin, Math.min(100 - margin, x));
-                        y = Math.max(margin, Math.min(100 - margin, y));
+                        for (let row = 0; row < 8 && !found; row++) {
+                          for (let col = 0; col < 8 && !found; col++) {
+                            const testX = 15 + col * gridSpacing;
+                            const testY = 15 + row * gridSpacing;
+                            
+                            if (testX + wordWidth/2 <= 95 && testY + wordHeight/2 <= 95) {
+                              if (!hasCollision(testX, testY)) {
+                                x = testX;
+                                y = testY;
+                                found = true;
+                              }
+                            }
+                          }
+                        }
+                        
+                        // Last resort: place at edge
+                        if (!found) {
+                          x = Math.random() * 60 + 20;
+                          y = Math.random() * 60 + 20;
+                        }
                       }
                     }
+                    
+                    // Store position for collision detection of subsequent words
+                    const tempPositions = JSON.parse(sessionStorage.getItem('tempWordPositions') || '[]');
+                    tempPositions[index] = { x, y };
+                    sessionStorage.setItem('tempWordPositions', JSON.stringify(tempPositions));
                     
                     // Professional color palette
                     const colors = [
