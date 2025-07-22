@@ -754,15 +754,22 @@ export default function FetchPatternsApp() {
                       x = centerX;
                       y = centerY;
                     } else {
-                      // Improved spiral formula with better spacing
-                      const angle = index * 0.8; // Increased angle step for more spacing
-                      const radius = Math.sqrt(index) * 12; // Increased radius multiplier for better spacing
-                      x = centerX + Math.cos(angle) * radius;
-                      y = centerY + Math.sin(angle) * radius;
+                      // Advanced spiral formula with collision avoidance
+                      const goldenAngle = 2.39996; // Golden angle for optimal spacing
+                      const angle = index * goldenAngle;
+                      const radius = Math.sqrt(index) * 15; // Increased spacing factor
                       
-                      // Enhanced bounds checking with better padding
-                      x = Math.max(8, Math.min(92, x));
-                      y = Math.max(15, Math.min(85, y));
+                      // Add position variation based on word length to reduce overlaps
+                      const wordLengthOffset = (word.length % 3) * 5; // Small offset based on word length
+                      const adjustedRadius = radius + wordLengthOffset;
+                      
+                      x = centerX + Math.cos(angle) * adjustedRadius;
+                      y = centerY + Math.sin(angle) * adjustedRadius;
+                      
+                      // Enhanced bounds checking with better padding for font sizes
+                      const padding = fontSize / 3; // Dynamic padding based on font size
+                      x = Math.max(padding, Math.min(100 - padding, x));
+                      y = Math.max(padding, Math.min(100 - padding, y));
                     }
                     
                     // Professional color palette
