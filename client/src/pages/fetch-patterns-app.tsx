@@ -63,6 +63,7 @@ export default function FetchPatternsApp() {
   const { isAuthenticated, isLoading } = useAuth();
   const queryClient = useQueryClient();
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
+  const [pendingFiles, setPendingFiles] = useState<File[]>([]); // For cumulative uploads
   const [uploadProgress, setUploadProgress] = useState(0);
   const [question, setQuestion] = useState("");
   const [contextQuery, setContextQuery] = useState("");
@@ -187,6 +188,7 @@ export default function FetchPatternsApp() {
         description: "Your documents are being processed.",
       });
       setSelectedFiles(null);
+      setPendingFiles([]); // Clear pending files after successful upload
       setUploadProgress(0);
       
       // Scroll to top of app immediately
@@ -252,7 +254,30 @@ export default function FetchPatternsApp() {
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (files && files.length > 0) {
-      setSelectedFiles(files);
+      // Add new files to existing pending files for cumulative upload
+      const newFiles = Array.from(files);
+      const combinedFiles = [...pendingFiles, ...newFiles];
+      
+      // Remove duplicates based on file name and size
+      const uniqueFiles = combinedFiles.filter((file, index, self) => 
+        index === self.findIndex(f => f.name === file.name && f.size === file.size)
+      );
+      
+      if (uniqueFiles.length > 20) {
+        toast({
+          title: "Too many files",
+          description: "Please select a maximum of 20 files per session.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      setPendingFiles(uniqueFiles);
+      
+      // Convert back to FileList-like structure for upload
+      const dt = new DataTransfer();
+      uniqueFiles.forEach(file => dt.items.add(file));
+      setSelectedFiles(dt.files);
     }
   };
 
@@ -761,33 +786,66 @@ export default function FetchPatternsApp() {
                       x = centerX;
                       y = centerY;
                     } else {
-                      // Use a simple grid-based approach that actually works
-                      const wordsPerRow = 8; // Maximum words per row
-                      const row = Math.floor((index - 1) / wordsPerRow);
-                      const col = (index - 1) % wordsPerRow;
+                      // Use force-directed approach with collision detection
+                      const attempts = 50; // Maximum positioning attempts
+                      let placed = false;
+                      let attempt = 0;
                       
-                      // Calculate grid position with equal spacing
-                      const gridWidth = 80; // Use 80% of available width
-                      const gridHeight = 70; // Use 70% of available height
-                      const startX = 10; // Start 10% from left
-                      const startY = 15; // Start 15% from top
+                      while (!placed && attempt < attempts) {
+                        // Start with spiral positioning as base
+                        const angle = attempt * 0.3 + index * 2.4;
+                        const radius = 5 + (attempt * 2) + (index * 3);
+                        
+                        const testX = centerX + Math.cos(angle) * radius;
+                        const testY = centerY + Math.sin(angle) * radius;
+                        
+                        // Check bounds
+                        if (testX < 8 || testX > 92 || testY < 8 || testY > 92) {
+                          attempt++;
+                          continue;
+                        }
+                        
+                        // Check collision with previously placed words (simple distance check)
+                        let collision = false;
+                        const minDistance = fontSize / 2 + 5; // Minimum distance based on font size
+                        
+                        // For simplicity, we'll only check the last few words to avoid performance issues
+                        const wordsToCheck = Math.min(index, 10);
+                        for (let i = Math.max(0, index - wordsToCheck); i < index; i++) {
+                          const prevWord = topWords[i];
+                          if (!prevWord) continue;
+                          
+                          // Estimate previous word position (simplified)
+                          const prevAngle = i * 2.4;
+                          const prevRadius = 5 + (i * 3);
+                          const prevX = centerX + Math.cos(prevAngle) * prevRadius;
+                          const prevY = centerY + Math.sin(prevAngle) * prevRadius;
+                          
+                          const distance = Math.sqrt(Math.pow(testX - prevX, 2) + Math.pow(testY - prevY, 2));
+                          if (distance < minDistance) {
+                            collision = true;
+                            break;
+                          }
+                        }
+                        
+                        if (!collision) {
+                          x = testX;
+                          y = testY;
+                          placed = true;
+                        } else {
+                          attempt++;
+                        }
+                      }
                       
-                      const colWidth = gridWidth / (wordsPerRow - 1);
-                      const rowHeight = gridHeight / Math.max(1, Math.ceil((topWords.length - 1) / wordsPerRow));
-                      
-                      x = startX + (col * colWidth);
-                      y = startY + (row * rowHeight);
-                      
-                      // Add small random offset to prevent perfect grid alignment
-                      const randomOffsetX = (Math.sin(index * 3.14159) * 3);
-                      const randomOffsetY = (Math.cos(index * 2.71828) * 3);
-                      
-                      x += randomOffsetX;
-                      y += randomOffsetY;
-                      
-                      // Ensure bounds
-                      x = Math.max(5, Math.min(95, x));
-                      y = Math.max(10, Math.min(90, y));
+                      // Fallback to simple grid if positioning fails
+                      if (!placed) {
+                        const gridCol = index % 6;
+                        const gridRow = Math.floor(index / 6);
+                        x = 15 + (gridCol * 12);
+                        y = 20 + (gridRow * 15);
+                        x = Math.max(8, Math.min(92, x));
+                        y = Math.max(8, Math.min(92, y));
+                      }
                     }
                     
                     // Professional color palette

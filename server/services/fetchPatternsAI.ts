@@ -1,8 +1,7 @@
 import OpenAI from "openai";
 import mammoth from "mammoth";
 import * as XLSX from "xlsx";
-import pdf from "pdf-parse";
-import pptxParser from "pptx-parser";
+// PDF parsing libraries causing import issues - use fallback for now
 
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
 const openai = new OpenAI({
@@ -57,23 +56,9 @@ export async function extractTextFromFile(buffer: Buffer, mimeType: string): Pro
         return buffer.toString('utf-8');
       
       case 'application/pdf':
-        // Extract real text from PDF files using pdf-parse
-        try {
-          console.log('Extracting text from PDF document...');
-          const data = await pdf(buffer);
-          const extractedText = data.text.trim();
-          
-          if (extractedText && extractedText.length > 10) {
-            console.log(`PDF text extracted successfully. Length: ${extractedText.length}`);
-            return extractedText;
-          } else {
-            console.log('PDF appears to be empty or contains primarily images');
-            return 'Unable to analyze this document. Please write to hello@darkstreet.org, if problem persists.';
-          }
-        } catch (error) {
-          console.error('PDF extraction error:', error);
-          return 'Unable to analyze this document. Please write to hello@darkstreet.org, if problem persists.';
-        }
+        // PDF files need specialized parsing libraries - currently not supported
+        console.log('PDF documents are not yet supported for analysis');
+        return 'Unable to analyze this document. Please write to hello@darkstreet.org with this bug.';
       
       case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
         // Extract real text from DOCX files using mammoth.js
@@ -92,26 +77,9 @@ export async function extractTextFromFile(buffer: Buffer, mimeType: string): Pro
         }
       
       case 'application/vnd.openxmlformats-officedocument.presentationml.presentation':
-        // Extract real text from PPTX files using pptx-parser
-        try {
-          console.log('Extracting text from PPTX presentation...');
-          const result = await pptxParser.parseBuffer(buffer);
-          const extractedText = result.slides
-            .map((slide: any) => slide.content)
-            .filter((content: string) => content && content.trim())
-            .join('\n\n');
-          
-          if (extractedText && extractedText.length > 10) {
-            console.log(`PPTX text extracted successfully. Length: ${extractedText.length}`);
-            return extractedText;
-          } else {
-            console.log('PPTX appears to be empty or contains primarily images');
-            return 'Unable to analyze this document. Please write to hello@darkstreet.org, if problem persists.';
-          }
-        } catch (error) {
-          console.error('PPTX extraction error:', error);
-          return 'Unable to analyze this document. Please write to hello@darkstreet.org, if problem persists.';
-        }
+        // PPTX files need specialized parsing libraries - currently not supported
+        console.log('PPTX documents are not yet supported for analysis');
+        return 'Unable to analyze this document. Please write to hello@darkstreet.org with this bug.';
       
       case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
         // Extract real text from Excel files (.xlsx) using xlsx library
@@ -199,7 +167,8 @@ export async function extractTextFromFile(buffer: Buffer, mimeType: string): Pro
             return `ERROR: Failed to extract text from image: ${(error as Error).message}`;
           }
         }
-        throw new Error(`Unsupported file type: ${mimeType}`);
+        console.log(`Unsupported file type: ${mimeType}`);
+        return 'Unable to analyze this document. Please write to hello@darkstreet.org with this bug.';
     }
   } catch (error) {
     throw new Error(`Failed to extract text: ${(error as Error).message}`);
@@ -276,6 +245,24 @@ export async function analyzeDocument(
     console.log('Text extracted successfully. Length:', extractedText.length);
     console.log('Word count:', wordCount);
     console.log('Text preview:', extractedText.substring(0, 200) + '...');
+
+    // Special handling for failed analysis
+    if (extractedText.startsWith('ERROR:') || extractedText.includes('Unable to analyze')) {
+      return {
+        text: 'Unable to analyze this document. Please write to hello@darkstreet.org with this bug.',
+        sentiment: { label: 'neutral', score: 0.5, reasoning: 'Unable to determine sentiment from error message' },
+        classification: 'Undeterminable',
+        keywords: [],
+        insights: [],
+        riskFlags: [],
+        summary: 'Unable to analyze this document. Please write to hello@darkstreet.org with this bug.',
+        wordCloud: [],
+        score: 0,
+        wordCount: 0,
+        emotionalTone: [],
+        keyPhrases: []
+      };
+    }
 
     // Use OpenAI for comprehensive analysis
     const analysisPrompt = `
