@@ -311,22 +311,53 @@ export default function FetchPatternsApp() {
   ).length;
 
   // Generate word cloud data
-  const wordCloudData = completedAnalyses.reduce((acc, analysis) => {
-    if (analysis.wordCloud) {
-      analysis.wordCloud.forEach(word => {
-        if (acc[word.text]) {
-          acc[word.text] += word.value;
-        } else {
-          acc[word.text] = word.value;
+  // Professional word cloud data generation following the react-wordcloud algorithm
+  const wordCounts = {} as Record<string, number>;
+  
+  completedAnalyses.forEach(analysis => {
+    // Extract content from summary and other text fields
+    const content = [
+      analysis.summary || '',
+      (analysis.insights || []).join(' '),
+      (analysis.keyPhrases || []).join(' ')
+    ].join(' ');
+
+    // Extract all words from content (not just keywords)
+    const words = content.toLowerCase()
+      .replace(/[^\w\s]/g, ' ') // Remove punctuation
+      .split(/\s+/)
+      .filter(word =>
+        word.length > 3 && // Only words longer than 3 characters
+        !['this', 'that', 'with', 'have', 'will', 'from', 'they', 'been', 'said', 'each', 'which', 'their', 'time', 'would', 'there', 'could', 'other', 'more', 'very', 'what', 'know', 'just', 'first', 'into', 'over', 'think', 'also', 'your', 'work', 'life', 'only', 'can', 'still', 'should', 'after', 'being', 'now', 'made', 'before', 'here', 'through', 'when', 'where', 'much', 'some', 'these', 'many', 'then', 'them', 'well', 'were', 'document', 'analysis', 'provides', 'using', 'within', 'based', 'include', 'approach'].includes(word) // Filter common words + context words
+      );
+
+    // Count word frequencies
+    words.forEach(word => {
+      wordCounts[word] = (wordCounts[word] || 0) + 1;
+    });
+
+    // Also include keywords with higher weight (3x)
+    if (analysis.keywords) {
+      analysis.keywords.forEach(keyword => {
+        const keywordLower = keyword.toLowerCase();
+        if (keywordLower.length > 3 && !['document', 'analysis'].includes(keywordLower)) {
+          wordCounts[keywordLower] = (wordCounts[keywordLower] || 0) + 3; // Give keywords 3x weight
         }
       });
     }
-    return acc;
-  }, {} as Record<string, number>);
+  });
 
+  // Convert to the expected format
+  const wordCloudData = wordCounts;
+
+  // Sort by frequency and take top N words, capitalize first letter
   const topWords = Object.entries(wordCloudData)
     .sort(([,a], [,b]) => b - a)
-    .slice(0, wordCount);
+    .slice(0, wordCount)
+    .map(([text, value]) => [
+      text.charAt(0).toUpperCase() + text.slice(1), // Capitalize first letter
+      value
+    ] as [string, number]);
 
   // Export functions
   const exportCSV = (data: any, filename: string) => {
@@ -783,58 +814,51 @@ export default function FetchPatternsApp() {
               })() ? (
                 <div className="relative w-full h-[450px]">
                   {topWords.map(([word, count], index) => {
-                    const maxCount = Math.max(...Object.values(wordCloudData));
-                    const normalizedSize = count / maxCount;
+                    // Deterministic positioning algorithm based on react-wordcloud principles
+                    // Font size range: 12-60px based on frequency (matching the guide)
+                    const minFontSize = 12;
+                    const maxFontSize = 60;
+                    const maxCount = Math.max(...topWords.map(([, count]) => count));
+                    const fontSizeRange = maxFontSize - minFontSize;
+                    const normalizedFreq = count / maxCount;
                     
-                    // Enhanced font sizing with better distribution
-                    let fontSize;
-                    if (normalizedSize > 0.8) fontSize = 48;
-                    else if (normalizedSize > 0.6) fontSize = 36;
-                    else if (normalizedSize > 0.4) fontSize = 28;
-                    else if (normalizedSize > 0.3) fontSize = 22;
-                    else if (normalizedSize > 0.2) fontSize = 18;
-                    else fontSize = 14;
+                    // Calculate font size using the same range as react-wordcloud
+                    let fontSize = Math.round(minFontSize + (fontSizeRange * normalizedFreq));
                     
-                    // Simple grid-based positioning with guaranteed spacing
-                    // Create a flexible grid that adapts to word count
-                    const totalWords = topWords.length;
-                    const wordsPerRow = Math.ceil(Math.sqrt(totalWords * 1.5)); // Slightly wider grid
-                    const rowCount = Math.ceil(totalWords / wordsPerRow);
+                    // Deterministic spiral positioning with proper padding
+                    let x, y;
+                    const centerX = 50;
+                    const centerY = 50;
                     
-                    // Calculate grid position
-                    const gridRow = Math.floor(index / wordsPerRow);
-                    const gridCol = index % wordsPerRow;
-                    
-                    // Calculate available space and ensure even distribution
-                    const containerWidth = 90; // Use 90% of container width
-                    const containerHeight = 80; // Use 80% of container height
-                    const offsetX = 5; // 5% margin from left
-                    const offsetY = 10; // 10% margin from top
-                    
-                    // Calculate cell size with guaranteed minimum spacing
-                    const cellWidth = containerWidth / wordsPerRow;
-                    const cellHeight = containerHeight / rowCount;
-                    
-                    // Position within cell with padding
-                    const paddingX = cellWidth * 0.1; // 10% padding within each cell
-                    const paddingY = cellHeight * 0.1; // 10% padding within each cell
-                    
-                    // Add small random offset for natural feel, but keep within cell bounds
-                    const randomOffsetX = (Math.random() - 0.5) * cellWidth * 0.3;
-                    const randomOffsetY = (Math.random() - 0.5) * cellHeight * 0.3;
-                    
-                    // Calculate final position
-                    let x = offsetX + (gridCol * cellWidth) + (cellWidth / 2) + randomOffsetX;
-                    let y = offsetY + (gridRow * cellHeight) + (cellHeight / 2) + randomOffsetY;
-                    
-                    // Ensure bounds with padding
-                    x = Math.max(offsetX + paddingX, Math.min(95 - paddingX, x));
-                    y = Math.max(offsetY + paddingY, Math.min(90 - paddingY, y));
-                    
-                    // Special positioning for the most frequent word (center it)
                     if (index === 0) {
-                      x = 50; // Center horizontally
-                      y = 45; // Slightly above center vertically
+                      // Place first (most frequent) word at center
+                      x = centerX;
+                      y = centerY;
+                    } else {
+                      // Calculate deterministic position using index-based spiral
+                      const angle = index * 2.4; // Deterministic angle increment
+                      const radius = Math.sqrt(index) * 8; // Spiral grows with square root
+                      
+                      // Convert polar to cartesian coordinates
+                      const spiralX = centerX + Math.cos(angle) * radius;
+                      const spiralY = centerY + Math.sin(angle) * radius;
+                      
+                      // Ensure words stay within bounds with proper margins
+                      const margin = 8; // 8% margin from edges
+                      x = Math.max(margin, Math.min(100 - margin, spiralX));
+                      y = Math.max(margin, Math.min(100 - margin, spiralY));
+                      
+                      // If spiral position goes out of bounds, use grid fallback
+                      if (spiralX < margin || spiralX > 100 - margin || spiralY < margin || spiralY > 100 - margin) {
+                        const gridCols = Math.ceil(Math.sqrt(topWords.length));
+                        const gridRow = Math.floor(index / gridCols);
+                        const gridCol = index % gridCols;
+                        const cellWidth = (100 - 2 * margin) / gridCols;
+                        const cellHeight = (100 - 2 * margin) / Math.ceil(topWords.length / gridCols);
+                        
+                        x = margin + gridCol * cellWidth + cellWidth / 2;
+                        y = margin + gridRow * cellHeight + cellHeight / 2;
+                      }
                     }
                     
                     // Professional color palette
@@ -849,16 +873,18 @@ export default function FetchPatternsApp() {
                     return (
                       <span
                         key={word}
-                        className="absolute hover:opacity-80 cursor-pointer transition-all duration-200 hover:scale-105 select-none transform -translate-x-1/2 -translate-y-1/2"
+                        className="absolute hover:opacity-80 cursor-pointer transition-opacity duration-200 select-none transform -translate-x-1/2 -translate-y-1/2"
                         style={{ 
                           left: `${x}%`,
                           top: `${y}%`,
                           fontSize: `${fontSize}px`,
                           color: color,
-                          fontWeight: index < 3 ? '600' : (normalizedSize > 0.5 ? '500' : '300'),
+                          fontFamily: 'Roboto, sans-serif', // Matching the guide
+                          fontWeight: 500, // Consistent weight as per guide
                           textShadow: 'none',
-                          zIndex: Math.max(1, Math.round(normalizedSize * 10)),
-                          lineHeight: 1
+                          zIndex: Math.max(1, Math.round(normalizedFreq * 10)),
+                          lineHeight: 1,
+                          padding: '2px' // Minimal padding as requested
                         }}
                         title={`${word}: ${count} occurrences`}
                       >

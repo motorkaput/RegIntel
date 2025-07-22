@@ -1,0 +1,90 @@
+## Word Cloud Display Algorithm in Fetch Patterns
+
+The word cloud in Fetch Patterns uses the `react-wordcloud` library with a sophisticated word frequency calculation and display system:
+
+### 1. **Word Frequency Calculation** (Lines 386-421)
+
+````javascript path=fetch-patterns-ai/frontend/src/App.js mode=EXCERPT
+// Enhanced word frequency calculation
+const wordCounts = {};
+
+filteredSummary.forEach((doc) => {
+  const content = doc.content || '';
+
+  // Extract all words from content (not just keywords)
+  const words = content.toLowerCase()
+    .replace(/[^\w\s]/g, ' ') // Remove punctuation
+    .split(/\s+/)
+    .filter(word =>
+      word.length > 3 && // Only words longer than 3 characters
+      !['this', 'that', 'with', 'have', 'will', 'from', 'they', 'been', 'said', 'each', 'which', 'their', 'time', 'would', 'there', 'could', 'other', 'more', 'very', 'what', 'know', 'just', 'first', 'into', 'over', 'think', 'also', 'your', 'work', 'life', 'only', 'can', 'still', 'should', 'after', 'being', 'now', 'made', 'before', 'here', 'through', 'when', 'where', 'much', 'some', 'these', 'many', 'then', 'them', 'well', 'were'].includes(word) // Filter common words
+    );
+
+  // Count word frequencies
+  words.forEach(word => {
+    wordCounts[word] = (wordCounts[word] || 0) + 1;
+  });
+
+  // Also include keywords with higher weight
+  (doc.keywords || []).forEach((keyword) => {
+    const keywordLower = keyword.toLowerCase();
+    wordCounts[keywordLower] = (wordCounts[keywordLower] || 0) + 3; // Give keywords 3x weight
+  });
+});
+````
+
+### 2. **Word Selection and Sorting** (Lines 413-421)
+
+````javascript path=fetch-patterns-ai/frontend/src/App.js mode=EXCERPT
+// Sort by frequency and take top N words based on user selection
+const sortedWords = Object.entries(wordCounts)
+  .sort(([,a], [,b]) => b - a)
+  .slice(0, wordCloudFrequency);
+
+const wordCloudData = sortedWords.map(([text, value]) => ({
+  text: text.charAt(0).toUpperCase() + text.slice(1), // Capitalize first letter
+  value,
+}));
+````
+
+### 3. **Word Cloud Rendering Configuration** (Lines 830-843)
+
+````javascript path=fetch-patterns-ai/frontend/src/App.js mode=EXCERPT
+<WordCloud
+  words={wordCloudData}
+  options={{
+    rotations: 1,
+    rotationAngles: [0],
+    fontSizes: [12, 60],
+    padding: 2,
+    deterministic: true,
+    enableTooltip: false,
+    fontFamily: 'Roboto, sans-serif',
+    fontWeight: 500
+  }}
+  size={[Math.min(800, windowWidth - 100), 400]}
+/>
+````
+
+## Key Algorithm Features:
+
+1. **Text Processing**: 
+   - Removes punctuation and converts to lowercase
+   - Filters out words shorter than 3 characters
+   - Excludes common stop words (extensive list)
+
+2. **Weighted Scoring**:
+   - Regular words get frequency count of 1
+   - Keywords get 3x weight (frequency + 3)
+
+3. **Display Configuration**:
+   - **No rotation**: `rotations: 1, rotationAngles: [0]` (all words horizontal)
+   - **Font size range**: 12-60px based on frequency
+   - **Deterministic layout**: Same words always appear in same positions
+   - **Responsive sizing**: Adapts to window width (max 800px)
+
+4. **User Controls**:
+   - Adjustable word count (1-200 words)
+   - Export options (PNG image, CSV data)
+
+What specific aspect of the word cloud algorithm would you like me to explain further or help you modify?
