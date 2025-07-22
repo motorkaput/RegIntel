@@ -504,22 +504,39 @@ export default function FetchPatternsApp() {
               {completedAnalyses.map((analysis) => (
                 <Card key={analysis.id} className="bg-gray-50 border-gray-200">
                   <CardContent className="p-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="font-semibold text-gray-900">{analysis.originalName}</h3>
-                      {analysis.classification && (
-                        <div className="flex flex-wrap gap-1">
+                    <div className="mb-3">
+                      <h3 className="font-semibold text-gray-900 mb-2">{analysis.originalName}</h3>
+                      
+                      {/* Classification and highlights in separate row */}
+                      <div className="flex flex-wrap gap-2 mb-3">
+                        {analysis.classification && (
                           <Badge 
                             variant="outline" 
-                            className="bg-green-50 text-green-700 border-green-300 text-xs px-2 py-1 whitespace-nowrap max-w-full overflow-hidden text-ellipsis"
-                            title={analysis.classification}
+                            className="bg-blue-50 text-blue-700 border-blue-300 text-xs px-2 py-1"
                           >
-                            {analysis.classification.length > 25 
-                              ? analysis.classification.substring(0, 22) + "..." 
-                              : analysis.classification
-                            }
+                            {analysis.classification}
                           </Badge>
-                        </div>
-                      )}
+                        )}
+                        {analysis.insights && analysis.insights.slice(0, 3).map((insight, idx) => (
+                          <Badge 
+                            key={idx}
+                            variant="outline" 
+                            className="bg-green-50 text-green-700 border-green-300 text-xs px-2 py-1 max-w-[200px] truncate"
+                            title={insight}
+                          >
+                            {insight.length > 30 ? insight.substring(0, 27) + "..." : insight}
+                          </Badge>
+                        ))}
+                        {analysis.keywords && analysis.keywords.slice(0, 2).map((keyword, idx) => (
+                          <Badge 
+                            key={idx}
+                            variant="outline" 
+                            className="bg-purple-50 text-purple-700 border-purple-300 text-xs px-2 py-1"
+                          >
+                            {keyword}
+                          </Badge>
+                        ))}
+                      </div>
                     </div>
                     
                     {analysis.summary && (

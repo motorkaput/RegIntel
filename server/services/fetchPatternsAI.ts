@@ -327,7 +327,7 @@ ${extractedText}
     "score": 0.0-1.0,
     "reasoning": "Detailed explanation citing specific language, tone indicators, and contextual elements from the document"
   },
-  "classification": "precise_document_category",
+  "classification": "broad_category_from_list_above",
   "keywords": ["10-15 most significant domain-specific terms from the document"],
   "insights": ["3-5 deep analytical insights showing understanding of strategic implications and business context"],
   "riskFlags": ["specific risks, challenges, or concerns identified in the document content"],
@@ -336,17 +336,15 @@ ${extractedText}
   "keyPhrases": ["5-8 important phrases directly quoted from the document"]
 }
 
-CLASSIFICATION CATEGORIES (choose most precise):
-- Strategic Business Planning Document
-- Financial Performance Analysis Report  
-- Market Research & Competitive Intelligence
-- Operational Efficiency Review
-- Risk Assessment & Compliance Report
-- Investment Analysis & Due Diligence
-- Executive Strategy Presentation
-- Performance Metrics Dashboard
-- Customer & Market Segmentation Analysis
-- Innovation & Product Development Brief
+CLASSIFICATION CATEGORIES (choose ONE broad category):
+- Strategy
+- Financial
+- Marketing
+- Legal
+- Operations
+- Business
+- Technical
+- HR
 
 ANALYSIS REQUIREMENTS:
 - Extract specific business metrics, financial figures, percentages mentioned
@@ -361,7 +359,7 @@ QUALITY STANDARDS:
 - Insights must reflect sophisticated business understanding
 - Keywords should include domain-specific terminology
 - Summary must demonstrate strategic business comprehension
-- Classification must be precise and industry-appropriate
+- Classification must be ONE of the 8 broad categories listed above
 - Base all analysis on actual document content, not assumptions`;
 
     console.log('Sending request to OpenAI...');
