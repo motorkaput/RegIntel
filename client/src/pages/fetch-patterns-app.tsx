@@ -183,10 +183,16 @@ export default function FetchPatternsApp() {
       return response.json();
     },
     onSuccess: (data) => {
-      toast({
-        title: "Upload Successful",
-        description: "Your documents are being processed.",
+      // Start with persistent progress toast
+      let progressToastId: any;
+      const totalDocs = data.analyses ? data.analyses.length : 0;
+      
+      progressToastId = toast({
+        title: "Analyzing documents",
+        description: `Progress: 0/${totalDocs} documents analyzed...`,
+        duration: Infinity, // Make it persistent
       });
+      
       setSelectedFiles(null);
       setPendingFiles([]); // Clear pending files after successful upload
       setUploadProgress(0);
@@ -227,11 +233,44 @@ export default function FetchPatternsApp() {
               return newAnalyses;
             });
             
+            // Update progress toast
+            const completedCount = updatedAnalyses.filter(a => a.status === 'completed' || a.status === 'error').length;
+            
+            if (progressToastId && progressToastId.dismiss) {
+              progressToastId.dismiss();
+            }
+            
+            if (completedCount < totalDocs) {
+              progressToastId = toast({
+                title: "Analyzing documents",
+                description: `Progress: ${completedCount}/${totalDocs} documents analyzed...`,
+                duration: Infinity,
+              });
+            }
+            
             // Stop polling if all analyses are completed or have errors
             const allDone = updatedAnalyses.every(a => a.status === 'completed' || a.status === 'error');
             if (allDone) {
               clearInterval(interval);
               setPollInterval(null);
+              
+              // Final completion toast
+              if (progressToastId && progressToastId.dismiss) {
+                progressToastId.dismiss();
+              }
+              toast({
+                title: "Analysis complete",
+                description: `All ${totalDocs} documents have been analyzed successfully.`,
+                duration: 3000,
+              });
+              
+              // Auto-scroll to document summaries after a brief delay
+              setTimeout(() => {
+                const summariesElement = document.getElementById('document-summaries');
+                if (summariesElement) {
+                  summariesElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+              }, 1000);
             }
           } catch (error) {
             console.error('Error polling for analysis updates:', error);
@@ -497,56 +536,8 @@ export default function FetchPatternsApp() {
           </Card>
         </div>
 
-        {/* Ask Questions Section */}
-        <Card className="bg-white">
-          <CardHeader>
-            <CardTitle className="text-gray-900">
-              Ask Questions About Your Documents
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex gap-4 mb-4">
-              <Input
-                value={question}
-                onChange={(e) => setQuestion(e.target.value)}
-                placeholder="Type in a question about the documents uploaded"
-                className="flex-1"
-                onKeyPress={(e) => e.key === 'Enter' && handleAskQuestion()}
-              />
-              <Button 
-                onClick={handleAskQuestion}
-                disabled={!question.trim() || questionMutation.isPending}
-                className="bg-gray-600 hover:bg-gray-700"
-              >
-                Ask Question
-              </Button>
-            </div>
-
-            {questionHistory.length > 0 && (
-              <div className="space-y-4">
-                {questionHistory.map((item, index) => (
-                  <Card key={index} className="bg-gray-50 border-gray-200">
-                    <CardContent className="p-4">
-                      <div className="text-sm text-gray-700 mb-2">
-                        <strong>Question:</strong> {item.question}
-                      </div>
-                      <div className="text-sm text-gray-700 mb-2">
-                        <strong>Answer:</strong>
-                      </div>
-                      <div className="text-gray-900 mb-2">{item.data.answer}</div>
-                      <div className="text-sm text-gray-600">
-                        <strong>Confidence:</strong> {(item.data.confidence * 100).toFixed(1)}%
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
         {/* Document Summaries */}
-        <Card className="bg-white">
+        <Card className="bg-white" id="document-summaries">
           <CardHeader>
             <CardTitle className="text-gray-900">
               Document Summaries
@@ -598,6 +589,54 @@ export default function FetchPatternsApp() {
                 </Card>
               ))}
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Ask Questions Section */}
+        <Card className="bg-white">
+          <CardHeader>
+            <CardTitle className="text-gray-900">
+              Ask Questions About Your Documents
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex gap-4 mb-4">
+              <Input
+                value={question}
+                onChange={(e) => setQuestion(e.target.value)}
+                placeholder="Type in a question about the documents uploaded"
+                className="flex-1"
+                onKeyPress={(e) => e.key === 'Enter' && handleAskQuestion()}
+              />
+              <Button 
+                onClick={handleAskQuestion}
+                disabled={!question.trim() || questionMutation.isPending}
+                className="bg-gray-600 hover:bg-gray-700"
+              >
+                Ask Question
+              </Button>
+            </div>
+
+            {questionHistory.length > 0 && (
+              <div className="space-y-4">
+                {questionHistory.map((item, index) => (
+                  <Card key={index} className="bg-gray-50 border-gray-200">
+                    <CardContent className="p-4">
+                      <div className="text-sm text-gray-700 mb-2">
+                        <strong>Question:</strong> {item.question}
+                      </div>
+                      <div className="text-sm text-gray-700 mb-2">
+                        <strong>Answer:</strong>
+                      </div>
+                      <div className="text-gray-900 mb-2">{item.data.answer}</div>
+                      <div className="text-sm text-gray-600">
+                        <strong>Confidence:</strong> {(item.data.confidence * 100).toFixed(1)}%
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -825,40 +864,48 @@ export default function FetchPatternsApp() {
                     // Calculate font size using the same range as react-wordcloud
                     let fontSize = Math.round(minFontSize + (fontSizeRange * normalizedFreq));
                     
-                    // Deterministic spiral positioning with proper padding
+                    // Enhanced grid system with guaranteed no overlaps
                     let x, y;
-                    const centerX = 50;
-                    const centerY = 50;
+                    const margin = 10; // 10% margin from edges
                     
                     if (index === 0) {
                       // Place first (most frequent) word at center
-                      x = centerX;
-                      y = centerY;
+                      x = 50;
+                      y = 50;
                     } else {
-                      // Calculate deterministic position using index-based spiral
-                      const angle = index * 2.4; // Deterministic angle increment
-                      const radius = Math.sqrt(index) * 8; // Spiral grows with square root
+                      // Use pure grid system for guaranteed spacing
+                      const availableWidth = 100 - 2 * margin;
+                      const availableHeight = 100 - 2 * margin;
                       
-                      // Convert polar to cartesian coordinates
-                      const spiralX = centerX + Math.cos(angle) * radius;
-                      const spiralY = centerY + Math.sin(angle) * radius;
+                      // Calculate optimal grid dimensions
+                      const totalWords = topWords.length;
+                      const aspectRatio = 1.4; // Slightly wider than tall
+                      const cols = Math.ceil(Math.sqrt(totalWords * aspectRatio));
+                      const rows = Math.ceil(totalWords / cols);
                       
-                      // Ensure words stay within bounds with proper margins
-                      const margin = 8; // 8% margin from edges
-                      x = Math.max(margin, Math.min(100 - margin, spiralX));
-                      y = Math.max(margin, Math.min(100 - margin, spiralY));
+                      // Calculate cell dimensions with extra padding
+                      const cellWidth = availableWidth / cols;
+                      const cellHeight = availableHeight / rows;
                       
-                      // If spiral position goes out of bounds, use grid fallback
-                      if (spiralX < margin || spiralX > 100 - margin || spiralY < margin || spiralY > 100 - margin) {
-                        const gridCols = Math.ceil(Math.sqrt(topWords.length));
-                        const gridRow = Math.floor(index / gridCols);
-                        const gridCol = index % gridCols;
-                        const cellWidth = (100 - 2 * margin) / gridCols;
-                        const cellHeight = (100 - 2 * margin) / Math.ceil(topWords.length / gridCols);
-                        
-                        x = margin + gridCol * cellWidth + cellWidth / 2;
-                        y = margin + gridRow * cellHeight + cellHeight / 2;
-                      }
+                      // Get grid position
+                      const gridRow = Math.floor((index - 1) / cols); // -1 because first word is centered
+                      const gridCol = (index - 1) % cols;
+                      
+                      // Calculate position with generous spacing
+                      x = margin + gridCol * cellWidth + cellWidth / 2;
+                      y = margin + gridRow * cellHeight + cellHeight / 2;
+                      
+                      // Add small deterministic offset for natural feel
+                      const offsetFactor = 0.15; // 15% of cell size
+                      const deterministicOffsetX = (Math.sin(index * 2.7) * cellWidth * offsetFactor);
+                      const deterministicOffsetY = (Math.cos(index * 3.1) * cellHeight * offsetFactor);
+                      
+                      x += deterministicOffsetX;
+                      y += deterministicOffsetY;
+                      
+                      // Ensure bounds
+                      x = Math.max(margin + 2, Math.min(100 - margin - 2, x));
+                      y = Math.max(margin + 2, Math.min(100 - margin - 2, y));
                     }
                     
                     // Professional color palette
