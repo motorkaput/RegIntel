@@ -507,7 +507,7 @@ export default function FetchPatternsApp() {
                     <div className="mb-3">
                       <h3 className="font-semibold text-gray-900 mb-2">{analysis.originalName}</h3>
                       
-                      {/* Classification and highlights in separate row */}
+                      {/* Classification and keywords only */}
                       <div className="flex flex-wrap gap-2 mb-3">
                         {analysis.classification && (
                           <Badge 
@@ -517,17 +517,7 @@ export default function FetchPatternsApp() {
                             {analysis.classification}
                           </Badge>
                         )}
-                        {analysis.insights && analysis.insights.slice(0, 3).map((insight, idx) => (
-                          <Badge 
-                            key={idx}
-                            variant="outline" 
-                            className="bg-green-50 text-green-700 border-green-300 text-xs px-2 py-1 max-w-[200px] truncate"
-                            title={insight}
-                          >
-                            {insight.length > 30 ? insight.substring(0, 27) + "..." : insight}
-                          </Badge>
-                        ))}
-                        {analysis.keywords && analysis.keywords.slice(0, 2).map((keyword, idx) => (
+                        {analysis.keywords && analysis.keywords.slice(0, 3).map((keyword, idx) => (
                           <Badge 
                             key={idx}
                             variant="outline" 
@@ -771,29 +761,33 @@ export default function FetchPatternsApp() {
                       x = centerX;
                       y = centerY;
                     } else {
-                      // Use a more systematic approach for positioning
-                      const rings = Math.ceil(Math.sqrt(index));
-                      const itemsInRing = Math.max(1, rings * 6); // More items in outer rings
-                      const angleStep = (2 * Math.PI) / itemsInRing;
-                      const ringIndex = index % itemsInRing;
+                      // Use a simple grid-based approach that actually works
+                      const wordsPerRow = 8; // Maximum words per row
+                      const row = Math.floor((index - 1) / wordsPerRow);
+                      const col = (index - 1) % wordsPerRow;
                       
-                      // Calculate angle with some variation to prevent perfect alignment
-                      const baseAngle = ringIndex * angleStep;
-                      const angleVariation = (Math.sin(index * 2.3) * 0.3); // Small random-like variation
-                      const angle = baseAngle + angleVariation;
+                      // Calculate grid position with equal spacing
+                      const gridWidth = 80; // Use 80% of available width
+                      const gridHeight = 70; // Use 70% of available height
+                      const startX = 10; // Start 10% from left
+                      const startY = 15; // Start 15% from top
                       
-                      // Calculate radius with tighter spacing and word-length consideration
-                      const baseRadius = rings * 8 + (fontSize / 4); // Tighter base spacing
-                      const wordLengthFactor = Math.min(word.length * 1.5, 10); // Limit word length impact
-                      const radius = baseRadius + wordLengthFactor;
+                      const colWidth = gridWidth / (wordsPerRow - 1);
+                      const rowHeight = gridHeight / Math.max(1, Math.ceil((topWords.length - 1) / wordsPerRow));
                       
-                      x = centerX + Math.cos(angle) * radius;
-                      y = centerY + Math.sin(angle) * radius;
+                      x = startX + (col * colWidth);
+                      y = startY + (row * rowHeight);
                       
-                      // Bounds checking with dynamic padding
-                      const dynamicPadding = fontSize / 2;
-                      x = Math.max(dynamicPadding, Math.min(100 - dynamicPadding, x));
-                      y = Math.max(dynamicPadding, Math.min(100 - dynamicPadding, y));
+                      // Add small random offset to prevent perfect grid alignment
+                      const randomOffsetX = (Math.sin(index * 3.14159) * 3);
+                      const randomOffsetY = (Math.cos(index * 2.71828) * 3);
+                      
+                      x += randomOffsetX;
+                      y += randomOffsetY;
+                      
+                      // Ensure bounds
+                      x = Math.max(5, Math.min(95, x));
+                      y = Math.max(10, Math.min(90, y));
                     }
                     
                     // Professional color palette

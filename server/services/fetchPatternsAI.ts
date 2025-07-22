@@ -1,6 +1,8 @@
 import OpenAI from "openai";
 import mammoth from "mammoth";
 import * as XLSX from "xlsx";
+import pdf from "pdf-parse";
+import pptxParser from "pptx-parser";
 
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
 const openai = new OpenAI({
@@ -55,9 +57,23 @@ export async function extractTextFromFile(buffer: Buffer, mimeType: string): Pro
         return buffer.toString('utf-8');
       
       case 'application/pdf':
-        // PDF files are not supported for text extraction
-        console.log('PDF documents are not supported for analysis');
-        return 'Unable to analyze this document. Please write to hello@darkstreet.org, if problem persists.';
+        // Extract real text from PDF files using pdf-parse
+        try {
+          console.log('Extracting text from PDF document...');
+          const data = await pdf(buffer);
+          const extractedText = data.text.trim();
+          
+          if (extractedText && extractedText.length > 10) {
+            console.log(`PDF text extracted successfully. Length: ${extractedText.length}`);
+            return extractedText;
+          } else {
+            console.log('PDF appears to be empty or contains primarily images');
+            return 'Unable to analyze this document. Please write to hello@darkstreet.org, if problem persists.';
+          }
+        } catch (error) {
+          console.error('PDF extraction error:', error);
+          return 'Unable to analyze this document. Please write to hello@darkstreet.org, if problem persists.';
+        }
       
       case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
         // Extract real text from DOCX files using mammoth.js
@@ -76,9 +92,26 @@ export async function extractTextFromFile(buffer: Buffer, mimeType: string): Pro
         }
       
       case 'application/vnd.openxmlformats-officedocument.presentationml.presentation':
-        // PPTX files are not supported for text extraction
-        console.log('PPTX documents are not supported for analysis');
-        return 'Unable to analyze this document. Please write to hello@darkstreet.org, if problem persists.';
+        // Extract real text from PPTX files using pptx-parser
+        try {
+          console.log('Extracting text from PPTX presentation...');
+          const result = await pptxParser.parseBuffer(buffer);
+          const extractedText = result.slides
+            .map((slide: any) => slide.content)
+            .filter((content: string) => content && content.trim())
+            .join('\n\n');
+          
+          if (extractedText && extractedText.length > 10) {
+            console.log(`PPTX text extracted successfully. Length: ${extractedText.length}`);
+            return extractedText;
+          } else {
+            console.log('PPTX appears to be empty or contains primarily images');
+            return 'Unable to analyze this document. Please write to hello@darkstreet.org, if problem persists.';
+          }
+        } catch (error) {
+          console.error('PPTX extraction error:', error);
+          return 'Unable to analyze this document. Please write to hello@darkstreet.org, if problem persists.';
+        }
       
       case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
         // Extract real text from Excel files (.xlsx) using xlsx library
