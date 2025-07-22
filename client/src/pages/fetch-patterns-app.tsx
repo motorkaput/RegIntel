@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import fetchPatternsLogo from "@assets/FetchPatterns_Logo_1752663550322.png";
+import fetchPatternsIcon from "@assets/FetchPatterns_Icon_1752663550310_1753148786989.png";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 
@@ -339,7 +339,7 @@ export default function FetchPatternsApp() {
         {/* FetchPatterns specific header */}
         <div className="bg-gray-50 border-b border-gray-200 py-6">
           <div className="max-w-6xl mx-auto px-6 flex items-center gap-4">
-            <img src={fetchPatternsLogo} alt="FetchPatterns" className="h-10 w-auto" />
+            <img src={fetchPatternsIcon} alt="FetchPatterns" className="h-16 w-auto" />
             <div>
               <h1 className="text-2xl font-bold text-gray-900">FetchPatterns</h1>
               <p className="text-gray-600 text-sm">AI-Powered Document Analysis & Visualization</p>

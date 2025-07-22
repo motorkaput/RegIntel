@@ -13,7 +13,7 @@ export default function PerMeaTeEnterprise() {
         {/* Hero Section */}
         <section className="py-6 section-divider">
           <div className="container-section">
-            <div className="space-y-8">
+            <div className="space-y-4">
               <h1 className="text-responsive-md text-primary">
                 PerMeaTe Enterprise
               </h1>
