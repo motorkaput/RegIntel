@@ -800,39 +800,34 @@ export default function FetchPatternsApp() {
                       x = centerX;
                       y = centerY;
                     } else {
-                      // Use expanded spiral with much better spacing for readability
-                      const goldenAngle = 137.508; // Golden angle in degrees
-                      const spiralTightness = 2.5; // Much more expanded spiral (was 0.75)
-                      const minSpacing = 8; // Minimum distance between words
+                      // Use uniform grid-based positioning for consistent spacing throughout
+                      const uniformSpacing = 15; // Consistent spacing between all words
+                      const goldenAngle = 137.508; // Golden angle in degrees for natural distribution
                       
-                      // Calculate position using expanded Fibonacci spiral
+                      // Calculate position using linear progression for uniform spacing
                       const angle = (index * goldenAngle) * (Math.PI / 180);
-                      const baseRadius = spiralTightness * Math.sqrt(index + 1) * 3;
-                      
-                      // Add extra spacing based on font size to ensure readability
-                      const spacingMultiplier = 1 + (fontSize / 40); // Larger words need more space
-                      const radius = baseRadius * spacingMultiplier;
+                      const radius = uniformSpacing * (index + 1) * 0.8; // Linear progression for uniform spacing
                       
                       x = centerX + Math.cos(angle) * radius;
                       y = centerY + Math.sin(angle) * radius;
                       
-                      // Ensure bounds with larger margin for text readability
-                      const margin = 12;
+                      // Ensure bounds with margin
+                      const margin = 10;
                       x = Math.max(margin, Math.min(100 - margin, x));
                       y = Math.max(margin, Math.min(100 - margin, y));
                       
-                      // If spiral goes out of bounds, use well-spaced concentric circles
+                      // If linear spiral goes out of bounds, use uniform concentric circles
                       if (x < margin || x > 100 - margin || y < margin || y > 100 - margin) {
-                        const wordsPerCircle = 6; // Fewer words per circle for better spacing
+                        const wordsPerCircle = Math.max(6, Math.floor(index / 3)); // Increase words per circle as we go out
                         const circleIndex = Math.floor(index / wordsPerCircle);
                         const positionInCircle = index % wordsPerCircle;
-                        const circleRadius = 18 + (circleIndex * 16); // Larger radius increments
+                        const circleRadius = 20 + (circleIndex * uniformSpacing); // Uniform circle spacing
                         const angleInCircle = (positionInCircle / wordsPerCircle) * 2 * Math.PI;
                         
                         x = centerX + Math.cos(angleInCircle) * circleRadius;
                         y = centerY + Math.sin(angleInCircle) * circleRadius;
                         
-                        // Final bounds check with margins
+                        // Final bounds check
                         x = Math.max(margin, Math.min(100 - margin, x));
                         y = Math.max(margin, Math.min(100 - margin, y));
                       }
