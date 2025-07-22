@@ -580,10 +580,24 @@ export default function FetchPatternsApp() {
               <Button 
                 variant="outline" 
                 size="sm"
-                onClick={() => contextMutation.data && exportCSV(
-                  `Context,Positive %,Negative %,Neutral %,Total Mentions,Emotional Tone,Key Phrases,Context Summary\n"${contextMutation.data.context}","${contextMutation.data.sentimentBreakdown.positive}","${contextMutation.data.sentimentBreakdown.negative}","${contextMutation.data.sentimentBreakdown.neutral}","${contextMutation.data.mentions}","${contextMutation.data.emotionalTone.join('; ')}","${contextMutation.data.keyPhrases.join('; ')}","${contextMutation.data.summary}"`,
-                  `Fetch_Patterns_Context_Analysis_${new Date().toISOString().slice(0,10)}.csv`
-                )}
+                onClick={() => {
+                  if (contextHistory.length === 0) {
+                    toast({
+                      title: "No data to export",
+                      description: "Perform a context analysis first.",
+                      variant: "destructive",
+                    });
+                    return;
+                  }
+                  
+                  // Export ALL contexts from the session
+                  const csvRows = ['Context,Positive %,Negative %,Neutral %,Total Mentions,Emotional Tone,Key Phrases,Context Summary'];
+                  contextHistory.slice().reverse().forEach(item => {
+                    csvRows.push(`"${item.query}","${item.data.sentimentBreakdown.positive}","${item.data.sentimentBreakdown.negative}","${item.data.sentimentBreakdown.neutral}","${item.data.mentions}","${item.data.emotionalTone.join('; ')}","${item.data.keyPhrases.join('; ')}","${item.data.summary}"`);
+                  });
+                  const csvContent = csvRows.join('\n');
+                  exportCSV(csvContent, `Fetch_Patterns_Context_Analysis_${new Date().toISOString().slice(0,10)}.csv`);
+                }}
                 className="text-gray-600 border-gray-300"
               >
                 CSV
@@ -629,7 +643,7 @@ export default function FetchPatternsApp() {
                           <div className="w-20 text-sm font-medium text-gray-700">Positive</div>
                           <div className="flex-1 bg-gray-200 rounded-full h-6 relative">
                             <div 
-                              className="bg-green-500 h-6 rounded-full flex items-center justify-end pr-2"
+                              className="bg-blue-500 h-6 rounded-full flex items-center justify-end pr-2"
                               style={{ width: `${item.data.sentimentBreakdown.positive}%` }}
                             >
                               <span className="text-white text-sm font-medium">
@@ -642,7 +656,7 @@ export default function FetchPatternsApp() {
                           <div className="w-20 text-sm font-medium text-gray-700">Negative</div>
                           <div className="flex-1 bg-gray-200 rounded-full h-6 relative">
                             <div 
-                              className="bg-red-500 h-6 rounded-full flex items-center justify-end pr-2"
+                              className="bg-purple-500 h-6 rounded-full flex items-center justify-end pr-2"
                               style={{ width: `${item.data.sentimentBreakdown.negative}%` }}
                             >
                               <span className="text-white text-sm font-medium">
@@ -786,65 +800,35 @@ export default function FetchPatternsApp() {
                       x = centerX;
                       y = centerY;
                     } else {
-                      // Use force-directed approach with collision detection
-                      const attempts = 50; // Maximum positioning attempts
-                      let placed = false;
-                      let attempt = 0;
+                      // Use deterministic grid with golden ratio spacing to eliminate overlaps
+                      const goldenAngle = 137.508; // Golden angle in degrees
+                      const spiralTightness = 0.75; // Controls how tight the spiral is
                       
-                      while (!placed && attempt < attempts) {
-                        // Start with spiral positioning as base
-                        const angle = attempt * 0.3 + index * 2.4;
-                        const radius = 5 + (attempt * 2) + (index * 3);
-                        
-                        const testX = centerX + Math.cos(angle) * radius;
-                        const testY = centerY + Math.sin(angle) * radius;
-                        
-                        // Check bounds
-                        if (testX < 8 || testX > 92 || testY < 8 || testY > 92) {
-                          attempt++;
-                          continue;
-                        }
-                        
-                        // Check collision with previously placed words (simple distance check)
-                        let collision = false;
-                        const minDistance = fontSize / 2 + 5; // Minimum distance based on font size
-                        
-                        // For simplicity, we'll only check the last few words to avoid performance issues
-                        const wordsToCheck = Math.min(index, 10);
-                        for (let i = Math.max(0, index - wordsToCheck); i < index; i++) {
-                          const prevWord = topWords[i];
-                          if (!prevWord) continue;
-                          
-                          // Estimate previous word position (simplified)
-                          const prevAngle = i * 2.4;
-                          const prevRadius = 5 + (i * 3);
-                          const prevX = centerX + Math.cos(prevAngle) * prevRadius;
-                          const prevY = centerY + Math.sin(prevAngle) * prevRadius;
-                          
-                          const distance = Math.sqrt(Math.pow(testX - prevX, 2) + Math.pow(testY - prevY, 2));
-                          if (distance < minDistance) {
-                            collision = true;
-                            break;
-                          }
-                        }
-                        
-                        if (!collision) {
-                          x = testX;
-                          y = testY;
-                          placed = true;
-                        } else {
-                          attempt++;
-                        }
-                      }
+                      // Calculate position using Fibonacci spiral (guaranteed no overlaps)
+                      const angle = (index * goldenAngle) * (Math.PI / 180);
+                      const radius = spiralTightness * Math.sqrt(index + 1) * 4;
                       
-                      // Fallback to simple grid if positioning fails
-                      if (!placed) {
-                        const gridCol = index % 6;
-                        const gridRow = Math.floor(index / 6);
-                        x = 15 + (gridCol * 12);
-                        y = 20 + (gridRow * 15);
-                        x = Math.max(8, Math.min(92, x));
-                        y = Math.max(8, Math.min(92, y));
+                      x = centerX + Math.cos(angle) * radius;
+                      y = centerY + Math.sin(angle) * radius;
+                      
+                      // Ensure bounds with margin for text
+                      const margin = 8;
+                      x = Math.max(margin, Math.min(100 - margin, x));
+                      y = Math.max(margin, Math.min(100 - margin, y));
+                      
+                      // If still out of bounds, use concentric circles approach
+                      if (x < margin || x > 100 - margin || y < margin || y > 100 - margin) {
+                        const circleIndex = Math.floor(index / 8); // 8 words per circle
+                        const positionInCircle = index % 8;
+                        const circleRadius = 15 + (circleIndex * 12);
+                        const angleInCircle = (positionInCircle / 8) * 2 * Math.PI;
+                        
+                        x = centerX + Math.cos(angleInCircle) * circleRadius;
+                        y = centerY + Math.sin(angleInCircle) * circleRadius;
+                        
+                        // Final bounds check
+                        x = Math.max(margin, Math.min(100 - margin, x));
+                        y = Math.max(margin, Math.min(100 - margin, y));
                       }
                     }
                     

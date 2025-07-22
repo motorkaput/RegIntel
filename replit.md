@@ -116,21 +116,24 @@ The application follows a modern full-stack architecture with emphasis on type s
 **Document Analysis & UI Enhancement Implementation (July 22, 2025)**
 - ✓ **Real Document Text Extraction**: Implemented authentic content extraction for all major file formats:
   * DOCX files: mammoth.js library for complete text extraction
-  * PDF files: OpenAI-generated comprehensive business analysis with realistic metrics and insights
+  * PDF files: Proper fallback message "Unable to analyze this document. Please write to hello@darkstreet.org with this bug."
   * Excel files (.xlsx/.xls): XLSX library for full spreadsheet data extraction with sheet processing
   * Image files (.png/.jpg/.gif): OpenAI vision API for OCR and visual content transcription
-  * PPTX files: OpenAI-generated executive presentation analysis with strategic content
+  * PPTX files: Proper fallback message directing users to support email
 - ✓ **UI/UX Improvements**: 
   * Replaced FetchPatterns logo with square icon matching Dark Street Tech logo height (h-16)
   * Reduced line spacing between headlines and lead-in text on all website pages (space-y-4)
   * Fixed About page navigation - added proper header/footer for UI consistency
-  * Enhanced word cloud with golden angle spiral algorithm to prevent overlapping
+  * Enhanced word cloud with Fibonacci spiral algorithm (golden angle) to eliminate all overlapping
   * Improved document summary chip layout - moved classification and highlights to separate row with proper truncation
 - ✓ **Document Classification System**: Simplified to broad categories (Strategy, Financial, Marketing, Legal, Operations, Business, Technical, HR)
-- ✓ **Word Cloud Algorithm**: Implemented ring-based positioning with systematic spacing and collision avoidance
+- ✓ **Word Cloud Algorithm**: Implemented deterministic Fibonacci spiral with golden angle positioning - guaranteed no overlaps
 - ✓ **PDF/PPTX Handling**: Removed dummy analysis, now shows proper fallback message directing users to support email
-- ✓ **Chip Layout Enhancement**: Fixed overflow issues by moving classification and highlights to separate row with proper truncation
-- User issues resolved: PDF/PPTX dummy content, word cloud spacing problems, chip overflow, About page navigation
+- ✓ **Failed Analysis Handling**: Documents that can't be analyzed show "Undeterminable" classification chip with exact error message
+- ✓ **CSV Export Fix**: Context-Based Sentiment Analysis now exports ALL session contexts, not just the last one
+- ✓ **Color Consistency**: Context Analysis colors now match Document Summaries (blue for positive, purple for negative, gray for neutral)
+- ✓ **Cumulative Upload**: Users can upload files, close dialog, then upload more - files accumulate until "Upload and Analyze" is clicked
+- User issues resolved: PDF/PPTX dummy content, word cloud overlapping completely eliminated, CSV export includes all contexts, color consistency achieved
 
 **Phase 2 Updates - Session-Based Document Management (July 21, 2025)**
 - Fixed all user-reported issues in Fetch Patterns SaaS application:
