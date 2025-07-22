@@ -864,76 +864,58 @@ export default function FetchPatternsApp() {
                     // Calculate font size using the same range as react-wordcloud
                     let fontSize = Math.round(minFontSize + (fontSizeRange * normalizedFreq));
                     
-                    // Dynamic space calculation based on word count and font sizes
+                    // Simple, reliable grid with word-count-based spacing
                     let x, y;
-                    const containerWidth = 450; // Actual container width in pixels
-                    const containerHeight = 450; // Actual container height in pixels
-                    
-                    // Calculate estimated text width (approximate formula)
-                    const estimatedTextWidth = word.length * fontSize * 0.6; // Rough character width calculation
-                    const estimatedTextHeight = fontSize * 1.2; // Line height
+                    const totalWords = topWords.length;
                     
                     if (index === 0) {
                       // Place first (most frequent) word at center
                       x = 50;
                       y = 50;
                     } else {
-                      // Dynamic grid based on actual space requirements
-                      const totalWords = topWords.length;
+                      // Calculate margin based on word count - more words = smaller margins
+                      const baseMargin = 12;
+                      const marginReduction = Math.max(0, (totalWords - 8) * 0.8);
+                      const margin = Math.max(6, baseMargin - marginReduction);
                       
-                      // Calculate total space needed
-                      const totalTextArea = topWords.reduce((sum, [w, count], idx) => {
-                        const wordFontSize = Math.round(minFontSize + (fontSizeRange * (count / maxCount)));
-                        const wordWidth = w.length * wordFontSize * 0.6;
-                        const wordHeight = wordFontSize * 1.2;
-                        return sum + (wordWidth * wordHeight);
-                      }, 0);
-                      
-                      // Calculate available space (minus margins)
-                      const margin = Math.max(5, Math.min(15, 10 - (totalWords - 8) * 0.5)); // Dynamic margin: smaller for more words
                       const availableWidth = 100 - 2 * margin;
                       const availableHeight = 100 - 2 * margin;
                       
-                      // Adaptive grid calculation
+                      // Calculate grid dimensions based on word count
                       let cols, rows;
                       if (totalWords <= 8) {
-                        // Original spacing for 8 or fewer words
-                        const aspectRatio = 1.4;
-                        cols = Math.ceil(Math.sqrt(totalWords * aspectRatio));
-                        rows = Math.ceil(totalWords / cols);
+                        // Perfect spacing for 8 or fewer words (as in your working screenshot)
+                        cols = Math.ceil(Math.sqrt(totalWords * 1.4));
+                        rows = Math.ceil((totalWords - 1) / cols); // -1 because first word is centered
+                      } else if (totalWords <= 16) {
+                        // Moderate density for 9-16 words
+                        cols = 4;
+                        rows = Math.ceil((totalWords - 1) / cols);
                       } else {
-                        // Tighter packing for more words
-                        const packingDensity = Math.min(1.2, 0.8 + (totalWords / 50)); // Increase density with word count
-                        cols = Math.ceil(Math.sqrt(totalWords * packingDensity));
-                        rows = Math.ceil(totalWords / cols);
+                        // Higher density for more words
+                        cols = 5;
+                        rows = Math.ceil((totalWords - 1) / cols);
                       }
                       
-                      // Calculate cell dimensions with adaptive spacing
-                      const baseCellWidth = availableWidth / cols;
-                      const baseCellHeight = availableHeight / rows;
-                      
-                      // Scale cell size based on estimated text size
-                      const cellWidth = Math.max(baseCellWidth, estimatedTextWidth / containerWidth * 100 + 2);
-                      const cellHeight = Math.max(baseCellHeight, estimatedTextHeight / containerHeight * 100 + 2);
+                      // Calculate cell dimensions
+                      const cellWidth = availableWidth / cols;
+                      const cellHeight = availableHeight / rows;
                       
                       // Get grid position (excluding the centered first word)
                       const gridIndex = index - 1;
                       const gridRow = Math.floor(gridIndex / cols);
                       const gridCol = gridIndex % cols;
                       
-                      // Calculate position with dynamic spacing
+                      // Calculate base position
                       x = margin + gridCol * cellWidth + cellWidth / 2;
                       y = margin + gridRow * cellHeight + cellHeight / 2;
                       
-                      // Add small deterministic offset for natural appearance (reduced for more words)
-                      const offsetFactor = Math.max(0.05, 0.15 - (totalWords / 100)); // Reduce offset as word count increases
-                      const deterministicOffsetX = (Math.sin(index * 2.7) * cellWidth * offsetFactor);
-                      const deterministicOffsetY = (Math.cos(index * 3.1) * cellHeight * offsetFactor);
+                      // Add small natural offset (reduced for more words)
+                      const offsetStrength = Math.max(0.08, 0.12 - (totalWords / 200));
+                      x += Math.sin(index * 2.3) * cellWidth * offsetStrength;
+                      y += Math.cos(index * 2.7) * cellHeight * offsetStrength;
                       
-                      x += deterministicOffsetX;
-                      y += deterministicOffsetY;
-                      
-                      // Ensure bounds with dynamic margins
+                      // Ensure bounds
                       x = Math.max(margin + 1, Math.min(100 - margin - 1, x));
                       y = Math.max(margin + 1, Math.min(100 - margin - 1, y));
                     }
