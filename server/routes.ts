@@ -470,6 +470,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   initializePlans();
 
+  // Test OpenAI API endpoint
+  app.post('/api/test-openai', async (req, res) => {
+    try {
+      const OpenAI = require('openai');
+      const openai = new OpenAI({
+        apiKey: process.env.OPENAI_API_KEY,
+      });
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "system",
+            content: "You are a helpful assistant."
+          },
+          {
+            role: "user",
+            content: "Say 'OpenAI API is working correctly' if you receive this message."
+          }
+        ],
+        temperature: 0.1,
+      });
+
+      res.json({
+        success: true,
+        message: "OpenAI API is working",
+        response: response.choices[0].message.content,
+        apiKeyExists: !!process.env.OPENAI_API_KEY,
+        apiKeyPrefix: process.env.OPENAI_API_KEY ? process.env.OPENAI_API_KEY.substring(0, 10) + "..." : "Not found"
+      });
+    } catch (error) {
+      console.error("OpenAI API Test Error:", error);
+      res.json({
+        success: false,
+        error: error.message,
+        apiKeyExists: !!process.env.OPENAI_API_KEY,
+        apiKeyPrefix: process.env.OPENAI_API_KEY ? process.env.OPENAI_API_KEY.substring(0, 10) + "..." : "Not found"
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

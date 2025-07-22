@@ -126,10 +126,20 @@ export async function analyzeDocument(
   buffer: Buffer,
   mimeType: string
 ): Promise<DocumentAnalysis> {
+  console.log('=== Starting analyzeDocument ===');
+  console.log('Document ID:', documentId);
+  console.log('MIME Type:', mimeType);
+  console.log('Buffer size:', buffer.length);
+  console.log('OpenAI API Key exists:', !!process.env.OPENAI_API_KEY);
+  
   try {
     // Extract text from document
     const extractedText = await extractTextFromFile(buffer, mimeType);
     const wordCount = extractedText.split(/\s+/).length;
+    
+    console.log('Text extracted successfully. Length:', extractedText.length);
+    console.log('Word count:', wordCount);
+    console.log('Text preview:', extractedText.substring(0, 200) + '...');
 
     // Use OpenAI for comprehensive analysis
     const analysisPrompt = `
@@ -161,6 +171,8 @@ CRITICAL INSTRUCTIONS:
 - Quote actual phrases and terms from the document
 - Base insights on real content, not assumptions`;
 
+    console.log('Sending request to OpenAI...');
+    
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
@@ -177,7 +189,11 @@ CRITICAL INSTRUCTIONS:
       temperature: 0.3,
     });
 
+    console.log('OpenAI response received successfully');
+    console.log('Response content preview:', response.choices[0].message.content?.substring(0, 200) + '...');
+
     const analysis = JSON.parse(response.choices[0].message.content || '{}');
+    console.log('Analysis parsed successfully:', Object.keys(analysis));
 
     // Generate word cloud
     const wordCloud = generateWordCloud(extractedText);
@@ -205,7 +221,14 @@ CRITICAL INSTRUCTIONS:
     };
 
   } catch (error) {
-    console.error('Error analyzing document:', error);
+    console.error('Error analyzing document with OpenAI:', error);
+    console.error('OpenAI API Key exists:', !!process.env.OPENAI_API_KEY);
+    console.error('Error details:', {
+      message: error.message,
+      name: error.name,
+      status: error.status,
+      code: error.code
+    });
     
     // Fallback analysis if OpenAI fails
     const extractedText = await extractTextFromFile(buffer, mimeType);
@@ -375,6 +398,8 @@ export async function processDocumentWithAI(
   summary: string;
   wordCloud: Array<{ text: string; value: number; }>;
 }> {
+  console.log('Starting OpenAI document processing for type:', mimeType);
+  console.log('OpenAI API Key configured:', !!process.env.OPENAI_API_KEY);
   const analysis = await analyzeDocument('temp', buffer, mimeType);
   return {
     extractedText: analysis.text,
