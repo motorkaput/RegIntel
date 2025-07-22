@@ -507,9 +507,18 @@ export default function FetchPatternsApp() {
                     <div className="flex items-center justify-between mb-3">
                       <h3 className="font-semibold text-gray-900">{analysis.originalName}</h3>
                       {analysis.classification && (
-                        <Badge className="bg-green-100 text-green-800 border-green-200">
-                          {analysis.classification}
-                        </Badge>
+                        <div className="flex flex-wrap gap-1">
+                          <Badge 
+                            variant="outline" 
+                            className="bg-green-50 text-green-700 border-green-300 text-xs px-2 py-1 whitespace-nowrap max-w-full overflow-hidden text-ellipsis"
+                            title={analysis.classification}
+                          >
+                            {analysis.classification.length > 25 
+                              ? analysis.classification.substring(0, 22) + "..." 
+                              : analysis.classification
+                            }
+                          </Badge>
+                        </div>
                       )}
                     </div>
                     

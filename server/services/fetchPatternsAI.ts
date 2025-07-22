@@ -148,21 +148,48 @@ This strategic framework positions our organization for sustainable growth while
  * Generate word cloud data from text
  */
 function generateWordCloud(text: string): Array<{ text: string; value: number; }> {
-  const words = text.toLowerCase()
-    .replace(/[^\w\s]/g, '')
-    .split(/\s+/)
-    .filter(word => word.length > 3)
-    .filter(word => !['this', 'that', 'with', 'have', 'will', 'from', 'they', 'been', 'said', 'each', 'which', 'their', 'time', 'would', 'there', 'could', 'other', 'document', 'content', 'analysis'].includes(word));
+  // Enhanced stop word list for business documents
+  const stopWords = new Set([
+    'this', 'that', 'with', 'have', 'will', 'from', 'they', 'been', 'said', 'each', 'which', 'their', 'time', 
+    'would', 'there', 'could', 'other', 'document', 'content', 'analysis', 'include', 'includes', 'including',
+    'these', 'those', 'such', 'more', 'also', 'well', 'most', 'some', 'many', 'much', 'very', 'into', 'over',
+    'should', 'than', 'through', 'while', 'where', 'when', 'what', 'who', 'how', 'why', 'can', 'may', 'might',
+    'the', 'and', 'for', 'are', 'but', 'not', 'you', 'all', 'any', 'had', 'her', 'was', 'one', 'our', 'out',
+    'day', 'get', 'has', 'him', 'his', 'how', 'man', 'new', 'now', 'old', 'see', 'two', 'way', 'who', 'boy',
+    'did', 'its', 'let', 'put', 'say', 'she', 'too', 'use'
+  ]);
 
+  // Extract words with better filtering for business terms
+  const words = text.toLowerCase()
+    .replace(/[^\w\s]/g, ' ')
+    .split(/\s+/)
+    .filter(word => word.length > 2)
+    .filter(word => !stopWords.has(word))
+    .filter(word => !/^\d+$/.test(word)) // Remove pure numbers
+    .filter(word => word.match(/[a-z]/i)); // Must contain at least one letter
+
+  // Count word frequency
   const wordCount = words.reduce((acc, word) => {
     acc[word] = (acc[word] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
 
-  return Object.entries(wordCount)
+  // Get top words and normalize values for better visual representation
+  const sortedWords = Object.entries(wordCount)
     .sort(([,a], [,b]) => b - a)
-    .slice(0, 50)
-    .map(([text, value]) => ({ text, value }));
+    .slice(0, 50);
+
+  // Normalize values to create better size distribution (1-100 scale)
+  const maxCount = sortedWords[0]?.[1] || 1;
+  const minCount = sortedWords[sortedWords.length - 1]?.[1] || 1;
+  
+  return sortedWords.map(([text, count]) => {
+    // Create logarithmic scaling for better visual distribution
+    const normalized = Math.max(1, Math.round(
+      20 + (Math.log(count) / Math.log(maxCount)) * 80
+    ));
+    return { text, value: normalized };
+  });
 }
 
 /**
@@ -190,33 +217,53 @@ export async function analyzeDocument(
 
     // Use OpenAI for comprehensive analysis
     const analysisPrompt = `
-Please analyze the following document text and provide a comprehensive, SPECIFIC analysis in JSON format. Extract actual content, real insights, and specific details from this document:
+You are an expert document analyst with deep expertise in business intelligence, financial analysis, strategic planning, and risk assessment. Analyze this document with exceptional depth and precision.
 
-Document Text:
+DOCUMENT CONTENT:
 ${extractedText}
 
-Provide analysis in this exact JSON structure:
 {
   "sentiment": {
-    "label": "positive|negative|neutral",
+    "label": "positive|negative|neutral|mixed",
     "score": 0.0-1.0,
-    "reasoning": "specific explanation based on actual content and language used in the document"
+    "reasoning": "Detailed explanation citing specific language, tone indicators, and contextual elements from the document"
   },
-  "classification": "specific document type based on actual content (e.g., Strategic Business Plan, Market Analysis Report, Financial Performance Review, etc.)",
-  "keywords": ["actual", "important", "words", "from", "this", "specific", "document"],
-  "insights": ["specific actionable insight from document content", "another concrete finding", "strategic implication found in text"],
-  "riskFlags": ["specific risk mentioned in document", "concrete concern identified in content"],
-  "summary": "detailed 3-4 sentence summary that captures the SPECIFIC subject matter, key findings, main objectives, and concrete details mentioned in THIS document",
-  "emotionalTone": ["specific tone like confident, analytical, urgent, optimistic"],
-  "keyPhrases": ["exact important phrase quoted from document", "another key phrase from text"]
+  "classification": "precise_document_category",
+  "keywords": ["10-15 most significant domain-specific terms from the document"],
+  "insights": ["3-5 deep analytical insights showing understanding of strategic implications and business context"],
+  "riskFlags": ["specific risks, challenges, or concerns identified in the document content"],
+  "summary": "comprehensive 4-6 sentence summary demonstrating deep understanding of purpose, findings, and business context",
+  "emotionalTone": ["2-4 specific emotional descriptors capturing the document's communication style"],
+  "keyPhrases": ["5-8 important phrases directly quoted from the document"]
 }
 
-CRITICAL INSTRUCTIONS:
-- Extract REAL keywords, phrases, and insights from the actual document content
-- The summary must reflect the SPECIFIC subject matter, goals, findings, and details in this document
-- Do NOT use generic business language - be specific to what this document actually discusses
-- Quote actual phrases and terms from the document
-- Base insights on real content, not assumptions`;
+CLASSIFICATION CATEGORIES (choose most precise):
+- Strategic Business Planning Document
+- Financial Performance Analysis Report  
+- Market Research & Competitive Intelligence
+- Operational Efficiency Review
+- Risk Assessment & Compliance Report
+- Investment Analysis & Due Diligence
+- Executive Strategy Presentation
+- Performance Metrics Dashboard
+- Customer & Market Segmentation Analysis
+- Innovation & Product Development Brief
+
+ANALYSIS REQUIREMENTS:
+- Extract specific business metrics, financial figures, percentages mentioned
+- Identify strategic objectives, initiatives, recommendations
+- Recognize industry terminology and business processes
+- Assess competitive positioning and market dynamics
+- Identify stakeholder concerns and implementation challenges
+- Understand intended audience and business context
+- Recognize timeframes, deadlines, historical comparisons
+
+QUALITY STANDARDS:
+- Insights must reflect sophisticated business understanding
+- Keywords should include domain-specific terminology
+- Summary must demonstrate strategic business comprehension
+- Classification must be precise and industry-appropriate
+- Base all analysis on actual document content, not assumptions`;
 
     console.log('Sending request to OpenAI...');
     
@@ -357,41 +404,58 @@ export async function analyzeContext(
 ): Promise<ContextAnalysis> {
   try {
     const combinedText = documents.map(doc => 
-      `${doc.filename}: ${doc.text}`
-    ).join('\n\n');
+      `Document: ${doc.filename}\n${doc.text}`
+    ).join('\n\n---\n\n');
 
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
         {
           role: "system",
-          content: "You are an expert at context-based sentiment analysis. Analyze documents for specific contexts and provide detailed sentiment breakdowns."
+          content: "You are an expert business analyst specializing in contextual sentiment analysis, strategic assessment, and document intelligence. Provide nuanced analysis that captures subtle business implications and stakeholder perspectives."
         },
         {
           role: "user",
           content: `
-Analyze the following documents for mentions and sentiment related to: "${context}"
+CONTEXT ANALYSIS REQUEST: "${context}"
 
-Documents:
+DOCUMENT COLLECTION:
 ${combinedText}
 
-Provide analysis in this JSON format:
+ANALYSIS INSTRUCTIONS:
+Perform deep contextual analysis to understand how "${context}" appears across these documents. Look for:
+- Direct mentions and indirect references
+- Sentiment patterns and emotional undertones  
+- Strategic implications and business impact
+- Stakeholder perspectives and concerns
+- Competitive positioning and market dynamics
+- Risk factors and opportunity indicators
+
+Provide analysis in this exact JSON format:
 {
-  "mentions": number_of_mentions,
+  "mentions": actual_count_of_context_references,
   "sentimentBreakdown": {
-    "positive": percentage,
-    "negative": percentage,
-    "neutral": percentage
+    "positive": percentage_0_to_100,
+    "negative": percentage_0_to_100,
+    "neutral": percentage_0_to_100
   },
-  "emotionalTone": ["array", "of", "emotional", "descriptors"],
-  "keyPhrases": ["relevant phrases mentioning the context"],
-  "summary": "detailed summary of how the context appears in the documents"
+  "emotionalTone": ["specific emotional descriptors reflecting business sentiment"],
+  "keyPhrases": ["exact phrases from documents mentioning or relating to the context"],
+  "summary": "comprehensive analysis of how this context appears across documents, including strategic implications, stakeholder perspectives, and business impact assessment"
 }
+
+QUALITY REQUIREMENTS:
+- Count actual mentions, not estimated ranges
+- Provide precise sentiment percentages that sum to 100
+- Include domain-specific emotional tone descriptors
+- Quote exact key phrases from the documents
+- Write a sophisticated summary showing deep business understanding
+- Focus on strategic and operational implications of the context
 `
         }
       ],
       response_format: { type: "json_object" },
-      temperature: 0.3,
+      temperature: 0.2,
     });
 
     const result = JSON.parse(response.choices[0].message.content || '{}');
