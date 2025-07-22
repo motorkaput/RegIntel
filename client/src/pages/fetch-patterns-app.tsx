@@ -864,48 +864,78 @@ export default function FetchPatternsApp() {
                     // Calculate font size using the same range as react-wordcloud
                     let fontSize = Math.round(minFontSize + (fontSizeRange * normalizedFreq));
                     
-                    // Enhanced grid system with guaranteed no overlaps
+                    // Dynamic space calculation based on word count and font sizes
                     let x, y;
-                    const margin = 10; // 10% margin from edges
+                    const containerWidth = 450; // Actual container width in pixels
+                    const containerHeight = 450; // Actual container height in pixels
+                    
+                    // Calculate estimated text width (approximate formula)
+                    const estimatedTextWidth = word.length * fontSize * 0.6; // Rough character width calculation
+                    const estimatedTextHeight = fontSize * 1.2; // Line height
                     
                     if (index === 0) {
                       // Place first (most frequent) word at center
                       x = 50;
                       y = 50;
                     } else {
-                      // Use pure grid system for guaranteed spacing
+                      // Dynamic grid based on actual space requirements
+                      const totalWords = topWords.length;
+                      
+                      // Calculate total space needed
+                      const totalTextArea = topWords.reduce((sum, [w, count], idx) => {
+                        const wordFontSize = Math.round(minFontSize + (fontSizeRange * (count / maxCount)));
+                        const wordWidth = w.length * wordFontSize * 0.6;
+                        const wordHeight = wordFontSize * 1.2;
+                        return sum + (wordWidth * wordHeight);
+                      }, 0);
+                      
+                      // Calculate available space (minus margins)
+                      const margin = Math.max(5, Math.min(15, 10 - (totalWords - 8) * 0.5)); // Dynamic margin: smaller for more words
                       const availableWidth = 100 - 2 * margin;
                       const availableHeight = 100 - 2 * margin;
                       
-                      // Calculate optimal grid dimensions
-                      const totalWords = topWords.length;
-                      const aspectRatio = 1.4; // Slightly wider than tall
-                      const cols = Math.ceil(Math.sqrt(totalWords * aspectRatio));
-                      const rows = Math.ceil(totalWords / cols);
+                      // Adaptive grid calculation
+                      let cols, rows;
+                      if (totalWords <= 8) {
+                        // Original spacing for 8 or fewer words
+                        const aspectRatio = 1.4;
+                        cols = Math.ceil(Math.sqrt(totalWords * aspectRatio));
+                        rows = Math.ceil(totalWords / cols);
+                      } else {
+                        // Tighter packing for more words
+                        const packingDensity = Math.min(1.2, 0.8 + (totalWords / 50)); // Increase density with word count
+                        cols = Math.ceil(Math.sqrt(totalWords * packingDensity));
+                        rows = Math.ceil(totalWords / cols);
+                      }
                       
-                      // Calculate cell dimensions with extra padding
-                      const cellWidth = availableWidth / cols;
-                      const cellHeight = availableHeight / rows;
+                      // Calculate cell dimensions with adaptive spacing
+                      const baseCellWidth = availableWidth / cols;
+                      const baseCellHeight = availableHeight / rows;
                       
-                      // Get grid position
-                      const gridRow = Math.floor((index - 1) / cols); // -1 because first word is centered
-                      const gridCol = (index - 1) % cols;
+                      // Scale cell size based on estimated text size
+                      const cellWidth = Math.max(baseCellWidth, estimatedTextWidth / containerWidth * 100 + 2);
+                      const cellHeight = Math.max(baseCellHeight, estimatedTextHeight / containerHeight * 100 + 2);
                       
-                      // Calculate position with generous spacing
+                      // Get grid position (excluding the centered first word)
+                      const gridIndex = index - 1;
+                      const gridRow = Math.floor(gridIndex / cols);
+                      const gridCol = gridIndex % cols;
+                      
+                      // Calculate position with dynamic spacing
                       x = margin + gridCol * cellWidth + cellWidth / 2;
                       y = margin + gridRow * cellHeight + cellHeight / 2;
                       
-                      // Add small deterministic offset for natural feel
-                      const offsetFactor = 0.15; // 15% of cell size
+                      // Add small deterministic offset for natural appearance (reduced for more words)
+                      const offsetFactor = Math.max(0.05, 0.15 - (totalWords / 100)); // Reduce offset as word count increases
                       const deterministicOffsetX = (Math.sin(index * 2.7) * cellWidth * offsetFactor);
                       const deterministicOffsetY = (Math.cos(index * 3.1) * cellHeight * offsetFactor);
                       
                       x += deterministicOffsetX;
                       y += deterministicOffsetY;
                       
-                      // Ensure bounds
-                      x = Math.max(margin + 2, Math.min(100 - margin - 2, x));
-                      y = Math.max(margin + 2, Math.min(100 - margin - 2, y));
+                      // Ensure bounds with dynamic margins
+                      x = Math.max(margin + 1, Math.min(100 - margin - 1, x));
+                      y = Math.max(margin + 1, Math.min(100 - margin - 1, y));
                     }
                     
                     // Professional color palette
