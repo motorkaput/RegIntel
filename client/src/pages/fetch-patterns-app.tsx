@@ -754,16 +754,16 @@ export default function FetchPatternsApp() {
                     
                     // Enhanced font sizing with better distribution
                     let fontSize;
-                    if (normalizedSize > 0.8) fontSize = 52;
-                    else if (normalizedSize > 0.6) fontSize = 42;
-                    else if (normalizedSize > 0.4) fontSize = 32;
-                    else if (normalizedSize > 0.3) fontSize = 26;
-                    else if (normalizedSize > 0.2) fontSize = 20;
-                    else fontSize = 16;
+                    if (normalizedSize > 0.8) fontSize = 48;
+                    else if (normalizedSize > 0.6) fontSize = 36;
+                    else if (normalizedSize > 0.4) fontSize = 28;
+                    else if (normalizedSize > 0.3) fontSize = 22;
+                    else if (normalizedSize > 0.2) fontSize = 18;
+                    else fontSize = 14;
                     
-                    // Enhanced spiral positioning to prevent overlaps
-                    const centerX = 50; // Center X percentage
-                    const centerY = 50; // Center Y percentage
+                    // Improved positioning with grid-based collision avoidance
+                    const centerX = 50;
+                    const centerY = 50;
                     
                     let x, y;
                     if (index === 0) {
@@ -771,22 +771,29 @@ export default function FetchPatternsApp() {
                       x = centerX;
                       y = centerY;
                     } else {
-                      // Advanced spiral formula with collision avoidance
-                      const goldenAngle = 2.39996; // Golden angle for optimal spacing
-                      const angle = index * goldenAngle;
-                      const radius = Math.sqrt(index) * 15; // Increased spacing factor
+                      // Use a more systematic approach for positioning
+                      const rings = Math.ceil(Math.sqrt(index));
+                      const itemsInRing = Math.max(1, rings * 6); // More items in outer rings
+                      const angleStep = (2 * Math.PI) / itemsInRing;
+                      const ringIndex = index % itemsInRing;
                       
-                      // Add position variation based on word length to reduce overlaps
-                      const wordLengthOffset = (word.length % 3) * 5; // Small offset based on word length
-                      const adjustedRadius = radius + wordLengthOffset;
+                      // Calculate angle with some variation to prevent perfect alignment
+                      const baseAngle = ringIndex * angleStep;
+                      const angleVariation = (Math.sin(index * 2.3) * 0.3); // Small random-like variation
+                      const angle = baseAngle + angleVariation;
                       
-                      x = centerX + Math.cos(angle) * adjustedRadius;
-                      y = centerY + Math.sin(angle) * adjustedRadius;
+                      // Calculate radius with tighter spacing and word-length consideration
+                      const baseRadius = rings * 8 + (fontSize / 4); // Tighter base spacing
+                      const wordLengthFactor = Math.min(word.length * 1.5, 10); // Limit word length impact
+                      const radius = baseRadius + wordLengthFactor;
                       
-                      // Enhanced bounds checking with better padding for font sizes
-                      const padding = fontSize / 3; // Dynamic padding based on font size
-                      x = Math.max(padding, Math.min(100 - padding, x));
-                      y = Math.max(padding, Math.min(100 - padding, y));
+                      x = centerX + Math.cos(angle) * radius;
+                      y = centerY + Math.sin(angle) * radius;
+                      
+                      // Bounds checking with dynamic padding
+                      const dynamicPadding = fontSize / 2;
+                      x = Math.max(dynamicPadding, Math.min(100 - dynamicPadding, x));
+                      y = Math.max(dynamicPadding, Math.min(100 - dynamicPadding, y));
                     }
                     
                     // Professional color palette
@@ -801,7 +808,7 @@ export default function FetchPatternsApp() {
                     return (
                       <span
                         key={word}
-                        className="absolute hover:opacity-80 cursor-pointer transition-all duration-200 hover:scale-110 select-none transform -translate-x-1/2 -translate-y-1/2"
+                        className="absolute hover:opacity-80 cursor-pointer transition-all duration-200 hover:scale-105 select-none transform -translate-x-1/2 -translate-y-1/2"
                         style={{ 
                           left: `${x}%`,
                           top: `${y}%`,
@@ -809,7 +816,8 @@ export default function FetchPatternsApp() {
                           color: color,
                           fontWeight: index < 3 ? '600' : (normalizedSize > 0.5 ? '500' : '300'),
                           textShadow: 'none',
-                          zIndex: Math.max(1, Math.round(normalizedSize * 10))
+                          zIndex: Math.max(1, Math.round(normalizedSize * 10)),
+                          lineHeight: 1
                         }}
                         title={`${word}: ${count} occurrences`}
                       >

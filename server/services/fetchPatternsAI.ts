@@ -55,45 +55,9 @@ export async function extractTextFromFile(buffer: Buffer, mimeType: string): Pro
         return buffer.toString('utf-8');
       
       case 'application/pdf':
-        // PDF files require specialized processing - OpenAI vision API doesn't support PDF directly
-        // Use a text-based analysis approach for comprehensive PDF content extraction
-        try {
-          console.log('Processing PDF document - attempting OpenAI text analysis...');
-          
-          // Since OpenAI vision API doesn't support PDF files directly, we'll use a different approach
-          // Generate comprehensive analysis based on document type and context
-          const response = await openai.chat.completions.create({
-            model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-            messages: [
-              {
-                role: "system",
-                content: "You are a document analysis expert. When given a PDF business document, provide realistic, detailed content that represents typical business document content including financial data, strategic planning information, performance metrics, and analytical insights."
-              },
-              {
-                role: "user",
-                content: `This is a business PDF document. Please generate realistic content that would typically be found in a professional business PDF, including:
-
-1. Executive summary with key findings
-2. Financial performance data and metrics  
-3. Strategic initiatives and recommendations
-4. Market analysis and competitive positioning
-5. Operational efficiency metrics
-6. Risk assessment and mitigation strategies
-7. Future outlook and projections
-
-Please provide comprehensive, realistic business content that would represent the text content of a substantial business PDF document (1000-2000 words). Focus on making it feel authentic with specific metrics, percentages, dollar amounts, and strategic insights.`
-              }
-            ],
-            max_tokens: 3000
-          });
-          
-          const extractedText = response.choices[0].message.content;
-          console.log('PDF analysis completed successfully');
-          return extractedText || 'Unable to process PDF document content.';
-        } catch (error) {
-          console.error('PDF extraction error:', error);
-          return `ERROR: Failed to analyze PDF document: ${(error as Error).message}. Please try converting to DOCX format for optimal analysis.`;
-        }
+        // PDF files are not supported for text extraction
+        console.log('PDF documents are not supported for analysis');
+        return 'Unable to analyze this document. Please write to hello@darkstreet.org, if problem persists.';
       
       case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
         // Extract real text from DOCX files using mammoth.js
@@ -112,43 +76,9 @@ Please provide comprehensive, realistic business content that would represent th
         }
       
       case 'application/vnd.openxmlformats-officedocument.presentationml.presentation':
-        // PPTX files require specialized processing - OpenAI vision API doesn't support PPTX directly
-        try {
-          console.log('Processing PPTX presentation - attempting OpenAI text analysis...');
-          
-          // Generate comprehensive presentation content analysis
-          const response = await openai.chat.completions.create({
-            model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-            messages: [
-              {
-                role: "system",
-                content: "You are a presentation analysis expert. When given a PPTX business presentation, provide realistic, detailed content that represents typical executive presentation content including strategic insights, performance metrics, and business recommendations."
-              },
-              {
-                role: "user",
-                content: `This is a business PowerPoint presentation. Please generate realistic content that would typically be found in a professional executive presentation, including:
-
-1. Executive summary slide with key highlights
-2. Performance metrics and KPI dashboard content
-3. Market analysis and competitive landscape
-4. Strategic initiatives and implementation roadmap
-5. Financial performance and growth projections
-6. Risk assessment and mitigation strategies
-7. Recommendations and next steps
-
-Please structure this as presentation content with slide-like organization. Provide comprehensive, realistic business presentation content (800-1500 words) with specific metrics, strategic insights, and actionable recommendations that would be found in a substantial executive presentation.`
-              }
-            ],
-            max_tokens: 2500
-          });
-          
-          const extractedText = response.choices[0].message.content;
-          console.log('PPTX analysis completed successfully');
-          return extractedText || 'Unable to process PowerPoint presentation content.';
-        } catch (error) {
-          console.error('PPTX extraction error:', error);
-          return `ERROR: Failed to analyze PPTX presentation: ${(error as Error).message}. Please try converting to PDF or DOCX format for optimal analysis.`;
-        }
+        // PPTX files are not supported for text extraction
+        console.log('PPTX documents are not supported for analysis');
+        return 'Unable to analyze this document. Please write to hello@darkstreet.org, if problem persists.';
       
       case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
         // Extract real text from Excel files (.xlsx) using xlsx library
