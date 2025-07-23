@@ -129,7 +129,7 @@ export default function DynamicHero({ title, subtitle }: DynamicHeroProps) {
   const combinedText = `${title}: ${subtitle}`;
 
   return (
-    <section ref={containerRef} className="relative py-18 section-divider overflow-hidden">
+    <section ref={containerRef} className="relative py-20 section-divider overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-br from-gray-50 to-gray-100">
         <svg 
           ref={svgRef}
