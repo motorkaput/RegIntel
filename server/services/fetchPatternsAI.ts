@@ -55,25 +55,45 @@ export async function extractTextFromFile(buffer: Buffer, mimeType: string): Pro
         return buffer.toString('utf-8');
       
       case 'application/pdf':
-        // Extract real text from PDF files using pdf-parse library
+        // Use OpenAI Vision API for PDF text extraction since pdf-parse has server compatibility issues
         try {
-          console.log('Processing PDF with pdf-parse...');
-          const pdfParse = (await import('pdf-parse')).default;
-          const pdfData = await pdfParse(buffer);
-          const extractedText = pdfData.text.trim();
+          console.log('Processing PDF with OpenAI Vision API...');
+          const base64Data = buffer.toString('base64');
           
+          const response = await openai.chat.completions.create({
+            model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+            messages: [
+              {
+                role: "user",
+                content: [
+                  {
+                    type: "text",
+                    text: "Extract all readable text from this PDF document. Include titles, headings, body text, bullet points, and any other textual content. Preserve the structure and organization of the text as much as possible. If the PDF contains primarily images or charts, describe what you can see and extract any visible text labels or captions."
+                  },
+                  {
+                    type: "image_url",
+                    image_url: {
+                      url: `data:application/pdf;base64,${base64Data}`
+                    }
+                  }
+                ]
+              }
+            ],
+            max_tokens: 2000,
+          });
+          
+          const extractedText = response.choices[0].message.content || '';
           console.log(`PDF processing completed. Text length: ${extractedText.length}`);
           console.log('PDF content preview:', extractedText.substring(0, 300) + '...');
           
-          if (extractedText && extractedText.length > 20) {
+          if (extractedText.trim() && extractedText.length > 20) {
             return extractedText;
           } else {
-            console.log('PDF appears to contain minimal text content');
-            return `This PDF document contains primarily images, charts, or formatting with minimal readable text content. Extracted ${extractedText.length} characters of text.`;
+            return `This PDF document contains primarily visual elements with minimal readable text content.`;
           }
         } catch (error) {
-          console.error('PDF extraction error:', error);
-          return `This PDF document could not be processed for text extraction. The file may be corrupted, password-protected, or contain only images. Please try converting to a text-based format.`;
+          console.error('PDF Vision API error:', error);
+          return `This PDF document could not be processed for text extraction. Please try converting to a text-based format or contact support.`;
         }
       
       case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
@@ -93,38 +113,45 @@ export async function extractTextFromFile(buffer: Buffer, mimeType: string): Pro
         }
       
       case 'application/vnd.openxmlformats-officedocument.presentationml.presentation':
-        // PPTX processing using pptx-parser library
+        // Use OpenAI Vision API for PPTX text extraction since pptx-parser has browser dependencies
         try {
-          console.log('Processing PPTX with pptx-parser...');
-          const pptxParser = (await import('pptx-parser')).default;
-          const slides = await pptxParser.parseBuffer(buffer);
+          console.log('Processing PPTX with OpenAI Vision API...');
+          const base64Data = buffer.toString('base64');
           
-          let extractedText = '';
-          
-          slides.forEach((slide: any, index: number) => {
-            if (slide.texts && slide.texts.length > 0) {
-              extractedText += `Slide ${index + 1}:\n`;
-              slide.texts.forEach((text: string) => {
-                if (text.trim()) {
-                  extractedText += `${text.trim()}\n`;
-                }
-              });
-              extractedText += '\n';
-            }
+          const response = await openai.chat.completions.create({
+            model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+            messages: [
+              {
+                role: "user",
+                content: [
+                  {
+                    type: "text",
+                    text: "Extract all text content from this PowerPoint presentation. Include slide titles, bullet points, body text, and any other readable content. Format the output by slide: 'Slide 1: [content], Slide 2: [content]' etc. If slides contain primarily images or charts, describe what you can see and extract any visible text labels."
+                  },
+                  {
+                    type: "image_url",
+                    image_url: {
+                      url: `data:application/vnd.openxmlformats-officedocument.presentationml.presentation;base64,${base64Data}`
+                    }
+                  }
+                ]
+              }
+            ],
+            max_tokens: 2000,
           });
           
-          console.log(`PPTX processing completed. Found ${slides.length} slides, text length: ${extractedText.length}`);
+          const extractedText = response.choices[0].message.content || '';
+          console.log(`PPTX processing completed. Text length: ${extractedText.length}`);
           console.log('PPTX content preview:', extractedText.substring(0, 300) + '...');
           
           if (extractedText.trim() && extractedText.length > 20) {
-            return extractedText.trim();
+            return extractedText;
           } else {
-            console.log('PPTX appears to contain minimal text content');
-            return `This PPTX presentation contains primarily images, charts, or visual elements with minimal readable text content. Found ${slides.length} slides with ${extractedText.length} characters of text.`;
+            return `This PPTX presentation contains primarily visual elements with minimal readable text content.`;
           }
         } catch (error) {
-          console.error('PPTX extraction error:', error);
-          return `This PPTX presentation could not be processed for text extraction. The file may be corrupted or contain only visual elements. Please try converting slides to PDF format.`;
+          console.error('PPTX Vision API error:', error);
+          return `This PPTX presentation could not be processed for text extraction. Please try converting slides to PDF format or contact support.`;
         }
       
       case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
@@ -294,8 +321,8 @@ export async function analyzeDocument(
 
     // Special handling for actual extraction failures only - be more specific
     if (extractedText.includes('could not be processed for text extraction') ||
-        extractedText.includes('corrupted') ||
-        extractedText.includes('password-protected') ||
+        extractedText.includes('contact support') ||
+        extractedText.includes('Please try converting') ||
         extractedText.startsWith('ERROR:')) {
       return {
         text: extractedText,
