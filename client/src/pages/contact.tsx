@@ -4,25 +4,17 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
+import DynamicHero from "@/components/dynamic-hero";
 
 export default function Contact() {
   return (
     <div className="min-h-screen bg-surface-white">
       <Navbar />
       <main className="pt-20">
-        <section className="py-16 section-divider bg-gradient-to-br from-surface-white via-surface-light to-surface-grey">
-          <div className="container-section">
-            <div className="max-w-4xl">
-              <h1 className="text-responsive-md text-primary mb-8 font-light tracking-tight">
-                Contact Us
-              </h1>
-              <p className="text-responsive-xxl text-secondary font-light leading-relaxed">
-                Get in touch with our team
-              </p>
-              <div className="mt-12 w-24 h-px bg-gradient-to-r from-accent-blue to-transparent"></div>
-            </div>
-          </div>
-        </section>
+        <DynamicHero 
+          title="Contact Us" 
+          subtitle="Get in touch with our team" 
+        />
 
         <div className="container-section py-6">
           <div className="max-w-2xl mx-auto">

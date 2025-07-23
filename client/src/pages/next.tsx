@@ -1,5 +1,6 @@
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
+import DynamicHero from "@/components/dynamic-hero";
 import { Brain, Shield, BarChart3, Mail } from "lucide-react";
 import darkStreetIcon from "@assets/DarkStreetTech_Icon_1752659608842.png";
 
@@ -9,20 +10,10 @@ export default function Next() {
       <Navbar />
       
       <main className="pt-20">
-        {/* Hero Section */}
-        <section className="py-16 section-divider bg-gradient-to-br from-surface-white via-surface-light to-surface-grey">
-          <div className="container-section">
-            <div className="max-w-4xl">
-              <h1 className="text-responsive-md text-primary mb-8 font-light tracking-tight">
-                What's coming next
-              </h1>
-              <p className="text-responsive-xxl text-secondary font-light leading-relaxed">
-                If your team is solving problems at the edge, we're likely building for you.
-              </p>
-              <div className="mt-12 w-24 h-px bg-gradient-to-r from-accent-blue to-transparent"></div>
-            </div>
-          </div>
-        </section>
+        <DynamicHero 
+          title="What's coming next" 
+          subtitle="If your team is solving problems at the edge, we're likely building for you." 
+        />
 
         {/* Introduction */}
         <section className="py-6 bg-surface-light section-divider">

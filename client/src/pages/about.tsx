@@ -1,25 +1,17 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
+import DynamicHero from "@/components/dynamic-hero";
 
 export default function About() {
   return (
     <div className="min-h-screen bg-surface-white">
       <Navbar />
       <main className="pt-20">
-        <section className="py-16 section-divider bg-gradient-to-br from-surface-white via-surface-light to-surface-grey">
-          <div className="container-section">
-            <div className="max-w-4xl">
-              <h1 className="text-responsive-md text-primary mb-8 font-light tracking-tight">
-                About Dark Street Tech
-              </h1>
-              <p className="text-responsive-xxl text-secondary font-light leading-relaxed">
-                AI-powered solutions for growing enterprises.
-              </p>
-              <div className="mt-12 w-24 h-px bg-gradient-to-r from-accent-blue to-transparent"></div>
-            </div>
-          </div>
-        </section>
+        <DynamicHero 
+          title="About Dark Street Tech" 
+          subtitle="AI-powered solutions for growing enterprises." 
+        />
 
         <div className="container-section py-6 space-y-6">
           <Card className="bg-white">
