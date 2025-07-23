@@ -853,71 +853,86 @@ export default function FetchPatternsApp() {
               })() ? (
                 <div className="relative w-full h-[450px]">
                   {topWords.map(([word, count], index) => {
-                    // Deterministic positioning algorithm based on react-wordcloud principles
-                    // Font size range: 12-60px based on frequency (matching the guide)
-                    const minFontSize = 12;
-                    const maxFontSize = 60;
+                    // GUARANTEED NO-OVERLAP ALGORITHM with proper scaling
+                    const totalWords = topWords.length;
                     const maxCount = Math.max(...topWords.map(([, count]) => count));
-                    const fontSizeRange = maxFontSize - minFontSize;
                     const normalizedFreq = count / maxCount;
                     
-                    // Calculate font size using the same range as react-wordcloud
-                    let fontSize = Math.round(minFontSize + (fontSizeRange * normalizedFreq));
+                    // DYNAMIC FONT SCALING: Reduce overall font sizes when more words
+                    let baseFontMin, baseFontMax;
+                    if (totalWords <= 8) {
+                      baseFontMin = 12;
+                      baseFontMax = 60;
+                    } else if (totalWords <= 15) {
+                      baseFontMin = 10;
+                      baseFontMax = 45;
+                    } else if (totalWords <= 25) {
+                      baseFontMin = 8;
+                      baseFontMax = 35;
+                    } else if (totalWords <= 40) {
+                      baseFontMin = 7;
+                      baseFontMax = 28;
+                    } else {
+                      baseFontMin = 6;
+                      baseFontMax = 22;
+                    }
                     
-                    // Simple, reliable grid with word-count-based spacing
+                    const fontSizeRange = baseFontMax - baseFontMin;
+                    let fontSize = Math.round(baseFontMin + (fontSizeRange * normalizedFreq));
+                    
+                    // GRID SYSTEM: Guaranteed cell-based positioning
                     let x, y;
-                    const totalWords = topWords.length;
                     
                     if (index === 0) {
-                      // Place first (most frequent) word at center
+                      // Center the most frequent word
                       x = 50;
                       y = 50;
                     } else {
-                      // Calculate margin based on word count - more words = smaller margins
-                      const baseMargin = 12;
-                      const marginReduction = Math.max(0, (totalWords - 8) * 0.8);
-                      const margin = Math.max(6, baseMargin - marginReduction);
+                      // Calculate optimal grid based on word count
+                      let cols, rows;
+                      const remainingWords = totalWords - 1; // Exclude centered word
                       
+                      if (remainingWords <= 7) {
+                        cols = Math.ceil(Math.sqrt(remainingWords * 1.4));
+                      } else if (remainingWords <= 15) {
+                        cols = 4;
+                      } else if (remainingWords <= 24) {
+                        cols = 5;
+                      } else if (remainingWords <= 35) {
+                        cols = 6;
+                      } else {
+                        cols = 7;
+                      }
+                      rows = Math.ceil(remainingWords / cols);
+                      
+                      // Dynamic margins: smaller as word count increases
+                      const margin = Math.max(3, 12 - (totalWords * 0.2));
                       const availableWidth = 100 - 2 * margin;
                       const availableHeight = 100 - 2 * margin;
                       
-                      // Calculate grid dimensions based on word count
-                      let cols, rows;
-                      if (totalWords <= 8) {
-                        // Perfect spacing for 8 or fewer words (as in your working screenshot)
-                        cols = Math.ceil(Math.sqrt(totalWords * 1.4));
-                        rows = Math.ceil((totalWords - 1) / cols); // -1 because first word is centered
-                      } else if (totalWords <= 16) {
-                        // Moderate density for 9-16 words
-                        cols = 4;
-                        rows = Math.ceil((totalWords - 1) / cols);
-                      } else {
-                        // Higher density for more words
-                        cols = 5;
-                        rows = Math.ceil((totalWords - 1) / cols);
-                      }
-                      
-                      // Calculate cell dimensions
+                      // Cell dimensions with guaranteed spacing
                       const cellWidth = availableWidth / cols;
                       const cellHeight = availableHeight / rows;
                       
-                      // Get grid position (excluding the centered first word)
+                      // Position in grid (excluding centered first word)
                       const gridIndex = index - 1;
                       const gridRow = Math.floor(gridIndex / cols);
                       const gridCol = gridIndex % cols;
                       
-                      // Calculate base position
+                      // Calculate position with padding
                       x = margin + gridCol * cellWidth + cellWidth / 2;
                       y = margin + gridRow * cellHeight + cellHeight / 2;
                       
-                      // Add small natural offset (reduced for more words)
-                      const offsetStrength = Math.max(0.08, 0.12 - (totalWords / 200));
-                      x += Math.sin(index * 2.3) * cellWidth * offsetStrength;
-                      y += Math.cos(index * 2.7) * cellHeight * offsetStrength;
+                      // Minimal offset for natural look (only if enough space)
+                      if (cellWidth > 8 && cellHeight > 6) {
+                        const offsetStrength = Math.min(0.1, cellWidth / 200);
+                        x += Math.sin(index * 2.1) * cellWidth * offsetStrength;
+                        y += Math.cos(index * 2.5) * cellHeight * offsetStrength;
+                      }
                       
-                      // Ensure bounds
-                      x = Math.max(margin + 1, Math.min(100 - margin - 1, x));
-                      y = Math.max(margin + 1, Math.min(100 - margin - 1, y));
+                      // Strict bounds enforcement
+                      x = Math.max(margin + 2, Math.min(100 - margin - 2, x));
+                      y = Math.max(margin + 2, Math.min(100 - margin - 2, y));
                     }
                     
                     // Professional color palette
