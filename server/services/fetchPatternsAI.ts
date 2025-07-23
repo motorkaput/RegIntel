@@ -152,10 +152,14 @@ export async function extractTextFromFile(buffer: Buffer, mimeType: string): Pro
           
           const extractedText = response.choices[0].message.content || '';
           
+          console.log('PPTX Vision API response:', extractedText.substring(0, 200) + '...');
+          
           if (extractedText.trim() && extractedText.length > 10) {
+            console.log('PPTX extraction successful!');
             return extractedText;
           } else {
-            return `PPTX presentation could not be processed for text extraction. Please convert to PDF or provide individual slide images for better analysis.`;
+            console.log('PPTX extraction failed - insufficient content');
+            return `ERROR: PPTX presentation could not be processed for text extraction. Please convert to PDF or provide individual slide images for better analysis.`;
           }
         } catch (error) {
           console.error('PPTX Vision API error:', error);
@@ -249,7 +253,7 @@ export async function extractTextFromFile(buffer: Buffer, mimeType: string): Pro
           }
         }
         console.log(`Unsupported file type: ${mimeType}`);
-        return 'Unable to analyze this document. Please write to hello@darkstreet.org with this bug.';
+        return `ERROR: Unsupported file type: ${mimeType}. Please write to hello@darkstreet.org with this bug.`;
     }
   } catch (error) {
     throw new Error(`Failed to extract text: ${(error as Error).message}`);

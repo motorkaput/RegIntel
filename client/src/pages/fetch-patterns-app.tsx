@@ -448,7 +448,8 @@ export default function FetchPatternsApp() {
         <div className="max-w-6xl mx-auto px-6 py-6 space-y-6">
         {/* Session Controls - Only show after analysis is complete, not during upload */}
         {sessionAnalyses.length > 0 && !progressStage && (
-          <Card className="bg-blue-50 border-blue-200 sticky top-20 z-10">
+          <div className="sticky top-20 z-10 mb-6">
+            <Card className="bg-blue-50 border-blue-200">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div className="text-sm text-blue-800">
@@ -467,7 +468,8 @@ export default function FetchPatternsApp() {
                 </Button>
               </div>
             </CardContent>
-          </Card>
+            </Card>
+          </div>
         )}
 
         {/* Upload Section */}
