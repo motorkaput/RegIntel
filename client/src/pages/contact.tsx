@@ -10,44 +10,25 @@ export default function Contact() {
     <div className="min-h-screen bg-surface-white">
       <Navbar />
       <main className="pt-20">
-        <section className="py-6 section-divider">
+        <section className="py-16 section-divider bg-gradient-to-br from-surface-white via-surface-light to-surface-grey">
           <div className="container-section">
-            <div className="space-y-4">
-              <h1 className="text-responsive-md text-primary">Contact Us</h1>
-              <p className="text-responsive-xl text-secondary font-light">Get in touch with our team</p>
+            <div className="max-w-4xl">
+              <h1 className="text-responsive-md text-primary mb-8 font-light tracking-tight">
+                Contact Us
+              </h1>
+              <p className="text-responsive-xxl text-secondary font-light leading-relaxed">
+                Get in touch with our team
+              </p>
+              <div className="mt-12 w-24 h-px bg-gradient-to-r from-accent-blue to-transparent"></div>
             </div>
           </div>
         </section>
 
-        <div className="container-section py-6 space-y-6">
-          <div className="grid md:grid-cols-2 gap-6">
+        <div className="container-section py-6">
+          <div className="max-w-2xl mx-auto">
             <Card className="bg-white">
             <CardHeader>
-              <CardTitle>Contact Information</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <h3 className="font-semibold text-gray-900">General Inquiries</h3>
-                <p className="text-gray-600">hello@darkstreet.org</p>
-              </div>
-              <div>
-                <h3 className="font-semibold text-gray-900">Technical Support</h3>
-                <p className="text-gray-600">hello@darkstreet.org</p>
-              </div>
-              <div>
-                <h3 className="font-semibold text-gray-900">Sales</h3>
-                <p className="text-gray-600">hello@darkstreet.org</p>
-              </div>
-              <div>
-                <h3 className="font-semibold text-gray-900">Partnership</h3>
-                <p className="text-gray-600">hello@darkstreet.org</p>
-              </div>
-            </CardContent>
-            </Card>
-
-            <Card className="bg-white">
-            <CardHeader>
-              <CardTitle>Send us a Message</CardTitle>
+              <CardTitle>Send us a message</CardTitle>
             </CardHeader>
             <CardContent>
               <form className="space-y-4">
@@ -77,26 +58,6 @@ export default function Contact() {
             </CardContent>
             </Card>
           </div>
-
-          <Card className="bg-white">
-          <CardHeader>
-            <CardTitle>Office Hours</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid md:grid-cols-2 gap-4">
-              <div>
-                <h3 className="font-semibold text-gray-900 mb-2">Business Hours</h3>
-                <p className="text-gray-600">Monday - Friday: 9:00 AM - 6:00 PM (EST)</p>
-                <p className="text-gray-600">Saturday - Sunday: Closed</p>
-              </div>
-              <div>
-                <h3 className="font-semibold text-gray-900 mb-2">Emergency Support</h3>
-                <p className="text-gray-600">24/7 support available for enterprise customers</p>
-                <p className="text-gray-600">Contact: hello@darkstreet.org</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
         </div>
       </main>
       <Footer />

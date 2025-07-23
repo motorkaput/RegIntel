@@ -7,11 +7,16 @@ export default function About() {
     <div className="min-h-screen bg-surface-white">
       <Navbar />
       <main className="pt-20">
-        <section className="py-6 section-divider">
+        <section className="py-16 section-divider bg-gradient-to-br from-surface-white via-surface-light to-surface-grey">
           <div className="container-section">
-            <div className="space-y-4">
-              <h1 className="text-responsive-md text-primary">About Dark Street Tech</h1>
-              <p className="text-responsive-xl text-secondary font-light">AI-Powered Solutions for Modern Enterprises</p>
+            <div className="max-w-4xl">
+              <h1 className="text-responsive-md text-primary mb-8 font-light tracking-tight">
+                About Dark Street Tech
+              </h1>
+              <p className="text-responsive-xxl text-secondary font-light leading-relaxed">
+                AI-powered solutions for growing enterprises.
+              </p>
+              <div className="mt-12 w-24 h-px bg-gradient-to-r from-accent-blue to-transparent"></div>
             </div>
           </div>
         </section>
@@ -61,11 +66,11 @@ export default function About() {
             <CardTitle>Leadership</CardTitle>
           </CardHeader>
           <CardContent className="prose max-w-none">
-            <p><strong>Barsha Panda</strong> - Co-Founder & Chief Technology Officer<br/>
-            Specialist in AI and machine learning systems with extensive experience in enterprise software development.</p>
+            <p><strong>Barsha Panda - CEO</strong><br/>
+            Business strategist with experience of working around the world, in technology organizations, spanning services, consumer internet (Yahoo), and enterprise tech (Oracle).</p>
             
-            <p><strong>David Jairaj</strong> - Co-Founder & Chief Executive Officer<br/>
-            Visionary leader with a background in product strategy and technology innovation.</p>
+            <p><strong>David Jairaj - COO</strong><br/>
+            Process and tech architect with expeience in working in diverse fields such as art, design, product development, performance measurement.</p>
           </CardContent>
         </Card>
 
@@ -76,7 +81,6 @@ export default function About() {
           <CardContent>
             <p>
               <strong>Email:</strong> hello@darkstreet.org<br/>
-              <strong>Support:</strong> hello@darkstreet.org<br/>
               <strong>Website:</strong> darkstreet.tech
             </p>
           </CardContent>

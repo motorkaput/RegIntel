@@ -450,7 +450,7 @@ export default function FetchPatternsApp() {
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-2 px-3 py-2 bg-blue-50 rounded-md border border-blue-200 shadow-sm h-10">
                   <span className="text-sm font-medium text-blue-800">
-                    Session: {sessionAnalyses.length} docs analyzed
+                    Session: {sessionAnalyses.length} {sessionAnalyses.length === 1 ? 'doc' : 'docs'} analyzed
                   </span>
                 </div>
                 <Button 

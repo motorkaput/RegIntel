@@ -10,15 +10,16 @@ export default function Next() {
       
       <main className="pt-20">
         {/* Hero Section */}
-        <section className="py-6 section-divider">
+        <section className="py-16 section-divider bg-gradient-to-br from-surface-white via-surface-light to-surface-grey">
           <div className="container-section">
-            <div className="space-y-4">
-              <h1 className="text-responsive-md text-primary">
+            <div className="max-w-4xl">
+              <h1 className="text-responsive-md text-primary mb-8 font-light tracking-tight">
                 What's coming next
               </h1>
-              <p className="text-responsive-xxl text-secondary font-light">
+              <p className="text-responsive-xxl text-secondary font-light leading-relaxed">
                 If your team is solving problems at the edge, we're likely building for you.
               </p>
+              <div className="mt-12 w-24 h-px bg-gradient-to-r from-accent-blue to-transparent"></div>
             </div>
           </div>
         </section>
