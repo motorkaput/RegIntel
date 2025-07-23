@@ -55,57 +55,80 @@ export async function extractTextFromFile(buffer: Buffer, mimeType: string): Pro
         return buffer.toString('utf-8');
       
       case 'application/pdf':
-        // Use OpenAI Vision API for comprehensive PDF text extraction
+        // Enhanced PDF processing: Convert PDF to images first, then use Vision API
         try {
-          console.log('Processing PDF with enhanced OpenAI Vision API...');
-          const base64Data = buffer.toString('base64');
+          console.log('Processing PDF: Converting to images first...');
+          const pdf2pic = await import('pdf2pic');
           
-          const response = await openai.chat.completions.create({
-            model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-            messages: [
-              {
-                role: "system",
-                content: "You are an expert document analyzer. Extract ALL readable text from PDF documents, maintaining structure and organization. Include titles, headings, body text, bullet points, tables, captions, footnotes, and any other textual content. Be thorough and detailed."
-              },
-              {
-                role: "user",
-                content: [
-                  {
-                    type: "text",
-                    text: "Extract every piece of readable text from this PDF document. Be extremely thorough - include all text content regardless of font size, formatting, or position. Preserve document structure with clear section breaks. If there are multiple pages, organize by page. Include any text in headers, footers, sidebars, tables, or captions."
-                  },
-                  {
-                    type: "image_url",
-                    image_url: {
-                      url: `data:image/jpeg;base64,${base64Data}`
-                    }
-                  }
-                ]
-              }
-            ],
-            max_tokens: 3000,
-            temperature: 0.1,
+          // Convert PDF to base64 images
+          const convert = pdf2pic.fromBuffer(buffer, {
+            density: 200,           // Higher quality
+            saveFilename: "page",
+            savePath: "/tmp",
+            format: "png",
+            width: 2000,
+            height: 2000
           });
           
-          const extractedText = response.choices[0].message.content || '';
-          console.log(`PDF processing completed. Text length: ${extractedText.length}`);
-          console.log('PDF content preview:', extractedText.substring(0, 300) + '...');
+          let allText = '';
+          let pageCount = 0;
           
-          if (extractedText.trim() && extractedText.length > 30 && 
-              !extractedText.includes("I cannot") && 
-              !extractedText.includes("I'm unable") &&
-              !extractedText.includes("cannot read") &&
-              !extractedText.includes("unable to extract")) {
-            return extractedText;
-          } else {
-            // Log the actual response to debug
-            console.log('PDF Vision API full response:', extractedText);
-            return `PDF processing failed. Vision API response: ${extractedText.substring(0, 200)}...`;
+          // Convert all pages (up to 10 pages to avoid token limits)
+          for (let pageNum = 1; pageNum <= 10; pageNum++) {
+            try {
+              const result = await convert(pageNum, { responseType: "base64" });
+              if (!result.base64) break; // No more pages
+              
+              pageCount++;
+              console.log(`Processing PDF page ${pageNum}...`);
+              
+              const response = await openai.chat.completions.create({
+                model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+                messages: [
+                  {
+                    role: "user",
+                    content: [
+                      {
+                        type: "text",
+                        text: `Extract all readable text from this PDF page ${pageNum}. Be thorough - include all text content regardless of font size, formatting, or position. Preserve document structure and include any text in headers, footers, sidebars, tables, or captions.`
+                      },
+                      {
+                        type: "image_url",
+                        image_url: {
+                          url: `data:image/png;base64,${result.base64}`
+                        }
+                      }
+                    ]
+                  }
+                ],
+                max_tokens: 1500,
+                temperature: 0.1,
+              });
+              
+              const pageText = response.choices[0].message.content || '';
+              if (pageText.trim() && pageText.length > 20) {
+                allText += `\n--- Page ${pageNum} ---\n${pageText}\n`;
+              }
+              
+            } catch (pageError) {
+              console.log(`No more pages or error on page ${pageNum}:`, pageError);
+              break; // No more pages or error
+            }
           }
+          
+          console.log(`PDF processing completed. Total pages: ${pageCount}, Text length: ${allText.length}`);
+          console.log('PDF content preview:', allText.substring(0, 300) + '...');
+          
+          if (allText.trim() && allText.length > 50) {
+            return allText;
+          } else {
+            return `PDF conversion completed but no readable text found. The PDF may contain only images or non-text content. Pages processed: ${pageCount}`;
+          }
+          
         } catch (error) {
-          console.error('PDF Vision API error:', error);
+          console.error('PDF processing error:', error);
           console.error('Error details:', JSON.stringify(error, null, 2));
-          return `PDF Vision API Error: ${(error as any)?.message || 'Unknown error occurred'}. Please try a different PDF file.`;
+          return `PDF processing failed: ${(error as any)?.message || 'Unknown error occurred'}. Please try a different PDF file.`;
         }
       
       case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
@@ -371,6 +394,7 @@ export async function analyzeDocument(
         extractedText.includes('structure may be incompatible') ||
         extractedText.includes('PDF processing failed') ||
         extractedText.includes('PDF Vision API Error') ||
+        extractedText.includes('PDF conversion completed but no readable text found') ||
         extractedText.startsWith('ERROR:')) {
       return {
         text: extractedText,
