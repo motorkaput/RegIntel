@@ -1,6 +1,7 @@
 import { useAuth } from "@/hooks/useAuth";
 import { useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import WordCloud from "@/components/WordCloud";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -844,119 +845,13 @@ export default function FetchPatternsApp() {
             <div 
               className="bg-white p-8 rounded-lg min-h-[500px] relative overflow-hidden"
               style={{ fontFamily: 'Roboto, sans-serif', fontWeight: '300' }}
-              onLoad={() => sessionStorage.removeItem('tempWordPositions')} // Clear on load
             >
-              {(() => {
-                // Clear previous positions for fresh calculation
-                sessionStorage.removeItem('tempWordPositions');
-                return topWords.length > 0;
-              })() ? (
-                <div className="relative w-full h-[450px]">
-                  {topWords.map(([word, count], index) => {
-                    // TIGHT CLUSTER ALGORITHM - Zero overlaps, minimal spacing
-                    const totalWords = topWords.length;
-                    const maxCount = Math.max(...topWords.map(([, count]) => count));
-                    const normalizedFreq = count / maxCount;
-                    
-                    // ADAPTIVE FONT SCALING for tight clustering
-                    let baseFontMin, baseFontMax;
-                    if (totalWords <= 10) {
-                      baseFontMin = 14;
-                      baseFontMax = 48;
-                    } else if (totalWords <= 20) {
-                      baseFontMin = 12;
-                      baseFontMax = 36;
-                    } else if (totalWords <= 30) {
-                      baseFontMin = 10;
-                      baseFontMax = 28;
-                    } else if (totalWords <= 50) {
-                      baseFontMin = 9;
-                      baseFontMax = 24;
-                    } else {
-                      baseFontMin = 8;
-                      baseFontMax = 20;
-                    }
-                    
-                    const fontSizeRange = baseFontMax - baseFontMin;
-                    let fontSize = Math.round(baseFontMin + (fontSizeRange * normalizedFreq));
-                    
-                    // TIGHT CLUSTERING LAYOUT
-                    let x, y;
-                    
-                    // Calculate cluster area (smaller area = tighter clustering)
-                    const clusterAreaPercent = Math.max(60, 85 - (totalWords * 0.5)); // 60-85% of container
-                    const centerOffset = (100 - clusterAreaPercent) / 2;
-                    
-                    if (index === 0) {
-                      // Center the most frequent word
-                      x = 50;
-                      y = 50;
-                    } else {
-                      // TIGHT GRID LAYOUT for clustering
-                      const remainingWords = totalWords - 1;
-                      
-                      // Calculate optimal dense grid
-                      let cols;
-                      if (remainingWords <= 6) cols = 3;
-                      else if (remainingWords <= 12) cols = 4;
-                      else if (remainingWords <= 20) cols = 5;
-                      else if (remainingWords <= 30) cols = 6;
-                      else if (remainingWords <= 42) cols = 7;
-                      else cols = 8;
-                      
-                      const rows = Math.ceil(remainingWords / cols);
-                      
-                      // Tight cell spacing within cluster area
-                      const cellWidth = clusterAreaPercent / cols;
-                      const cellHeight = clusterAreaPercent / rows;
-                      
-                      // Position in tight grid
-                      const gridIndex = index - 1;
-                      const gridRow = Math.floor(gridIndex / cols);
-                      const gridCol = gridIndex % cols;
-                      
-                      // Calculate exact position within cluster
-                      x = centerOffset + gridCol * cellWidth + cellWidth / 2;
-                      y = centerOffset + gridRow * cellHeight + cellHeight / 2;
-                      
-                      // NO OFFSETS for tight clustering - exact grid positioning only
-                      // Ensure strict bounds within cluster area
-                      x = Math.max(centerOffset + 1, Math.min(centerOffset + clusterAreaPercent - 1, x));
-                      y = Math.max(centerOffset + 1, Math.min(centerOffset + clusterAreaPercent - 1, y));
-                    }
-                    
-                    // Professional color palette
-                    const colors = [
-                      '#2563eb', '#059669', '#d97706', '#7c3aed', '#dc2626',
-                      '#0891b2', '#65a30d', '#ea580c', '#4338ca', '#be123c',
-                      '#0d9488', '#9333ea', '#0369a1', '#db2777', '#6366f1'
-                    ];
-                    
-                    const color = colors[index % colors.length];
-                    
-                    return (
-                      <span
-                        key={word}
-                        className="absolute hover:opacity-80 cursor-pointer transition-opacity duration-200 select-none transform -translate-x-1/2 -translate-y-1/2"
-                        style={{ 
-                          left: `${x}%`,
-                          top: `${y}%`,
-                          fontSize: `${fontSize}px`,
-                          color: color,
-                          fontFamily: 'Roboto, sans-serif', // Matching the guide
-                          fontWeight: 500, // Consistent weight as per guide
-                          textShadow: 'none',
-                          zIndex: Math.max(1, Math.round(normalizedFreq * 10)),
-                          lineHeight: 1,
-                          padding: '2px' // Minimal padding as requested
-                        }}
-                        title={`${word}: ${count} occurrences`}
-                      >
-                        {word}
-                      </span>
-                    );
-                  })}
-                </div>
+              {topWords.length > 0 ? (
+                <WordCloud 
+                  words={topWords.map(([text, value]) => ({ text, value }))}
+                  width={450}
+                  height={450}
+                />
               ) : (
                 <div className="text-gray-400 text-center h-[450px] flex flex-col items-center justify-center">
                   <div className="text-4xl mb-4">📊</div>
