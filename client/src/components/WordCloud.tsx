@@ -39,15 +39,15 @@ export default function WordCloud({ words, width = 450, height = 450 }: WordClou
       .domain([minValue, maxValue])
       .range([14, 60]);
 
-    // Create layout
+    // Create layout with expanded word cloud area
     const layout = cloud<WordData>()
-      .size([width, height])
+      .size([width * 1.5, height]) // Wider word cloud to fill container
       .words(words.map(d => ({
         text: d.text,
         size: fontScale(d.value),
         value: d.value
       })))
-      .padding(2)
+      .padding(1) // Tighter padding for more space
       .rotate(() => 0) // No rotation for clean look
       .font('Roboto')
       .fontSize((d: WordData) => d.size)
@@ -61,7 +61,7 @@ export default function WordCloud({ words, width = 450, height = 450 }: WordClou
       
       const g = svg
         .append('g')
-        .attr('transform', `translate(${width / 2}, ${height / 2})`);
+        .attr('transform', `translate(${(width * 1.5) / 2}, ${height / 2})`);
 
       g.selectAll('text')
         .data(words)

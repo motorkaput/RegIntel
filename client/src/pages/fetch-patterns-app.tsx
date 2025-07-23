@@ -188,10 +188,11 @@ export default function FetchPatternsApp() {
       let progressToastId: any;
       const totalDocs = data.analyses ? data.analyses.length : 0;
       
+      // Create a single persistent progress toast
       progressToastId = toast({
         title: "Analyzing documents",
         description: `Progress: 0/${totalDocs} documents analyzed...`,
-        duration: Infinity, // Make it persistent
+        duration: Infinity,
       });
       
       setSelectedFiles(null);
@@ -234,19 +235,22 @@ export default function FetchPatternsApp() {
               return newAnalyses;
             });
             
-            // Update progress toast
+            // Update progress (without recreating toast to prevent blinking)
             const completedCount = updatedAnalyses.filter(a => a.status === 'completed' || a.status === 'error').length;
             
-            if (progressToastId && progressToastId.dismiss) {
-              progressToastId.dismiss();
-            }
-            
+            // Update progress description in existing toast (no recreation)
             if (completedCount < totalDocs) {
-              progressToastId = toast({
-                title: "Analyzing documents",
-                description: `Progress: ${completedCount}/${totalDocs} documents analyzed...`,
-                duration: Infinity,
-              });
+              // Simply update the uploadProgress state for potential UI components
+              setUploadProgress(Math.round((completedCount / totalDocs) * 100));
+              
+              // Update existing toast description without dismissing/recreating
+              if (progressToastId?.update) {
+                progressToastId.update({
+                  title: "Analyzing documents",
+                  description: `Progress: ${completedCount}/${totalDocs} documents analyzed...`,
+                  duration: Infinity,
+                });
+              }
             }
             
             // Stop polling if all analyses are completed or have errors
@@ -265,11 +269,11 @@ export default function FetchPatternsApp() {
                 duration: 3000,
               });
               
-              // Auto-scroll to document summaries after a brief delay
+              // Auto-scroll to metrics boxes after a brief delay
               setTimeout(() => {
-                const summariesElement = document.getElementById('document-summaries');
-                if (summariesElement) {
-                  summariesElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                const metricsElement = document.getElementById('session-metrics');
+                if (metricsElement) {
+                  metricsElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }
               }, 1000);
             }
@@ -516,7 +520,7 @@ export default function FetchPatternsApp() {
         </Card>
 
         {/* Statistics Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div id="session-metrics" className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Card className="bg-white text-center p-6">
             <div className="text-4xl font-bold text-gray-700 mb-2">{completedAnalyses.length}</div>
             <div className="text-sm text-gray-500">Documents Processed</div>
@@ -849,7 +853,7 @@ export default function FetchPatternsApp() {
               {topWords.length > 0 ? (
                 <WordCloud 
                   words={topWords.map(([text, value]) => ({ text, value }))}
-                  width={450}
+                  width={600} // Wider to fill container better
                   height={450}
                 />
               ) : (
