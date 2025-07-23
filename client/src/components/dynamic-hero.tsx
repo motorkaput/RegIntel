@@ -18,101 +18,105 @@ export default function DynamicHero({ title, subtitle }: DynamicHeroProps) {
     // Clear previous content
     svg.selectAll('*').remove();
 
-    // Get container dimensions
-    const rect = container.getBoundingClientRect();
-    const width = rect.width;
-    const height = rect.height;
+    const createStreamgraph = () => {
+      // Get fresh container dimensions
+      const rect = container.getBoundingClientRect();
+      const width = rect.width;
+      const height = rect.height;
 
-    svg.attr('width', width).attr('height', height);
+      // Clear and set SVG dimensions
+      svg.selectAll('*').remove();
+      svg.attr('width', width).attr('height', height).attr('viewBox', `0 0 ${width} ${height}`);
 
-    // Generate sample data for streamgraph
-    const n = 20; // number of layers
-    const m = 200; // number of samples per layer
+      // Generate sample data for streamgraph
+      const n = 20; // number of layers
+      const m = Math.max(50, Math.floor(width / 4)); // Scale points based on width
 
-    // Random color schemes - changes on each refresh
-    const colorSchemes = [
-      d3.schemeBlues[9],
-      d3.schemeGreens[9],
-      d3.schemePurples[9],
-      d3.schemeOranges[9],
-      d3.schemeReds[9],
-      d3.schemeGreys[9]
-    ];
-    const selectedColors = colorSchemes[Math.floor(Math.random() * colorSchemes.length)];
-    const color = d3.scaleOrdinal(selectedColors);
+      // Random color schemes - changes on each refresh
+      const colorSchemes = [
+        d3.schemeBlues[9],
+        d3.schemeGreens[9],
+        d3.schemePurples[9],
+        d3.schemeOranges[9],
+        d3.schemeReds[9],
+        d3.schemeGreys[9]
+      ];
+      const selectedColors = colorSchemes[Math.floor(Math.random() * colorSchemes.length)];
+      const color = d3.scaleOrdinal(selectedColors);
 
-    // Generate data
-    const data = d3.range(n).map(() => {
-      return d3.range(m).map((d, i) => {
-        return {
-          x: i,
-          y: Math.random() * 10 * Math.sin(i / 10) + Math.random() * 5
-        };
+      // Generate data with bumps function (similar to Observable example)
+      const bumps = (n: number, m: number) => {
+        const a = new Array(n).fill(0);
+        for (let i = 0; i < m; ++i) {
+          const x = 1 / (0.1 + Math.random());
+          const y = 2 * Math.random() - 0.5;
+          const z = 10 / (0.1 + Math.random());
+          for (let j = 0; j < n; ++j) {
+            const w = (j / n - y) * z;
+            a[j] += x * Math.exp(-w * w);
+          }
+        }
+        return a;
+      };
+
+      const data = d3.transpose(Array.from({length: n}, () => bumps(m, 10)));
+
+      // Create stack
+      const stack = d3.stack()
+        .keys(d3.range(n).map(String))
+        .offset(d3.stackOffsetWiggle)
+        .order(d3.stackOrderInsideOut);
+
+      // Transform data for stacking
+      const stackData = data.map((d, i) => {
+        const obj: any = { index: i };
+        d.forEach((value, j) => {
+          obj[j.toString()] = value;
+        });
+        return obj;
       });
-    });
 
-    // Create stack
-    const stack = d3.stack()
-      .keys(d3.range(n).map(String))
-      .value((d: any, key) => d[key]?.y || 0)
-      .offset(d3.stackOffsetWiggle)
-      .order(d3.stackOrderInsideOut);
+      const series = stack(stackData);
 
-    // Transform data for stacking
-    const stackData = d3.range(m).map(i => {
-      const obj: any = { x: i };
-      data.forEach((layer, j) => {
-        obj[j] = layer[i];
-      });
-      return obj;
-    });
+      // Scales - ensure full width coverage
+      const x = d3.scaleLinear()
+        .domain([0, m - 1])
+        .range([0, width]);
 
-    const series = stack(stackData);
+      const y = d3.scaleLinear()
+        .domain(d3.extent(series.flat(2).filter(d => d !== undefined)) as [number, number] || [0, 1])
+        .range([height, 0]);
 
-    // Scales
-    const x = d3.scaleLinear()
-      .domain([0, m - 1])
-      .range([0, width]);
+      // Area generator
+      const area = d3.area<any>()
+        .x((d, i) => x(i))
+        .y0(d => y(d[0]))
+        .y1(d => y(d[1]))
+        .curve(d3.curveBasis);
 
-    const y = d3.scaleLinear()
-      .domain(d3.extent(series.flat(2).filter(d => d !== undefined)) as [number, number] || [0, 1])
-      .range([height, 0]);
+      // Create paths
+      const paths = svg.selectAll('path')
+        .data(series)
+        .enter().append('path')
+        .attr('d', area)
+        .attr('fill', (d, i) => color(i.toString()))
+        .attr('opacity', 0.15)
+        .attr('stroke', 'none');
 
-    // Area generator
-    const area = d3.area<any>()
-      .x((d, i) => x(i))
-      .y0(d => y(d[0]))
-      .y1(d => y(d[1]))
-      .curve(d3.curveBasis);
+      // Animation
+      paths
+        .transition()
+        .duration(2000)
+        .ease(d3.easeLinear)
+        .attr('opacity', 0.2);
+    };
 
-    // Create paths
-    const paths = svg.selectAll('path')
-      .data(series)
-      .enter().append('path')
-      .attr('d', area)
-      .attr('fill', (d, i) => color(i.toString()))
-      .attr('opacity', 0.15)
-      .attr('stroke', 'none');
-
-    // Animation
-    paths
-      .transition()
-      .duration(2000)
-      .ease(d3.easeLinear)
-      .attr('opacity', 0.2);
+    // Initial creation
+    createStreamgraph();
 
     // Resize handler
     const handleResize = () => {
-      const newRect = container.getBoundingClientRect();
-      const newWidth = newRect.width;
-      const newHeight = newRect.height;
-      
-      svg.attr('width', newWidth).attr('height', newHeight);
-      
-      x.range([0, newWidth]);
-      y.range([newHeight, 0]);
-      
-      paths.attr('d', area);
+      createStreamgraph();
     };
 
     window.addEventListener('resize', handleResize);
@@ -130,6 +134,7 @@ export default function DynamicHero({ title, subtitle }: DynamicHeroProps) {
         <svg 
           ref={svgRef}
           className="w-full h-full"
+          style={{ display: 'block' }}
         />
       </div>
       <div className="relative z-10 container-section">
