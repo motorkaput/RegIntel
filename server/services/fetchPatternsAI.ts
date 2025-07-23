@@ -327,16 +327,17 @@ export async function analyzeDocument(
     console.log('Word count:', wordCount);
     console.log('Text preview:', extractedText.substring(0, 200) + '...');
 
-    // Special handling for failed analysis
-    if (extractedText.startsWith('ERROR:') || extractedText.includes('Unable to analyze')) {
+    // Special handling for actual extraction failures only - be more specific
+    if (extractedText.startsWith('ERROR: Failed to extract text from') ||
+        extractedText === 'Unable to analyze this document. Please write to hello@darkstreet.org with this bug.') {
       return {
-        text: 'Unable to analyze this document. Please write to hello@darkstreet.org with this bug.',
-        sentiment: { label: 'neutral', score: 0.5, reasoning: 'Unable to determine sentiment from error message' },
+        text: extractedText,
+        sentiment: { label: 'neutral', score: 0.5, reasoning: 'Document extraction failed' },
         classification: 'Undeterminable',
         keywords: [],
         insights: [],
         riskFlags: [],
-        summary: 'Unable to analyze this document. Please write to hello@darkstreet.org with this bug.',
+        summary: extractedText,
         wordCloud: [],
         score: 0,
         wordCount: 0,

@@ -132,6 +132,8 @@ The application follows a modern full-stack architecture with emphasis on type s
 - ✓ **Auto-scroll Navigation**: Automatic scroll to session metrics boxes (not middle of section) after analysis completion
 - ✓ **UI Layout Optimization**: Moved "Ask Questions" section below Document Summaries for better workflow
 - ✓ **PDF/PPTX Processing**: Implemented real text extraction using pdf-parse and pptx-parser libraries for full document analysis
+- ✓ **Enhanced Error Handling**: Fixed overly broad error detection that was incorrectly marking valid PDF/PPTX content as "Undeterminable"
+- ✓ **Session Status Visibility**: Made session status bar sticky and only visible after analysis completion (not during progress), ensuring users can always access the refresh button
 - ✓ **Failed Analysis Handling**: Documents that can't be analyzed show "Undeterminable" classification chip with exact error message
 - ✓ **CSV Export Fix**: Context-Based Sentiment Analysis now exports ALL session contexts, not just the last one
 - ✓ **Color Consistency**: Context Analysis colors now match Document Summaries (blue for positive, purple for negative, gray for neutral)
