@@ -264,7 +264,14 @@ export default function FetchPatternsApp() {
                 setProgressStage(null); // Hide progress bar
                 const metricsElement = document.getElementById('session-metrics');
                 if (metricsElement) {
-                  metricsElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  // Scroll to show the top of the metrics section
+                  const elementRect = metricsElement.getBoundingClientRect();
+                  const absoluteElementTop = elementRect.top + window.pageYOffset;
+                  const offset = 80; // Account for navbar height
+                  window.scrollTo({ 
+                    top: absoluteElementTop - offset, 
+                    behavior: 'smooth' 
+                  });
                 }
               }, 1500);
             }
