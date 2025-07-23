@@ -7,149 +7,118 @@ interface DynamicHeroProps {
 }
 
 export default function DynamicHero({ title, subtitle }: DynamicHeroProps) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const canvas = canvasRef.current;
+    const svg = d3.select(svgRef.current);
     const container = containerRef.current;
-    if (!canvas || !container) return;
+    if (!container) return;
 
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    // Clear previous content
+    svg.selectAll('*').remove();
 
-    // Set canvas size
-    const resizeCanvas = () => {
-      const rect = container.getBoundingClientRect();
-      canvas.width = rect.width;
-      canvas.height = rect.height;
-      drawFractal();
+    // Get container dimensions
+    const rect = container.getBoundingClientRect();
+    const width = rect.width;
+    const height = rect.height;
+
+    svg.attr('width', width).attr('height', height);
+
+    // Generate sample data for streamgraph
+    const n = 20; // number of layers
+    const m = 200; // number of samples per layer
+
+    // Random color schemes - changes on each refresh
+    const colorSchemes = [
+      d3.schemeBlues[9],
+      d3.schemeGreens[9],
+      d3.schemePurples[9],
+      d3.schemeOranges[9],
+      d3.schemeReds[9],
+      d3.schemeGreys[9]
+    ];
+    const selectedColors = colorSchemes[Math.floor(Math.random() * colorSchemes.length)];
+    const color = d3.scaleOrdinal(selectedColors);
+
+    // Generate data
+    const data = d3.range(n).map(() => {
+      return d3.range(m).map((d, i) => {
+        return {
+          x: i,
+          y: Math.random() * 10 * Math.sin(i / 10) + Math.random() * 5
+        };
+      });
+    });
+
+    // Create stack
+    const stack = d3.stack()
+      .keys(d3.range(n).map(String))
+      .value((d: any, key) => d[key]?.y || 0)
+      .offset(d3.stackOffsetWiggle)
+      .order(d3.stackOrderInsideOut);
+
+    // Transform data for stacking
+    const stackData = d3.range(m).map(i => {
+      const obj: any = { x: i };
+      data.forEach((layer, j) => {
+        obj[j] = layer[i];
+      });
+      return obj;
+    });
+
+    const series = stack(stackData);
+
+    // Scales
+    const x = d3.scaleLinear()
+      .domain([0, m - 1])
+      .range([0, width]);
+
+    const y = d3.scaleLinear()
+      .domain(d3.extent(series.flat(2).filter(d => d !== undefined)) as [number, number] || [0, 1])
+      .range([height, 0]);
+
+    // Area generator
+    const area = d3.area<any>()
+      .x((d, i) => x(i))
+      .y0(d => y(d[0]))
+      .y1(d => y(d[1]))
+      .curve(d3.curveBasis);
+
+    // Create paths
+    const paths = svg.selectAll('path')
+      .data(series)
+      .enter().append('path')
+      .attr('d', area)
+      .attr('fill', (d, i) => color(i.toString()))
+      .attr('opacity', 0.15)
+      .attr('stroke', 'none');
+
+    // Animation
+    paths
+      .transition()
+      .duration(2000)
+      .ease(d3.easeLinear)
+      .attr('opacity', 0.2);
+
+    // Resize handler
+    const handleResize = () => {
+      const newRect = container.getBoundingClientRect();
+      const newWidth = newRect.width;
+      const newHeight = newRect.height;
+      
+      svg.attr('width', newWidth).attr('height', newHeight);
+      
+      x.range([0, newWidth]);
+      y.range([newHeight, 0]);
+      
+      paths.attr('d', area);
     };
 
-    // Fractal generation functions
-    const drawMandelbrot = () => {
-      const width = canvas.width;
-      const height = canvas.height;
-      const imageData = ctx.createImageData(width, height);
-      
-      for (let x = 0; x < width; x++) {
-        for (let y = 0; y < height; y++) {
-          const cx = (x - width / 2) * 4 / width;
-          const cy = (y - height / 2) * 4 / height;
-          
-          let zx = 0, zy = 0;
-          let iterations = 0;
-          const maxIterations = 100;
-          
-          while (zx * zx + zy * zy < 4 && iterations < maxIterations) {
-            const temp = zx * zx - zy * zy + cx;
-            zy = 2 * zx * zy + cy;
-            zx = temp;
-            iterations++;
-          }
-          
-          const pixelIndex = (y * width + x) * 4;
-          const intensity = iterations === maxIterations ? 0 : (iterations / maxIterations) * 255;
-          
-          imageData.data[pixelIndex] = intensity * 0.3; // R
-          imageData.data[pixelIndex + 1] = intensity * 0.3; // G
-          imageData.data[pixelIndex + 2] = intensity * 0.3; // B
-          imageData.data[pixelIndex + 3] = 60; // A (low opacity)
-        }
-      }
-      
-      ctx.putImageData(imageData, 0, 0);
-    };
-
-    const drawJulia = () => {
-      const width = canvas.width;
-      const height = canvas.height;
-      const imageData = ctx.createImageData(width, height);
-      
-      // Random Julia set parameters
-      const cReal = Math.random() * 0.8 - 0.4;
-      const cImag = Math.random() * 0.8 - 0.4;
-      
-      for (let x = 0; x < width; x++) {
-        for (let y = 0; y < height; y++) {
-          let zx = (x - width / 2) * 3 / width;
-          let zy = (y - height / 2) * 3 / height;
-          
-          let iterations = 0;
-          const maxIterations = 80;
-          
-          while (zx * zx + zy * zy < 4 && iterations < maxIterations) {
-            const temp = zx * zx - zy * zy + cReal;
-            zy = 2 * zx * zy + cImag;
-            zx = temp;
-            iterations++;
-          }
-          
-          const pixelIndex = (y * width + x) * 4;
-          const intensity = iterations === maxIterations ? 0 : (iterations / maxIterations) * 255;
-          
-          imageData.data[pixelIndex] = intensity * 0.2;
-          imageData.data[pixelIndex + 1] = intensity * 0.2;
-          imageData.data[pixelIndex + 2] = intensity * 0.2;
-          imageData.data[pixelIndex + 3] = 40;
-        }
-      }
-      
-      ctx.putImageData(imageData, 0, 0);
-    };
-
-    const drawDragonCurve = () => {
-      ctx.strokeStyle = 'rgba(0, 0, 0, 0.1)';
-      ctx.lineWidth = 1;
-      
-      const centerX = canvas.width / 2;
-      const centerY = canvas.height / 2;
-      
-      let x = centerX;
-      let y = centerY;
-      let direction = 0; // 0: right, 1: up, 2: left, 3: down
-      const step = 3;
-      
-      ctx.beginPath();
-      ctx.moveTo(x, y);
-      
-      // Generate dragon curve sequence
-      let sequence = [1];
-      for (let i = 0; i < 14; i++) {
-        const newSequence = [...sequence, 1];
-        for (let j = sequence.length - 1; j >= 0; j--) {
-          newSequence.push(1 - sequence[j]);
-        }
-        sequence = newSequence;
-      }
-      
-      for (const turn of sequence) {
-        const dx = step * Math.cos(direction * Math.PI / 2);
-        const dy = step * Math.sin(direction * Math.PI / 2);
-        x += dx;
-        y += dy;
-        ctx.lineTo(x, y);
-        direction = (direction + (turn ? 1 : -1) + 4) % 4;
-      }
-      
-      ctx.stroke();
-    };
-
-    const drawFractal = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      
-      // Random fractal selection
-      const fractals = [drawMandelbrot, drawJulia, drawDragonCurve];
-      const selectedFractal = fractals[Math.floor(Math.random() * fractals.length)];
-      selectedFractal();
-    };
-
-    // Initial setup
-    resizeCanvas();
-    window.addEventListener('resize', resizeCanvas);
-
+    window.addEventListener('resize', handleResize);
+    
     return () => {
-      window.removeEventListener('resize', resizeCanvas);
+      window.removeEventListener('resize', handleResize);
     };
   }, []);
 
@@ -157,14 +126,15 @@ export default function DynamicHero({ title, subtitle }: DynamicHeroProps) {
 
   return (
     <section ref={containerRef} className="relative py-12 section-divider overflow-hidden">
-      <canvas 
-        ref={canvasRef}
-        className="absolute inset-0 w-full h-full"
-        style={{ background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)' }}
-      />
+      <div className="absolute inset-0 bg-gradient-to-br from-gray-50 to-gray-100">
+        <svg 
+          ref={svgRef}
+          className="w-full h-full"
+        />
+      </div>
       <div className="relative z-10 container-section">
         <div className="max-w-4xl">
-          <h1 className="text-responsive-lg font-light text-gray-900 leading-relaxed tracking-tight">
+          <h1 className="text-responsive-lg font-light text-gray-900 leading-tight tracking-tight">
             {combinedText}
           </h1>
         </div>

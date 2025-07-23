@@ -160,16 +160,18 @@ The application follows a modern full-stack architecture with emphasis on type s
 - ✓ **Contact Page Simplification**: Streamlined to single-column message form, removed Contact Information and Office Hours sections
 - ✓ **Professional Hero Design**: All pages now feature consistent, sophisticated hero sections with gradient backgrounds and accent lines
 
-**Fractal Background Hero Sections (July 23, 2025)**
+**Streamgraph Background Hero Sections (July 23, 2025)**
 - ✓ **Single-Line Text Format**: Redesigned all hero sections with colon-separated format ("Title: Subtitle") in consistent weight and size
-- ✓ **Dynamic Fractal Backgrounds**: Implemented randomized mathematical fractals using HTML5 Canvas:
-  * Three fractal types: Mandelbrot sets, Julia sets, and Dragon curves - randomly selected per page refresh
-  * Muted black/white palette with low opacity for subtle background texture
-  * High contrast text overlay ensures readability against any fractal pattern
-  * Mathematically generated patterns provide authentic, non-repetitive backgrounds
+- ✓ **Tight Line Spacing**: Reduced leading to "leading-tight" for compact multi-line headlines
+- ✓ **D3.js Streamgraph Backgrounds**: Implemented animated streamgraph visualization based on Observable's streamgraph-transitions:
+  * Organic flowing layers with smooth curves using d3.curveBasis
+  * Random color schemes from D3's color palettes (Blues, Greens, Purples, Oranges, Reds, Greys) - changes per refresh  
+  * Wiggle offset and inside-out ordering for natural streamgraph appearance
+  * Low opacity (0.15-0.2) for subtle background texture with high text contrast
+  * Smooth animation transitions on component mount
 - ✓ **Logo Size Reduction**: Reduced Dark Street Tech logo from h-16 to h-10 (40px) to match FetchPatterns icon height
-- ✓ **Responsive Canvas Rendering**: Fractal backgrounds automatically adapt to container dimensions and device sizes
-- ✓ **Performance Optimized**: Canvas-based rendering with efficient mathematical algorithms for smooth generation
+- ✓ **Responsive SVG Rendering**: Streamgraphs automatically adapt to container dimensions with proper scaling
+- ✓ **Performance Optimized**: SVG-based rendering with efficient D3.js stack generation and curve interpolation
 
 **Document Analysis & UI Enhancement Implementation (July 22, 2025)**
 - ✓ **Real Document Text Extraction**: Implemented authentic content extraction for all major file formats:
