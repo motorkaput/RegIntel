@@ -172,6 +172,7 @@ The application follows a modern full-stack architecture with emphasis on type s
 - ✓ **Logo Size Reduction**: Reduced Dark Street Tech logo from h-16 to h-10 (40px) to match FetchPatterns icon height
 - ✓ **Responsive SVG Rendering**: Streamgraphs automatically adapt to container dimensions with proper scaling
 - ✓ **Performance Optimized**: SVG-based rendering with efficient D3.js stack generation and curve interpolation
+- ✓ **Increased Hero Height**: Expanded hero section padding from py-12 to py-18 (50% increase) for more prominent streamgraph display
 
 **Document Analysis & UI Enhancement Implementation (July 22, 2025)**
 - ✓ **Real Document Text Extraction**: Implemented authentic content extraction for all major file formats:
