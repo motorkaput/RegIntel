@@ -1,7 +1,10 @@
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { Mail, ExternalLink } from "lucide-react";
+import { handleNavigation } from "@/utils/navigation";
 
 export default function Footer() {
+  const [location] = useLocation();
+  
   return (
     <footer className="bg-surface-white border-t border-light section-divider">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -11,17 +14,38 @@ export default function Footer() {
             <h4 className="font-semibold text-primary mb-2 text-sm">Products</h4>
             <ul className="space-y-1">
               <li>
-                <a href="/fetch-patterns" target="_blank" rel="noopener noreferrer" className="text-secondary hover:text-accent-blue transition-colors text-sm">
+                <a 
+                  href="/fetch-patterns" 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleNavigation('/fetch-patterns', location);
+                  }}
+                  className="text-secondary hover:text-accent-blue transition-colors text-sm"
+                >
                   Fetch Patterns
                 </a>
               </li>
               <li>
-                <a href="/permeate-enterprise" target="_blank" rel="noopener noreferrer" className="text-secondary hover:text-accent-blue transition-colors text-sm">
+                <a 
+                  href="/permeate-enterprise" 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleNavigation('/permeate-enterprise', location);
+                  }}
+                  className="text-secondary hover:text-accent-blue transition-colors text-sm"
+                >
                   PerMeaTe Enterprise
                 </a>
               </li>
               <li>
-                <a href="/next" target="_blank" rel="noopener noreferrer" className="text-secondary hover:text-accent-blue transition-colors text-sm">
+                <a 
+                  href="/next" 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleNavigation('/next', location);
+                  }}
+                  className="text-secondary hover:text-accent-blue transition-colors text-sm"
+                >
                   What's Next
                 </a>
               </li>
@@ -33,12 +57,26 @@ export default function Footer() {
             <h4 className="font-semibold text-primary mb-2 text-sm">Company</h4>
             <ul className="space-y-1">
               <li>
-                <a href="/about" target="_blank" rel="noopener noreferrer" className="text-secondary hover:text-accent-blue transition-colors text-sm">
+                <a 
+                  href="/about" 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleNavigation('/about', location);
+                  }}
+                  className="text-secondary hover:text-accent-blue transition-colors text-sm"
+                >
                   About Us
                 </a>
               </li>
               <li>
-                <a href="/contact" target="_blank" rel="noopener noreferrer" className="text-secondary hover:text-accent-blue transition-colors text-sm">
+                <a 
+                  href="/contact" 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleNavigation('/contact', location);
+                  }}
+                  className="text-secondary hover:text-accent-blue transition-colors text-sm"
+                >
                   Contact
                 </a>
               </li>
@@ -61,17 +99,38 @@ export default function Footer() {
             <h4 className="font-semibold text-primary mb-2 text-sm">Legal</h4>
             <ul className="space-y-1">
               <li>
-                <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-secondary hover:text-accent-blue transition-colors text-sm">
+                <a 
+                  href="/privacy" 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleNavigation('/privacy', location);
+                  }}
+                  className="text-secondary hover:text-accent-blue transition-colors text-sm"
+                >
                   Privacy Policy
                 </a>
               </li>
               <li>
-                <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-secondary hover:text-accent-blue transition-colors text-sm">
+                <a 
+                  href="/terms" 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleNavigation('/terms', location);
+                  }}
+                  className="text-secondary hover:text-accent-blue transition-colors text-sm"
+                >
                   Terms of Service
                 </a>
               </li>
               <li>
-                <a href="/security" target="_blank" rel="noopener noreferrer" className="text-secondary hover:text-accent-blue transition-colors text-sm">
+                <a 
+                  href="/security" 
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleNavigation('/security', location);
+                  }}
+                  className="text-secondary hover:text-accent-blue transition-colors text-sm"
+                >
                   Security
                 </a>
               </li>
@@ -91,17 +150,7 @@ export default function Footer() {
                   hello@darkstreet.org
                 </a>
               </div>
-              <div>
-                <a 
-                  href="https://darkstreet.consulting" 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  className="text-secondary hover:text-accent-blue transition-colors text-sm inline-flex items-center gap-1"
-                >
-                  darkstreet.consulting
-                  <ExternalLink className="w-3 h-3" />
-                </a>
-              </div>
+
             </div>
           </div>
         </div>

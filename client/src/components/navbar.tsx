@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Menu, X, User, LogOut } from "lucide-react";
 import logoPath from "@assets/DarkStreetTech_Logo_1752659608844.png";
+import { handleNavigation } from "@/utils/navigation";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -51,13 +52,17 @@ export default function Navbar() {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-6 ml-auto">
             {items.map((item) => (
-              <Link
+              <a
                 key={item.name}
                 href={item.href}
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleNavigation(item.href, location);
+                }}
                 className={`nav-item ${location === item.href ? 'active' : ''}`}
               >
                 {item.name}
-              </Link>
+              </a>
             ))}
           </div>
 
@@ -96,18 +101,22 @@ export default function Navbar() {
           <div className="md:hidden py-4 border-t border-light">
             <div className="flex flex-col space-y-1">
               {items.map((item) => (
-                <Link
+                <a
                   key={item.name}
                   href={item.href}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setIsOpen(false);
+                    handleNavigation(item.href, location);
+                  }}
                   className={`px-3 py-2 rounded-sm text-sm transition-colors ${
                     location === item.href
                       ? "text-primary bg-surface-grey"
                       : "text-secondary hover:text-primary hover:bg-surface-grey"
                   }`}
-                  onClick={() => setIsOpen(false)}
                 >
                   {item.name}
-                </Link>
+                </a>
               ))}
               
               {/* Mobile Auth */}

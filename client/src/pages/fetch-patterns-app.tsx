@@ -435,8 +435,8 @@ export default function FetchPatternsApp() {
       
       <main className="pt-24 pb-6">
         {/* FetchPatterns specific header - sticky and compact */}
-        <div className="bg-gray-50 border-b border-gray-200 py-3 sticky top-16 z-20">
-          <div className="max-w-6xl mx-auto px-6 flex items-center justify-between">
+        <div className="bg-gray-50 border-b border-gray-200 py-3 sticky top-24 z-20">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <img src={fetchPatternsIcon} alt="FetchPatterns" className="h-10 w-auto" />
               <div>
@@ -445,17 +445,19 @@ export default function FetchPatternsApp() {
               </div>
             </div>
             
-            {/* Session Controls aligned with user details */}
+            {/* Session Controls aligned with user authentication styling */}
             {sessionAnalyses.length > 0 && !progressStage && (
-              <div className="flex items-center gap-3 text-sm">
-                <div className="text-blue-800">
-                  <strong>Session:</strong> {sessionAnalyses.length} docs analyzed
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 px-3 py-2 bg-blue-50 rounded-md border border-blue-200 shadow-sm h-10">
+                  <span className="text-sm font-medium text-blue-800">
+                    Session: {sessionAnalyses.length} docs analyzed
+                  </span>
                 </div>
                 <Button 
                   variant="outline" 
                   size="sm"
                   onClick={() => window.location.reload()}
-                  className="text-blue-700 border-blue-300 hover:bg-blue-100"
+                  className="text-blue-700 border-blue-300 hover:bg-blue-100 h-10"
                 >
                   Refresh Session
                 </Button>
@@ -464,7 +466,7 @@ export default function FetchPatternsApp() {
           </div>
         </div>
 
-        <div className="max-w-6xl mx-auto px-6 py-6 space-y-6">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
 
         {/* Upload Section */}
