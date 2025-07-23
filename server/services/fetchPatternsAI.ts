@@ -1,7 +1,6 @@
 import OpenAI from "openai";
 import mammoth from "mammoth";
 import * as XLSX from "xlsx";
-// PDF parsing libraries causing import issues - use fallback for now
 
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
 const openai = new OpenAI({
@@ -56,9 +55,56 @@ export async function extractTextFromFile(buffer: Buffer, mimeType: string): Pro
         return buffer.toString('utf-8');
       
       case 'application/pdf':
-        // PDF files need specialized parsing libraries - currently not supported
-        console.log('PDF documents are not yet supported for analysis');
-        return 'Unable to analyze this document. Please write to hello@darkstreet.org with this bug.';
+        // Extract real text from PDF files using dynamic import to avoid startup issues
+        try {
+          console.log('Processing PDF with dynamic import...');
+          const pdfParse = (await import('pdf-parse')).default;
+          const pdfData = await pdfParse(buffer);
+          const extractedText = pdfData.text.trim();
+          
+          if (extractedText && extractedText.length > 10) {
+            console.log(`PDF text extracted successfully. Length: ${extractedText.length}`);
+            console.log('Text preview:', extractedText.substring(0, 200) + '...');
+            return extractedText;
+          } else {
+            return `PDF document appears to be empty or contains primarily images/formatting. Extracted ${extractedText.length} characters.`;
+          }
+        } catch (error) {
+          console.error('PDF extraction error:', error);
+          // Fallback to OpenAI Vision for PDF processing
+          try {
+            console.log('Falling back to OpenAI Vision for PDF...');
+            const base64Data = buffer.toString('base64');
+            
+            const response = await openai.chat.completions.create({
+              model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+              messages: [
+                {
+                  role: "user",
+                  content: [
+                    {
+                      type: "text",
+                      text: "This is a PDF document. Extract all readable text content from all pages. If you cannot read the PDF directly, explain what you can observe about the document structure."
+                    },
+                    {
+                      type: "image_url",
+                      image_url: {
+                        url: `data:application/pdf;base64,${base64Data}`
+                      }
+                    }
+                  ]
+                }
+              ],
+              max_tokens: 1000,
+            });
+            
+            const extractedText = response.choices[0].message.content || '';
+            return extractedText || `PDF document could not be processed for text extraction. Please convert to text format for better analysis.`;
+          } catch (visionError) {
+            console.error('PDF Vision API fallback error:', visionError);
+            return `ERROR: Failed to extract text from PDF document: ${(error as Error).message}`;
+          }
+        }
       
       case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
         // Extract real text from DOCX files using mammoth.js
@@ -77,9 +123,44 @@ export async function extractTextFromFile(buffer: Buffer, mimeType: string): Pro
         }
       
       case 'application/vnd.openxmlformats-officedocument.presentationml.presentation':
-        // PPTX files need specialized parsing libraries - currently not supported
-        console.log('PPTX documents are not yet supported for analysis');
-        return 'Unable to analyze this document. Please write to hello@darkstreet.org with this bug.';
+        // PPTX processing using OpenAI Vision API - treat as binary data for OCR
+        try {
+          console.log('Processing PPTX as binary for OpenAI Vision analysis...');
+          const base64Data = buffer.toString('base64');
+          
+          const response = await openai.chat.completions.create({
+            model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+            messages: [
+              {
+                role: "user",
+                content: [
+                  {
+                    type: "text",
+                    text: "This is a PPTX presentation file. Extract all text content from all slides, including titles, bullet points, and any readable text. Format the output as: 'Slide 1: [content]\\nSlide 2: [content]' etc. If you cannot extract text, explain what you can see."
+                  },
+                  {
+                    type: "image_url",
+                    image_url: {
+                      url: `data:application/vnd.openxmlformats-officedocument.presentationml.presentation;base64,${base64Data}`
+                    }
+                  }
+                ]
+              }
+            ],
+            max_tokens: 1000,
+          });
+          
+          const extractedText = response.choices[0].message.content || '';
+          
+          if (extractedText.trim() && extractedText.length > 10) {
+            return extractedText;
+          } else {
+            return `PPTX presentation could not be processed for text extraction. Please convert to PDF or provide individual slide images for better analysis.`;
+          }
+        } catch (error) {
+          console.error('PPTX Vision API error:', error);
+          return `ERROR: Failed to extract text from PPTX document: ${(error as Error).message}`;
+        }
       
       case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
         // Extract real text from Excel files (.xlsx) using xlsx library
@@ -365,10 +446,10 @@ QUALITY STANDARDS:
     console.error('Error analyzing document with OpenAI:', error);
     console.error('OpenAI API Key exists:', !!process.env.OPENAI_API_KEY);
     console.error('Error details:', {
-      message: error.message,
-      name: error.name,
-      status: error.status,
-      code: error.code
+      message: (error as any).message,
+      name: (error as any).name,
+      status: (error as any).status,
+      code: (error as any).code
     });
     
     // Fallback analysis if OpenAI fails

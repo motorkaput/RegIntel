@@ -131,7 +131,7 @@ The application follows a modern full-stack architecture with emphasis on type s
 - ✓ **Progress Tracking**: Professional progress bar with textual states (Uploading... Analyzing... Fetching patterns... Done) replacing toast notifications
 - ✓ **Auto-scroll Navigation**: Automatic scroll to session metrics boxes (not middle of section) after analysis completion
 - ✓ **UI Layout Optimization**: Moved "Ask Questions" section below Document Summaries for better workflow
-- ✓ **PDF/PPTX Handling**: Removed dummy analysis, now shows proper fallback message directing users to support email
+- ✓ **PDF/PPTX Processing**: Implemented real text extraction using pdf-parse and pptx-parser libraries for full document analysis
 - ✓ **Failed Analysis Handling**: Documents that can't be analyzed show "Undeterminable" classification chip with exact error message
 - ✓ **CSV Export Fix**: Context-Based Sentiment Analysis now exports ALL session contexts, not just the last one
 - ✓ **Color Consistency**: Context Analysis colors now match Document Summaries (blue for positive, purple for negative, gray for neutral)
