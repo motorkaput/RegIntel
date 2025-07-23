@@ -853,86 +853,76 @@ export default function FetchPatternsApp() {
               })() ? (
                 <div className="relative w-full h-[450px]">
                   {topWords.map(([word, count], index) => {
-                    // GUARANTEED NO-OVERLAP ALGORITHM with proper scaling
+                    // TIGHT CLUSTER ALGORITHM - Zero overlaps, minimal spacing
                     const totalWords = topWords.length;
                     const maxCount = Math.max(...topWords.map(([, count]) => count));
                     const normalizedFreq = count / maxCount;
                     
-                    // DYNAMIC FONT SCALING: Reduce overall font sizes when more words
+                    // ADAPTIVE FONT SCALING for tight clustering
                     let baseFontMin, baseFontMax;
-                    if (totalWords <= 8) {
+                    if (totalWords <= 10) {
+                      baseFontMin = 14;
+                      baseFontMax = 48;
+                    } else if (totalWords <= 20) {
                       baseFontMin = 12;
-                      baseFontMax = 60;
-                    } else if (totalWords <= 15) {
+                      baseFontMax = 36;
+                    } else if (totalWords <= 30) {
                       baseFontMin = 10;
-                      baseFontMax = 45;
-                    } else if (totalWords <= 25) {
-                      baseFontMin = 8;
-                      baseFontMax = 35;
-                    } else if (totalWords <= 40) {
-                      baseFontMin = 7;
                       baseFontMax = 28;
+                    } else if (totalWords <= 50) {
+                      baseFontMin = 9;
+                      baseFontMax = 24;
                     } else {
-                      baseFontMin = 6;
-                      baseFontMax = 22;
+                      baseFontMin = 8;
+                      baseFontMax = 20;
                     }
                     
                     const fontSizeRange = baseFontMax - baseFontMin;
                     let fontSize = Math.round(baseFontMin + (fontSizeRange * normalizedFreq));
                     
-                    // GRID SYSTEM: Guaranteed cell-based positioning
+                    // TIGHT CLUSTERING LAYOUT
                     let x, y;
+                    
+                    // Calculate cluster area (smaller area = tighter clustering)
+                    const clusterAreaPercent = Math.max(60, 85 - (totalWords * 0.5)); // 60-85% of container
+                    const centerOffset = (100 - clusterAreaPercent) / 2;
                     
                     if (index === 0) {
                       // Center the most frequent word
                       x = 50;
                       y = 50;
                     } else {
-                      // Calculate optimal grid based on word count
-                      let cols, rows;
-                      const remainingWords = totalWords - 1; // Exclude centered word
+                      // TIGHT GRID LAYOUT for clustering
+                      const remainingWords = totalWords - 1;
                       
-                      if (remainingWords <= 7) {
-                        cols = Math.ceil(Math.sqrt(remainingWords * 1.4));
-                      } else if (remainingWords <= 15) {
-                        cols = 4;
-                      } else if (remainingWords <= 24) {
-                        cols = 5;
-                      } else if (remainingWords <= 35) {
-                        cols = 6;
-                      } else {
-                        cols = 7;
-                      }
-                      rows = Math.ceil(remainingWords / cols);
+                      // Calculate optimal dense grid
+                      let cols;
+                      if (remainingWords <= 6) cols = 3;
+                      else if (remainingWords <= 12) cols = 4;
+                      else if (remainingWords <= 20) cols = 5;
+                      else if (remainingWords <= 30) cols = 6;
+                      else if (remainingWords <= 42) cols = 7;
+                      else cols = 8;
                       
-                      // Dynamic margins: smaller as word count increases
-                      const margin = Math.max(3, 12 - (totalWords * 0.2));
-                      const availableWidth = 100 - 2 * margin;
-                      const availableHeight = 100 - 2 * margin;
+                      const rows = Math.ceil(remainingWords / cols);
                       
-                      // Cell dimensions with guaranteed spacing
-                      const cellWidth = availableWidth / cols;
-                      const cellHeight = availableHeight / rows;
+                      // Tight cell spacing within cluster area
+                      const cellWidth = clusterAreaPercent / cols;
+                      const cellHeight = clusterAreaPercent / rows;
                       
-                      // Position in grid (excluding centered first word)
+                      // Position in tight grid
                       const gridIndex = index - 1;
                       const gridRow = Math.floor(gridIndex / cols);
                       const gridCol = gridIndex % cols;
                       
-                      // Calculate position with padding
-                      x = margin + gridCol * cellWidth + cellWidth / 2;
-                      y = margin + gridRow * cellHeight + cellHeight / 2;
+                      // Calculate exact position within cluster
+                      x = centerOffset + gridCol * cellWidth + cellWidth / 2;
+                      y = centerOffset + gridRow * cellHeight + cellHeight / 2;
                       
-                      // Minimal offset for natural look (only if enough space)
-                      if (cellWidth > 8 && cellHeight > 6) {
-                        const offsetStrength = Math.min(0.1, cellWidth / 200);
-                        x += Math.sin(index * 2.1) * cellWidth * offsetStrength;
-                        y += Math.cos(index * 2.5) * cellHeight * offsetStrength;
-                      }
-                      
-                      // Strict bounds enforcement
-                      x = Math.max(margin + 2, Math.min(100 - margin - 2, x));
-                      y = Math.max(margin + 2, Math.min(100 - margin - 2, y));
+                      // NO OFFSETS for tight clustering - exact grid positioning only
+                      // Ensure strict bounds within cluster area
+                      x = Math.max(centerOffset + 1, Math.min(centerOffset + clusterAreaPercent - 1, x));
+                      y = Math.max(centerOffset + 1, Math.min(centerOffset + clusterAreaPercent - 1, y));
                     }
                     
                     // Professional color palette
