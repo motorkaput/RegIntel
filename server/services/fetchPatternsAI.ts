@@ -55,55 +55,25 @@ export async function extractTextFromFile(buffer: Buffer, mimeType: string): Pro
         return buffer.toString('utf-8');
       
       case 'application/pdf':
-        // Extract real text from PDF files using dynamic import to avoid startup issues
+        // Extract real text from PDF files using pdf-parse library
         try {
-          console.log('Processing PDF with dynamic import...');
+          console.log('Processing PDF with pdf-parse...');
           const pdfParse = (await import('pdf-parse')).default;
           const pdfData = await pdfParse(buffer);
           const extractedText = pdfData.text.trim();
           
-          if (extractedText && extractedText.length > 10) {
-            console.log(`PDF text extracted successfully. Length: ${extractedText.length}`);
-            console.log('Text preview:', extractedText.substring(0, 200) + '...');
+          console.log(`PDF processing completed. Text length: ${extractedText.length}`);
+          console.log('PDF content preview:', extractedText.substring(0, 300) + '...');
+          
+          if (extractedText && extractedText.length > 20) {
             return extractedText;
           } else {
-            return `PDF document appears to be empty or contains primarily images/formatting. Extracted ${extractedText.length} characters.`;
+            console.log('PDF appears to contain minimal text content');
+            return `This PDF document contains primarily images, charts, or formatting with minimal readable text content. Extracted ${extractedText.length} characters of text.`;
           }
         } catch (error) {
           console.error('PDF extraction error:', error);
-          // Fallback to OpenAI Vision for PDF processing
-          try {
-            console.log('Falling back to OpenAI Vision for PDF...');
-            const base64Data = buffer.toString('base64');
-            
-            const response = await openai.chat.completions.create({
-              model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-              messages: [
-                {
-                  role: "user",
-                  content: [
-                    {
-                      type: "text",
-                      text: "This is a PDF document. Extract all readable text content from all pages. If you cannot read the PDF directly, explain what you can observe about the document structure."
-                    },
-                    {
-                      type: "image_url",
-                      image_url: {
-                        url: `data:image/jpeg;base64,${base64Data}`
-                      }
-                    }
-                  ]
-                }
-              ],
-              max_tokens: 1000,
-            });
-            
-            const extractedText = response.choices[0].message.content || '';
-            return extractedText || `PDF document could not be processed for text extraction. Please convert to text format for better analysis.`;
-          } catch (visionError) {
-            console.error('PDF Vision API fallback error:', visionError);
-            return `ERROR: Failed to extract text from PDF document: ${(error as Error).message}`;
-          }
+          return `This PDF document could not be processed for text extraction. The file may be corrupted, password-protected, or contain only images. Please try converting to a text-based format.`;
         }
       
       case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
@@ -123,47 +93,38 @@ export async function extractTextFromFile(buffer: Buffer, mimeType: string): Pro
         }
       
       case 'application/vnd.openxmlformats-officedocument.presentationml.presentation':
-        // PPTX processing using OpenAI Vision API - treat as binary data for OCR
+        // PPTX processing using pptx-parser library
         try {
-          console.log('Processing PPTX as binary for OpenAI Vision analysis...');
-          const base64Data = buffer.toString('base64');
+          console.log('Processing PPTX with pptx-parser...');
+          const pptxParser = (await import('pptx-parser')).default;
+          const slides = await pptxParser.parseBuffer(buffer);
           
-          const response = await openai.chat.completions.create({
-            model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-            messages: [
-              {
-                role: "user",
-                content: [
-                  {
-                    type: "text",
-                    text: "This is a PPTX presentation file. Extract all text content from all slides, including titles, bullet points, and any readable text. Format the output as: 'Slide 1: [content]\\nSlide 2: [content]' etc. If you cannot extract text, explain what you can see."
-                  },
-                  {
-                    type: "image_url",
-                    image_url: {
-                      url: `data:image/jpeg;base64,${base64Data}`
-                    }
-                  }
-                ]
-              }
-            ],
-            max_tokens: 1000,
+          let extractedText = '';
+          
+          slides.forEach((slide: any, index: number) => {
+            if (slide.texts && slide.texts.length > 0) {
+              extractedText += `Slide ${index + 1}:\n`;
+              slide.texts.forEach((text: string) => {
+                if (text.trim()) {
+                  extractedText += `${text.trim()}\n`;
+                }
+              });
+              extractedText += '\n';
+            }
           });
           
-          const extractedText = response.choices[0].message.content || '';
+          console.log(`PPTX processing completed. Found ${slides.length} slides, text length: ${extractedText.length}`);
+          console.log('PPTX content preview:', extractedText.substring(0, 300) + '...');
           
-          console.log('PPTX Vision API response:', extractedText.substring(0, 200) + '...');
-          
-          if (extractedText.trim() && extractedText.length > 10) {
-            console.log('PPTX extraction successful!');
-            return extractedText;
+          if (extractedText.trim() && extractedText.length > 20) {
+            return extractedText.trim();
           } else {
-            console.log('PPTX extraction failed - insufficient content');
-            return `ERROR: PPTX presentation could not be processed for text extraction. Please convert to PDF or provide individual slide images for better analysis.`;
+            console.log('PPTX appears to contain minimal text content');
+            return `This PPTX presentation contains primarily images, charts, or visual elements with minimal readable text content. Found ${slides.length} slides with ${extractedText.length} characters of text.`;
           }
         } catch (error) {
-          console.error('PPTX Vision API error:', error);
-          return `ERROR: Failed to extract text from PPTX document: ${(error as Error).message}`;
+          console.error('PPTX extraction error:', error);
+          return `This PPTX presentation could not be processed for text extraction. The file may be corrupted or contain only visual elements. Please try converting slides to PDF format.`;
         }
       
       case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
@@ -332,8 +293,10 @@ export async function analyzeDocument(
     console.log('Text preview:', extractedText.substring(0, 200) + '...');
 
     // Special handling for actual extraction failures only - be more specific
-    if (extractedText.startsWith('ERROR: Failed to extract text from') ||
-        extractedText === 'Unable to analyze this document. Please write to hello@darkstreet.org with this bug.') {
+    if (extractedText.includes('could not be processed for text extraction') ||
+        extractedText.includes('corrupted') ||
+        extractedText.includes('password-protected') ||
+        extractedText.startsWith('ERROR:')) {
       return {
         text: extractedText,
         sentiment: { label: 'neutral', score: 0.5, reasoning: 'Document extraction failed' },
