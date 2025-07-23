@@ -7,15 +7,17 @@ export default function Privacy() {
   return (
     <div className="min-h-screen bg-surface-white">
       <Navbar />
-      <main className="pt-32">
-        <div className="bg-white border-b border-gray-200 p-4">
-          <div className="max-w-6xl mx-auto">
-            <h1 className="text-2xl font-bold text-gray-900">Privacy Policy</h1>
-            <p className="text-gray-600 text-sm">Last updated: July 21, 2025</p>
+      <main className="pt-20">
+        <section className="py-6 section-divider">
+          <div className="container-section">
+            <div className="space-y-4">
+              <h1 className="text-responsive-md text-primary">Privacy Policy</h1>
+              <p className="text-responsive-xl text-secondary font-light">Last updated: July 21, 2025</p>
+            </div>
           </div>
-        </div>
+        </section>
 
-        <div className="max-w-6xl mx-auto p-6 space-y-6">
+        <div className="container-section py-6 space-y-6">
         <Card className="bg-white">
           <CardHeader>
             <CardTitle>Information We Collect</CardTitle>

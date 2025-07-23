@@ -49,7 +49,7 @@ export default function Home() {
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
               <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
-                Welcome back, <span className="text-neon-green">{user?.firstName || 'User'}</span>
+                Welcome back, <span className="text-neon-green">{(user as any)?.firstName || 'User'}</span>
               </h1>
               <p className="text-xl text-gray-300 max-w-2xl mx-auto">
                 Your AI-powered workspace is ready. Start analyzing documents, tracking performance, and automating workflows.
@@ -69,7 +69,7 @@ export default function Home() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-gray-300 mb-4">Upload and analyze documents with AI-powered insights</p>
-                  <Link href="/document-analyzer">
+                  <Link href="/app/fetch-patterns">
                     <Button className="w-full bg-neon-green text-black hover:bg-neon-cyan">
                       Start Analyzing
                     </Button>
@@ -151,7 +151,7 @@ export default function Home() {
                     <div className="flex items-center justify-between">
                       <span className="text-gray-300">Current Plan:</span>
                       <Badge variant="outline" className="text-neon-green border-neon-green">
-                        {user?.subscriptionStatus === 'trial' ? 'Free Trial' : 'Active'}
+                        {(user as any)?.subscriptionStatus === 'trial' ? 'Free Trial' : 'Active'}
                       </Badge>
                     </div>
                     <div className="flex items-center justify-between">

@@ -7,15 +7,17 @@ export default function Security() {
   return (
     <div className="min-h-screen bg-surface-white">
       <Navbar />
-      <main className="pt-32">
-        <div className="bg-white border-b border-gray-200 p-4">
-          <div className="max-w-6xl mx-auto">
-            <h1 className="text-2xl font-bold text-gray-900">Security & Compliance</h1>
-            <p className="text-gray-600 text-sm">Your data security is our top priority</p>
+      <main className="pt-20">
+        <section className="py-6 section-divider">
+          <div className="container-section">
+            <div className="space-y-4">
+              <h1 className="text-responsive-md text-primary">Security & Compliance</h1>
+              <p className="text-responsive-xl text-secondary font-light">Your data security is our top priority</p>
+            </div>
           </div>
-        </div>
+        </section>
 
-        <div className="max-w-6xl mx-auto p-6 space-y-6">
+        <div className="container-section py-6 space-y-6">
         <Card className="bg-white">
           <CardHeader>
             <CardTitle>Data Protection</CardTitle>

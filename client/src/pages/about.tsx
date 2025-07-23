@@ -4,17 +4,19 @@ import Footer from "@/components/footer";
 
 export default function About() {
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-surface-white">
       <Navbar />
       <main className="pt-20">
-        <div className="bg-white border-b border-gray-200 py-4">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h1 className="text-2xl font-bold text-gray-900">About Dark Street Tech</h1>
-            <p className="text-gray-600 text-sm">AI-Powered Solutions for Modern Enterprises</p>
+        <section className="py-6 section-divider">
+          <div className="container-section">
+            <div className="space-y-4">
+              <h1 className="text-responsive-md text-primary">About Dark Street Tech</h1>
+              <p className="text-responsive-xl text-secondary font-light">AI-Powered Solutions for Modern Enterprises</p>
+            </div>
           </div>
-        </div>
+        </section>
 
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+        <div className="container-section py-6 space-y-6">
           <Card className="bg-white">
           <CardHeader>
             <CardTitle>Our Mission</CardTitle>
