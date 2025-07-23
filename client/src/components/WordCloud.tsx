@@ -86,11 +86,14 @@ export default function WordCloud({ words, width = 450, height = 450 }: WordClou
   }, [words, width, height]);
 
   return (
-    <div className="flex items-center justify-center w-full h-full">
+    <div className="w-full h-full flex justify-center items-center overflow-hidden">
       <svg 
         ref={svgRef} 
-        width={width} 
+        width={width * 1.5} 
         height={height}
+        viewBox={`0 0 ${width * 1.5} ${height}`}
+        className="max-w-full max-h-full"
+        preserveAspectRatio="xMidYMid meet"
         style={{ fontFamily: 'Roboto, sans-serif' }}
       />
     </div>

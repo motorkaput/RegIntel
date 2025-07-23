@@ -66,6 +66,7 @@ export default function FetchPatternsApp() {
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
   const [pendingFiles, setPendingFiles] = useState<File[]>([]); // For cumulative uploads
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [progressStage, setProgressStage] = useState<'uploading' | 'analyzing' | 'fetching' | 'done' | null>(null);
   const [question, setQuestion] = useState("");
   const [contextQuery, setContextQuery] = useState("");
   const [wordCount, setWordCount] = useState(50);
@@ -183,21 +184,19 @@ export default function FetchPatternsApp() {
 
       return response.json();
     },
+    onMutate: () => {
+      setProgressStage('uploading');
+      setUploadProgress(0);
+    },
     onSuccess: (data) => {
-      // Start with persistent progress toast
-      let progressToastId: any;
       const totalDocs = data.analyses ? data.analyses.length : 0;
       
-      // Create a single persistent progress toast
-      progressToastId = toast({
-        title: "Analyzing documents",
-        description: `Progress: 0/${totalDocs} documents analyzed...`,
-        duration: Infinity,
-      });
+      // Start progress bar system
+      setProgressStage('analyzing');
+      setUploadProgress(0);
       
       setSelectedFiles(null);
       setPendingFiles([]); // Clear pending files after successful upload
-      setUploadProgress(0);
       
       // Scroll to top of app immediately
       setTimeout(() => {
@@ -238,18 +237,15 @@ export default function FetchPatternsApp() {
             // Update progress (without recreating toast to prevent blinking)
             const completedCount = updatedAnalyses.filter(a => a.status === 'completed' || a.status === 'error').length;
             
-            // Update progress description in existing toast (no recreation)
+            // Update progress bar
             if (completedCount < totalDocs) {
-              // Simply update the uploadProgress state for potential UI components
-              setUploadProgress(Math.round((completedCount / totalDocs) * 100));
+              const progressPercent = Math.round((completedCount / totalDocs) * 100);
+              setUploadProgress(progressPercent);
               
-              // Update existing toast description without dismissing/recreating
-              if (progressToastId?.update) {
-                progressToastId.update({
-                  title: "Analyzing documents",
-                  description: `Progress: ${completedCount}/${totalDocs} documents analyzed...`,
-                  duration: Infinity,
-                });
+              if (progressPercent < 50) {
+                setProgressStage('analyzing');
+              } else if (progressPercent < 90) {
+                setProgressStage('fetching');
               }
             }
             
@@ -259,23 +255,18 @@ export default function FetchPatternsApp() {
               clearInterval(interval);
               setPollInterval(null);
               
-              // Final completion toast
-              if (progressToastId && progressToastId.dismiss) {
-                progressToastId.dismiss();
-              }
-              toast({
-                title: "Analysis complete",
-                description: `All ${totalDocs} documents have been analyzed successfully.`,
-                duration: 3000,
-              });
+              // Complete progress
+              setProgressStage('done');
+              setUploadProgress(100);
               
-              // Auto-scroll to metrics boxes after a brief delay
+              // Auto-scroll to metrics boxes after completion
               setTimeout(() => {
+                setProgressStage(null); // Hide progress bar
                 const metricsElement = document.getElementById('session-metrics');
                 if (metricsElement) {
                   metricsElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }
-              }, 1000);
+              }, 1500);
             }
           } catch (error) {
             console.error('Error polling for analysis updates:', error);
@@ -504,13 +495,30 @@ export default function FetchPatternsApp() {
                 </label>
               </div>
 
-              {uploadProgress > 0 && (
-                <Progress value={uploadProgress} className="w-full" />
+              {/* Progress Bar with textual states */}
+              {progressStage && (
+                <div className="space-y-3 bg-gray-50 p-4 rounded-lg border">
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm font-medium text-gray-700">
+                      {progressStage === 'uploading' && 'Uploading...'}
+                      {progressStage === 'analyzing' && 'Analyzing...'}
+                      {progressStage === 'fetching' && 'Fetching patterns...'}
+                      {progressStage === 'done' && 'Done'}
+                    </div>
+                    <div className="text-sm text-gray-500">{uploadProgress}%</div>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div 
+                      className="bg-blue-600 h-2 rounded-full transition-all duration-500"
+                      style={{ width: `${uploadProgress}%` }}
+                    />
+                  </div>
+                </div>
               )}
 
               <Button 
                 onClick={handleUpload}
-                disabled={!selectedFiles || uploadMutation.isPending}
+                disabled={!selectedFiles || uploadMutation.isPending || !!progressStage}
                 className="w-full bg-gray-700 hover:bg-gray-800 text-white"
               >
                 {uploadMutation.isPending ? "Uploading..." : "Upload & Analyze"}
