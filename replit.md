@@ -113,6 +113,18 @@ The application follows a modern full-stack architecture with emphasis on type s
 
 ## Recent Changes
 
+**PDF/PPTX Processing Fix & UI Enhancement (July 23, 2025)**
+- ✓ **Fixed PDF/PPTX Processing**: Implemented comprehensive document analysis using Python-inspired approach:
+  * PDF processing: Enhanced OpenAI Vision API with expert prompting and 3000 token limit for thorough text extraction
+  * PPTX processing: Direct XML parsing using JSZip library mimicking Python's pptx library functionality
+  * Fixed TypeScript compatibility issues with regex patterns and Set iteration
+  * Enhanced error detection to distinguish extraction failures from minimal content documents
+- ✓ **Sticky App Header**: Made FetchPatterns header sticky with compact design matching user header height
+  * Reduced icon size from h-16 to h-10 and padding from py-6 to py-3
+  * Session controls positioned in header bar for always-visible access
+  * Header stays in place during scroll with proper z-index layering
+- ✓ **UI Improvements**: Removed emoji icon from word cloud empty state for cleaner interface
+
 **Document Analysis & UI Enhancement Implementation (July 22, 2025)**
 - ✓ **Real Document Text Extraction**: Implemented authentic content extraction for all major file formats:
   * DOCX files: mammoth.js library for complete text extraction

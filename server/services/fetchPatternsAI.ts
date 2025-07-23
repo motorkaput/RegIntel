@@ -55,45 +55,57 @@ export async function extractTextFromFile(buffer: Buffer, mimeType: string): Pro
         return buffer.toString('utf-8');
       
       case 'application/pdf':
-        // Use OpenAI Vision API for PDF text extraction since pdf-parse has server compatibility issues
+        // Use OpenAI Vision API for comprehensive PDF text extraction
         try {
-          console.log('Processing PDF with OpenAI Vision API...');
+          console.log('Processing PDF with enhanced OpenAI Vision API...');
           const base64Data = buffer.toString('base64');
           
           const response = await openai.chat.completions.create({
             model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
             messages: [
               {
+                role: "system",
+                content: "You are an expert document analyzer. Extract ALL readable text from PDF documents, maintaining structure and organization. Include titles, headings, body text, bullet points, tables, captions, footnotes, and any other textual content. Be thorough and detailed."
+              },
+              {
                 role: "user",
                 content: [
                   {
                     type: "text",
-                    text: "Extract all readable text from this PDF document. Include titles, headings, body text, bullet points, and any other textual content. Preserve the structure and organization of the text as much as possible. If the PDF contains primarily images or charts, describe what you can see and extract any visible text labels or captions."
+                    text: "Extract every piece of readable text from this PDF document. Be extremely thorough - include all text content regardless of font size, formatting, or position. Preserve document structure with clear section breaks. If there are multiple pages, organize by page. Include any text in headers, footers, sidebars, tables, or captions."
                   },
                   {
                     type: "image_url",
                     image_url: {
-                      url: `data:application/pdf;base64,${base64Data}`
+                      url: `data:image/jpeg;base64,${base64Data}`
                     }
                   }
                 ]
               }
             ],
-            max_tokens: 2000,
+            max_tokens: 3000,
+            temperature: 0.1,
           });
           
           const extractedText = response.choices[0].message.content || '';
           console.log(`PDF processing completed. Text length: ${extractedText.length}`);
           console.log('PDF content preview:', extractedText.substring(0, 300) + '...');
           
-          if (extractedText.trim() && extractedText.length > 20) {
+          if (extractedText.trim() && extractedText.length > 30 && 
+              !extractedText.includes("I cannot") && 
+              !extractedText.includes("I'm unable") &&
+              !extractedText.includes("cannot read") &&
+              !extractedText.includes("unable to extract")) {
             return extractedText;
           } else {
-            return `This PDF document contains primarily visual elements with minimal readable text content.`;
+            // Log the actual response to debug
+            console.log('PDF Vision API full response:', extractedText);
+            return `PDF processing failed. Vision API response: ${extractedText.substring(0, 200)}...`;
           }
         } catch (error) {
           console.error('PDF Vision API error:', error);
-          return `This PDF document could not be processed for text extraction. Please try converting to a text-based format or contact support.`;
+          console.error('Error details:', JSON.stringify(error, null, 2));
+          return `PDF Vision API Error: ${(error as any)?.message || 'Unknown error occurred'}. Please try a different PDF file.`;
         }
       
       case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
@@ -113,45 +125,78 @@ export async function extractTextFromFile(buffer: Buffer, mimeType: string): Pro
         }
       
       case 'application/vnd.openxmlformats-officedocument.presentationml.presentation':
-        // Use OpenAI Vision API for PPTX text extraction since pptx-parser has browser dependencies
+        // Process PPTX using JSZip and XML parsing (mimicking Python's pptx library approach)
         try {
-          console.log('Processing PPTX with OpenAI Vision API...');
-          const base64Data = buffer.toString('base64');
+          console.log('Processing PPTX with comprehensive XML parsing...');
+          const JSZip = await import('jszip');
+          const zip = new JSZip.default();
           
-          const response = await openai.chat.completions.create({
-            model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-            messages: [
-              {
-                role: "user",
-                content: [
-                  {
-                    type: "text",
-                    text: "Extract all text content from this PowerPoint presentation. Include slide titles, bullet points, body text, and any other readable content. Format the output by slide: 'Slide 1: [content], Slide 2: [content]' etc. If slides contain primarily images or charts, describe what you can see and extract any visible text labels."
-                  },
-                  {
-                    type: "image_url",
-                    image_url: {
-                      url: `data:application/vnd.openxmlformats-officedocument.presentationml.presentation;base64,${base64Data}`
-                    }
-                  }
-                ]
-              }
-            ],
-            max_tokens: 2000,
-          });
+          // Load PPTX as ZIP file
+          const archive = await zip.loadAsync(buffer);
           
-          const extractedText = response.choices[0].message.content || '';
-          console.log(`PPTX processing completed. Text length: ${extractedText.length}`);
+          let extractedText = '';
+          let slideCount = 0;
+          
+          // Find all slide files and sort them properly
+          const slideFiles = Object.keys(archive.files)
+            .filter(name => name.startsWith('ppt/slides/slide') && name.endsWith('.xml'))
+            .sort((a, b) => {
+              const numA = parseInt(a.match(/slide(\d+)\.xml/)?.[1] || '0');
+              const numB = parseInt(b.match(/slide(\d+)\.xml/)?.[1] || '0');
+              return numA - numB;
+            });
+          
+          for (const slideFile of slideFiles) {
+            slideCount++;
+            const slideXml = await archive.files[slideFile].async('text');
+            
+            // Enhanced text extraction with multiple patterns
+            const patterns = [
+              /<a:t[^>]*>([^<]*)<\/a:t>/g,
+              /<a:t>([^<]*)<\/a:t>/g,
+              /<p:txBody[^>]*>.*?<\/p:txBody>/g
+            ];
+            
+            let slideTexts: string[] = [];
+            
+            // Try each pattern to extract maximum text
+            for (const pattern of patterns) {
+              const matches = slideXml.match(pattern) || [];
+              const texts = matches.map(match => {
+                // Clean up XML tags and decode entities
+                let text = match.replace(/<[^>]*>/g, '').trim();
+                text = text.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+                return text;
+              }).filter(text => text.length > 0);
+              
+              slideTexts = slideTexts.concat(texts);
+            }
+            
+            // Remove duplicates and empty strings
+            slideTexts = Array.from(new Set(slideTexts)).filter(text => text.trim().length > 0);
+            
+            if (slideTexts.length > 0) {
+              extractedText += `\n--- Slide ${slideCount} ---\n`;
+              slideTexts.forEach(text => {
+                if (text.trim()) {
+                  extractedText += `${text.trim()}\n`;
+                }
+              });
+              extractedText += '\n';
+            }
+          }
+          
+          console.log(`PPTX processing completed. Found ${slideCount} slides, text length: ${extractedText.length}`);
           console.log('PPTX content preview:', extractedText.substring(0, 300) + '...');
           
-          if (extractedText.trim() && extractedText.length > 20) {
-            return extractedText;
+          if (extractedText.trim() && extractedText.length > 30) {
+            return extractedText.trim();
           } else {
-            return `This PPTX presentation contains primarily visual elements with minimal readable text content.`;
+            return `This PPTX presentation contains ${slideCount} slides but appears to have primarily visual content with minimal extractable text.`;
           }
         } catch (error) {
-          console.error('PPTX Vision API error:', error);
-          return `This PPTX presentation could not be processed for text extraction. Please try converting slides to PDF format or contact support.`;
+          console.error('PPTX processing error:', error);
+          return `This PPTX presentation could not be processed for text extraction. The file structure may be incompatible or corrupted.`;
         }
       
       case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
@@ -321,8 +366,11 @@ export async function analyzeDocument(
 
     // Special handling for actual extraction failures only - be more specific
     if (extractedText.includes('could not be processed for text extraction') ||
-        extractedText.includes('contact support') ||
-        extractedText.includes('Please try converting') ||
+        extractedText.includes('corrupted') ||
+        extractedText.includes('verify the file') ||
+        extractedText.includes('structure may be incompatible') ||
+        extractedText.includes('PDF processing failed') ||
+        extractedText.includes('PDF Vision API Error') ||
         extractedText.startsWith('ERROR:')) {
       return {
         text: extractedText,
