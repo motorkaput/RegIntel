@@ -7,129 +7,166 @@ interface DynamicHeroProps {
 }
 
 export default function DynamicHero({ title, subtitle }: DynamicHeroProps) {
-  const titleRef = useRef<HTMLDivElement>(null);
-  const subtitleRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!titleRef.current || !subtitleRef.current) return;
+    const canvas = canvasRef.current;
+    const container = containerRef.current;
+    if (!canvas || !container) return;
 
-    // Clear previous content
-    d3.select(titleRef.current).selectAll('*').remove();
-    d3.select(subtitleRef.current).selectAll('*').remove();
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
 
-    // Random color palette
-    const colors = ['#1e40af', '#7c3aed', '#dc2626', '#059669', '#ea580c', '#0891b2'];
-    
-    // Random animation type
-    const animations = ['scatter', 'wave', 'spiral', 'bounce'];
-    const selectedAnimation = animations[Math.floor(Math.random() * animations.length)];
+    // Set canvas size
+    const resizeCanvas = () => {
+      const rect = container.getBoundingClientRect();
+      canvas.width = rect.width;
+      canvas.height = rect.height;
+      drawFractal();
+    };
 
-    // Title animation
-    const titleWords = title.split(' ');
-    const titleContainer = d3.select(titleRef.current);
-    
-    titleWords.forEach((word, i) => {
-      const wordSpan = titleContainer
-        .append('span')
-        .style('display', 'inline-block')
-        .style('margin-right', '0.5rem')
-        .style('color', colors[Math.floor(Math.random() * colors.length)])
-        .style('font-weight', '300')
-        .style('font-size', 'clamp(2.5rem, 8vw, 4rem)')
-        .style('opacity', 0)
-        .text(word);
-
-      // Apply random animation
-      switch (selectedAnimation) {
-        case 'scatter':
-          wordSpan
-            .style('transform', `translate(${Math.random() * 100 - 50}px, ${Math.random() * 100 - 50}px) rotate(${Math.random() * 20 - 10}deg)`)
-            .transition()
-            .duration(800)
-            .delay(i * 150)
-            .style('opacity', 1)
-            .style('transform', 'translate(0px, 0px) rotate(0deg)');
-          break;
-        case 'wave':
-          wordSpan
-            .style('transform', `translateY(${Math.sin(i) * 30}px)`)
-            .transition()
-            .duration(600)
-            .delay(i * 100)
-            .style('opacity', 1)
-            .style('transform', 'translateY(0px)');
-          break;
-        case 'spiral':
-          const angle = i * 45;
-          const radius = 30;
-          wordSpan
-            .style('transform', `translate(${Math.cos(angle) * radius}px, ${Math.sin(angle) * radius}px) scale(0.5)`)
-            .transition()
-            .duration(700)
-            .delay(i * 120)
-            .style('opacity', 1)
-            .style('transform', 'translate(0px, 0px) scale(1)');
-          break;
-        case 'bounce':
-          wordSpan
-            .style('transform', 'scale(0) translateY(-50px)')
-            .transition()
-            .duration(500)
-            .delay(i * 80)
-            .style('opacity', 1)
-            .style('transform', 'scale(1) translateY(0px)')
-            .transition()
-            .duration(200)
-            .style('transform', 'scale(1.1) translateY(-5px)')
-            .transition()
-            .duration(200)
-            .style('transform', 'scale(1) translateY(0px)');
-          break;
+    // Fractal generation functions
+    const drawMandelbrot = () => {
+      const width = canvas.width;
+      const height = canvas.height;
+      const imageData = ctx.createImageData(width, height);
+      
+      for (let x = 0; x < width; x++) {
+        for (let y = 0; y < height; y++) {
+          const cx = (x - width / 2) * 4 / width;
+          const cy = (y - height / 2) * 4 / height;
+          
+          let zx = 0, zy = 0;
+          let iterations = 0;
+          const maxIterations = 100;
+          
+          while (zx * zx + zy * zy < 4 && iterations < maxIterations) {
+            const temp = zx * zx - zy * zy + cx;
+            zy = 2 * zx * zy + cy;
+            zx = temp;
+            iterations++;
+          }
+          
+          const pixelIndex = (y * width + x) * 4;
+          const intensity = iterations === maxIterations ? 0 : (iterations / maxIterations) * 255;
+          
+          imageData.data[pixelIndex] = intensity * 0.3; // R
+          imageData.data[pixelIndex + 1] = intensity * 0.3; // G
+          imageData.data[pixelIndex + 2] = intensity * 0.3; // B
+          imageData.data[pixelIndex + 3] = 60; // A (low opacity)
+        }
       }
-    });
+      
+      ctx.putImageData(imageData, 0, 0);
+    };
 
-    // Subtitle animation with staggered character reveal
-    const subtitleChars = subtitle.split('');
-    const subtitleContainer = d3.select(subtitleRef.current);
-    
-    subtitleChars.forEach((char, i) => {
-      const charSpan = subtitleContainer
-        .append('span')
-        .style('color', colors[Math.floor(Math.random() * colors.length)])
-        .style('font-weight', '300')
-        .style('font-size', 'clamp(1.25rem, 4vw, 2rem)')
-        .style('opacity', 0)
-        .text(char === ' ' ? '\u00A0' : char);
+    const drawJulia = () => {
+      const width = canvas.width;
+      const height = canvas.height;
+      const imageData = ctx.createImageData(width, height);
+      
+      // Random Julia set parameters
+      const cReal = Math.random() * 0.8 - 0.4;
+      const cImag = Math.random() * 0.8 - 0.4;
+      
+      for (let x = 0; x < width; x++) {
+        for (let y = 0; y < height; y++) {
+          let zx = (x - width / 2) * 3 / width;
+          let zy = (y - height / 2) * 3 / height;
+          
+          let iterations = 0;
+          const maxIterations = 80;
+          
+          while (zx * zx + zy * zy < 4 && iterations < maxIterations) {
+            const temp = zx * zx - zy * zy + cReal;
+            zy = 2 * zx * zy + cImag;
+            zx = temp;
+            iterations++;
+          }
+          
+          const pixelIndex = (y * width + x) * 4;
+          const intensity = iterations === maxIterations ? 0 : (iterations / maxIterations) * 255;
+          
+          imageData.data[pixelIndex] = intensity * 0.2;
+          imageData.data[pixelIndex + 1] = intensity * 0.2;
+          imageData.data[pixelIndex + 2] = intensity * 0.2;
+          imageData.data[pixelIndex + 3] = 40;
+        }
+      }
+      
+      ctx.putImageData(imageData, 0, 0);
+    };
 
-      charSpan
-        .transition()
-        .duration(50)
-        .delay(1000 + i * 30)
-        .style('opacity', 1);
-    });
+    const drawDragonCurve = () => {
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.1)';
+      ctx.lineWidth = 1;
+      
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 2;
+      
+      let x = centerX;
+      let y = centerY;
+      let direction = 0; // 0: right, 1: up, 2: left, 3: down
+      const step = 3;
+      
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      
+      // Generate dragon curve sequence
+      let sequence = [1];
+      for (let i = 0; i < 14; i++) {
+        const newSequence = [...sequence, 1];
+        for (let j = sequence.length - 1; j >= 0; j--) {
+          newSequence.push(1 - sequence[j]);
+        }
+        sequence = newSequence;
+      }
+      
+      for (const turn of sequence) {
+        const dx = step * Math.cos(direction * Math.PI / 2);
+        const dy = step * Math.sin(direction * Math.PI / 2);
+        x += dx;
+        y += dy;
+        ctx.lineTo(x, y);
+        direction = (direction + (turn ? 1 : -1) + 4) % 4;
+      }
+      
+      ctx.stroke();
+    };
 
-    // Accent line animation
-    const accentLine = titleContainer
-      .append('div')
-      .style('width', '0px')
-      .style('height', '1px')
-      .style('background', `linear-gradient(90deg, ${colors[0]}, transparent)`)
-      .style('margin-top', '3rem');
+    const drawFractal = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Random fractal selection
+      const fractals = [drawMandelbrot, drawJulia, drawDragonCurve];
+      const selectedFractal = fractals[Math.floor(Math.random() * fractals.length)];
+      selectedFractal();
+    };
 
-    accentLine
-      .transition()
-      .duration(800)
-      .delay(1500)
-      .style('width', '6rem');
+    // Initial setup
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
 
-  }, [title, subtitle]);
+    return () => {
+      window.removeEventListener('resize', resizeCanvas);
+    };
+  }, []);
+
+  const combinedText = `${title}: ${subtitle}`;
 
   return (
-    <section className="py-12 section-divider bg-gradient-to-br from-surface-white via-surface-light to-surface-grey">
-      <div className="container-section">
+    <section ref={containerRef} className="relative py-12 section-divider overflow-hidden">
+      <canvas 
+        ref={canvasRef}
+        className="absolute inset-0 w-full h-full"
+        style={{ background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)' }}
+      />
+      <div className="relative z-10 container-section">
         <div className="max-w-4xl">
-          <div ref={titleRef} className="mb-6 leading-tight tracking-tight" />
-          <div ref={subtitleRef} className="leading-relaxed" />
+          <h1 className="text-responsive-lg font-light text-gray-900 leading-relaxed tracking-tight">
+            {combinedText}
+          </h1>
         </div>
       </div>
     </section>
