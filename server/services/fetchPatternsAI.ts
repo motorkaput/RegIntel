@@ -89,7 +89,7 @@ export async function extractTextFromFile(buffer: Buffer, mimeType: string): Pro
                     {
                       type: "image_url",
                       image_url: {
-                        url: `data:application/pdf;base64,${base64Data}`
+                        url: `data:image/jpeg;base64,${base64Data}`
                       }
                     }
                   ]
@@ -141,7 +141,7 @@ export async function extractTextFromFile(buffer: Buffer, mimeType: string): Pro
                   {
                     type: "image_url",
                     image_url: {
-                      url: `data:application/vnd.openxmlformats-officedocument.presentationml.presentation;base64,${base64Data}`
+                      url: `data:image/jpeg;base64,${base64Data}`
                     }
                   }
                 ]

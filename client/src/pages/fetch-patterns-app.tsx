@@ -436,27 +436,20 @@ export default function FetchPatternsApp() {
       <main className="pt-24 pb-6">
         {/* FetchPatterns specific header */}
         <div className="bg-gray-50 border-b border-gray-200 py-6">
-          <div className="max-w-6xl mx-auto px-6 flex items-center gap-4">
-            <img src={fetchPatternsIcon} alt="FetchPatterns" className="h-16 w-auto" />
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">FetchPatterns</h1>
-              <p className="text-gray-600 text-sm">AI-Powered Document Analysis & Visualization</p>
+          <div className="max-w-6xl mx-auto px-6 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <img src={fetchPatternsIcon} alt="FetchPatterns" className="h-16 w-auto" />
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">FetchPatterns</h1>
+                <p className="text-gray-600 text-sm">AI-Powered Document Analysis & Visualization</p>
+              </div>
             </div>
-          </div>
-        </div>
-
-        <div className="max-w-6xl mx-auto px-6 py-6 space-y-6">
-        {/* Session Controls - Only show after analysis is complete, not during upload */}
-        {sessionAnalyses.length > 0 && !progressStage && (
-          <div className="sticky top-20 z-10 mb-6">
-            <Card className="bg-blue-50 border-blue-200">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div className="text-sm text-blue-800">
-                  <strong>Session Active:</strong> {sessionAnalyses.length} documents analyzed. 
-                  <span className="text-blue-600 ml-2">
-                    To start fresh, refresh the page (previous analysis will be lost - save CSVs/PNGs first).
-                  </span>
+            
+            {/* Session Controls aligned with user details */}
+            {sessionAnalyses.length > 0 && !progressStage && (
+              <div className="flex items-center gap-3 text-sm">
+                <div className="text-blue-800">
+                  <strong>Session:</strong> {sessionAnalyses.length} docs analyzed
                 </div>
                 <Button 
                   variant="outline" 
@@ -467,10 +460,12 @@ export default function FetchPatternsApp() {
                   Refresh Session
                 </Button>
               </div>
-            </CardContent>
-            </Card>
+            )}
           </div>
-        )}
+        </div>
+
+        <div className="max-w-6xl mx-auto px-6 py-6 space-y-6">
+
 
         {/* Upload Section */}
         <Card className="bg-white">
@@ -875,7 +870,6 @@ export default function FetchPatternsApp() {
                 />
               ) : (
                 <div className="text-gray-400 text-center h-[450px] flex flex-col items-center justify-center">
-                  <div className="text-4xl mb-4">📊</div>
                   <p>Upload and process documents to see word cloud visualization</p>
                 </div>
               )}
