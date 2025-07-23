@@ -76,7 +76,7 @@ export default function Navbar() {
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2 px-3 py-2 bg-white rounded-md border border-gray-200 shadow-sm h-10">
                 <User className="w-4 h-4 text-gray-500" />
-                <span className="text-sm font-medium text-gray-700">{user?.firstName || user?.email || 'User'}</span>
+                <span className="text-sm font-medium text-gray-700">{(user as any)?.firstName || (user as any)?.email || 'User'}</span>
               </div>
               <Button 
                 variant="outline" 

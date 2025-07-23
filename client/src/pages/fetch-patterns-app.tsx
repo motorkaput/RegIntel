@@ -482,9 +482,9 @@ export default function FetchPatternsApp() {
                     <Upload className="w-10 h-10 mb-3 text-gray-400" />
                     <p className="mb-2 text-sm text-gray-500">
                       {selectedFiles ? (
-                        <span className="font-semibold">Choose files {selectedFiles.length} files</span>
+                        <span className="font-semibold">{selectedFiles.length} files selected</span>
                       ) : (
-                        <span><span className="font-semibold">Choose files</span></span>
+                        <span className="font-semibold">Choose files</span>
                       )}
                     </p>
                     <p className="text-xs text-gray-400">Select multiple files (PDF, DOCX, PPTX, XLSX, TXT, Images)</p>
