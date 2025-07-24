@@ -20,6 +20,7 @@ import Contact from "@/pages/contact";
 import Security from "@/pages/security";
 import PerMeaTeEnterprise from "@/pages/permeate-enterprise";
 import Next from "@/pages/next";
+import SimpleLogin from "@/components/simple-login";
 
 
 function Router() {
@@ -45,8 +46,10 @@ function Router() {
         </>
       )}
       
-      {/* SaaS Application routes */}
-      <Route path="/app/fetch-patterns" component={FetchPatternsApp} />
+      {/* SaaS Application routes - show login if not authenticated */}
+      <Route path="/app/fetch-patterns">
+        {isAuthenticated ? <FetchPatternsApp /> : <SimpleLogin />}
+      </Route>
       
       {/* Legal and info pages */}
       <Route path="/privacy" component={Privacy} />

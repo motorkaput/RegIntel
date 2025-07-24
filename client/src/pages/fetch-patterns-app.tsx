@@ -22,6 +22,7 @@ import { apiRequest } from "@/lib/queryClient";
 import fetchPatternsIcon from "@assets/FetchPatterns_Icon_1752663550310_1753148786989.png";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
+import html2canvas from 'html2canvas';
 
 interface DocumentAnalysis {
   id: string;
@@ -413,12 +414,47 @@ export default function FetchPatternsApp() {
     window.URL.revokeObjectURL(url);
   };
 
-  const exportPNG = (elementId: string, filename: string) => {
-    // Simple screenshot functionality - in production use html2canvas
-    toast({
-      title: "Export Feature",
-      description: "PNG export would be implemented with html2canvas in production",
-    });
+  const exportPNG = async (elementId: string, filename: string) => {
+    try {
+      const element = document.getElementById(elementId);
+      if (!element) {
+        toast({
+          title: "Export Error",
+          description: "Element not found for export",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const canvas = await (html2canvas as any)(element, {
+        backgroundColor: '#ffffff',
+        scale: 2, // Higher quality
+        useCORS: true,
+      });
+
+      canvas.toBlob((blob: Blob | null) => {
+        if (blob) {
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = filename;
+          a.click();
+          window.URL.revokeObjectURL(url);
+          
+          toast({
+            title: "Export Successful",
+            description: `Word cloud saved as ${filename}`,
+          });
+        }
+      }, 'image/png');
+    } catch (error) {
+      console.error('Export error:', error);
+      toast({
+        title: "Export Error", 
+        description: "Failed to export word cloud. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   if (!isAuthenticated || isLoading) {
@@ -614,9 +650,28 @@ export default function FetchPatternsApp() {
         {/* Ask Questions Section */}
         <Card className="bg-white">
           <CardHeader>
-            <CardTitle className="text-gray-900">
-              Ask Questions About Your Documents
-            </CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-gray-900">
+                Ask Questions About Your Documents
+              </CardTitle>
+              {questionHistory.length > 0 && (
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => {
+                    const csvRows = ['Question,Answer,Confidence %'];
+                    questionHistory.forEach(item => {
+                      csvRows.push(`"${item.question}","${item.data.answer}","${(item.data.confidence * 100).toFixed(1)}"`);
+                    });
+                    const csvContent = csvRows.join('\n');
+                    exportCSV(csvContent, `Fetch_Patterns_Q&A_${new Date().toISOString().slice(0,10)}.csv`);
+                  }}
+                  className="text-gray-600 border-gray-300"
+                >
+                  CSV
+                </Button>
+              )}
+            </div>
           </CardHeader>
           <CardContent>
             <div className="flex gap-4 mb-4">
