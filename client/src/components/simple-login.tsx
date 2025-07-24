@@ -14,10 +14,13 @@ export default function SimpleLogin() {
 
   const loginMutation = useMutation({
     mutationFn: async (data: { email: string; name?: string }) => {
-      return await apiRequest("/api/auth/login", "POST", data);
+      const response = await apiRequest("/api/auth/login", "POST", data);
+      return await response.json();
     },
     onSuccess: () => {
+      // Force refresh the auth state
       queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      queryClient.refetchQueries({ queryKey: ["/api/auth/user"] });
       toast({
         title: "Welcome!",
         description: "You've been logged in successfully.",
