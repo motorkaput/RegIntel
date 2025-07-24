@@ -28,16 +28,32 @@ export function getSession() {
   });
 }
 
+// Beta invite list - add emails here to allow access
+const BETA_INVITE_EMAILS = [
+  'david.jairaj@gmail.com',
+  'dj.darkbark@gmail.com',
+  'test@darkstreet.tech',
+  'test@example.com',
+  // Add more email addresses here as needed
+];
+
 export async function setupCustomAuth(app: Express) {
   app.use(getSession());
 
-  // Simple email-based authentication for free access
+  // Beta invite-only authentication system
   app.post('/api/auth/login', async (req, res) => {
     try {
       const { email, name } = req.body;
       
       if (!email || !email.includes('@')) {
         return res.status(400).json({ message: 'Valid email address required' });
+      }
+
+      // Check if email is on beta invite list
+      if (!BETA_INVITE_EMAILS.includes(email.toLowerCase())) {
+        return res.status(403).json({ 
+          message: 'Beta access only. Please contact hello@darkstreet.org for an invitation.' 
+        });
       }
 
       // Create or get user

@@ -53,7 +53,7 @@ export default function SimpleLogin() {
             Welcome to Dark Street Tech
           </CardTitle>
           <p className="text-gray-600 mt-2">
-            Enter your email to access Fetch Patterns - completely free!
+            Enter your email to access Fetch Patterns beta.
           </p>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -80,10 +80,10 @@ export default function SimpleLogin() {
             disabled={loginMutation.isPending}
             className="w-full bg-gray-800 hover:bg-gray-900"
           >
-            {loginMutation.isPending ? "Signing in..." : "Get Free Access"}
+            {loginMutation.isPending ? "Signing in..." : "Get Beta Access"}
           </Button>
           <p className="text-xs text-gray-500 text-center">
-            No password required. Free access to all features.
+            Beta access only. Contact hello@darkstreet.org for invitations.
           </p>
         </CardContent>
       </Card>
