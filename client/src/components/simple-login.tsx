@@ -20,7 +20,10 @@ export default function SimpleLogin() {
     onSuccess: () => {
       // Force refresh the auth state
       queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
-      queryClient.refetchQueries({ queryKey: ["/api/auth/user"] });
+      // Add a small delay to ensure the session is properly set
+      setTimeout(() => {
+        queryClient.refetchQueries({ queryKey: ["/api/auth/user"] });
+      }, 100);
       toast({
         title: "Welcome!",
         description: "You've been logged in successfully.",
