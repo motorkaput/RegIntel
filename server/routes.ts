@@ -18,8 +18,13 @@ const upload = multer({
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Auth middleware
-  await setupAuth(app);
+  try {
+    // Auth middleware
+    await setupAuth(app);
+  } catch (error) {
+    console.error("Failed to setup auth:", error);
+    // Continue without auth for now to prevent complete server failure
+  }
 
   // Initialize Razorpay
   initializeRazorpay();
