@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupCustomAuth as setupAuth, isAuthenticated } from "./customAuth";
+import { setupAuth, isAuthenticated } from "./replitAuth";
 import { initializeRazorpay, createSubscription, verifyPayment } from "./services/razorpay";
 import { processDocument } from "./services/documentProcessor";
 import { generatePerformanceAnalytics } from "./services/performanceAnalytics";
@@ -19,12 +19,22 @@ const upload = multer({
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
-  setupAuth(app);
+  await setupAuth(app);
 
   // Initialize Razorpay
   initializeRazorpay();
 
-  // Auth routes are now handled in customAuth.ts
+  // Auth routes
+  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      res.json(user);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
 
   // Subscription routes
   app.get('/api/subscription-plans', async (req, res) => {
@@ -147,24 +157,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Process document asynchronously
       processDocument(document.id.toString(), file.buffer, file.mimetype)
         .then(async (analysis) => {
-          await storage.updateDocument(document.id.toString(), {
+          await storage.updateDocument(document.id, {
             status: 'completed',
             extractedText: analysis.text,
             analysis: analysis.insights,
             sentiment: analysis.sentiment,
-            score: analysis.score,
+            score: analysis.score.toString(),
           });
 
           // Record performance metric
           await storage.createPerformanceMetric({
             userId,
             metricType: 'document_processed',
-            value: 1,
+            value: "1",
             metadata: { documentId: document.id.toString() },
           });
         })
         .catch(async (error) => {
-          await storage.updateDocument(document.id.toString(), {
+          await storage.updateDocument(document.id, {
             status: 'failed',
             processingError: error.message,
           });
@@ -494,7 +504,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("OpenAI API Test Error:", error);
       res.json({
         success: false,
-        error: error.message,
+        error: (error as Error).message,
         apiKeyExists: !!process.env.OPENAI_API_KEY,
         apiKeyPrefix: process.env.OPENAI_API_KEY ? process.env.OPENAI_API_KEY.substring(0, 10) + "..." : "Not found"
       });

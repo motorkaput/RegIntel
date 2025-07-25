@@ -91,7 +91,7 @@ export async function setupAuth(app: Express) {
         name: `replitauth:${domain}`,
         config,
         scope: "openid email profile offline_access",
-        callbackURL: `https://${domain}/api/callback`,
+        callbackURL: `https://${domain}/api/x9k2m/callback`,
       },
       verify,
     );
@@ -101,25 +101,21 @@ export async function setupAuth(app: Express) {
   passport.serializeUser((user: Express.User, cb) => cb(null, user));
   passport.deserializeUser((user: Express.User, cb) => cb(null, user));
 
-  app.get("/api/login", (req, res, next) => {
-    // Use the actual Replit domain instead of hostname
-    const domain = process.env.REPLIT_DOMAINS!.split(",")[0];
-    passport.authenticate(`replitauth:${domain}`, {
+  app.get("/api/x9k2m/auth", (req, res, next) => {
+    passport.authenticate(`replitauth:${req.hostname}`, {
       prompt: "login consent",
       scope: ["openid", "email", "profile", "offline_access"],
     })(req, res, next);
   });
 
-  app.get("/api/callback", (req, res, next) => {
-    // Use the actual Replit domain instead of hostname
-    const domain = process.env.REPLIT_DOMAINS!.split(",")[0];
-    passport.authenticate(`replitauth:${domain}`, {
+  app.get("/api/x9k2m/callback", (req, res, next) => {
+    passport.authenticate(`replitauth:${req.hostname}`, {
       successReturnToOrRedirect: "/",
-      failureRedirect: "/api/login",
+      failureRedirect: "/api/x9k2m/auth",
     })(req, res, next);
   });
 
-  app.get("/api/logout", (req, res) => {
+  app.get("/api/x9k2m/logout", (req, res) => {
     req.logout(() => {
       res.redirect(
         client.buildEndSessionUrl(config, {

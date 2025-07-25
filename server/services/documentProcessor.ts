@@ -8,7 +8,7 @@ interface DocumentAnalysis {
 }
 
 export async function processDocument(
-  documentId: number,
+  documentId: string | number,
   fileBuffer: Buffer,
   mimeType: string
 ): Promise<DocumentAnalysis> {
@@ -20,11 +20,12 @@ export async function processDocument(
     const score = await calculateQualityScore(text, insights);
 
     // Record processing time metric
+    const docId = typeof documentId === 'string' ? parseInt(documentId) : documentId;
     await storage.createPerformanceMetric({
-      userId: (await storage.getDocument(documentId))?.userId || "",
+      userId: (await storage.getDocument(docId))?.userId || "",
       metricType: 'processing_time',
-      value: Math.random() * 5 + 1, // Simulate processing time 1-6 seconds
-      metadata: { documentId },
+      value: (Math.random() * 5 + 1).toString(), // Simulate processing time 1-6 seconds
+      metadata: { documentId: docId.toString() },
     });
 
     return {

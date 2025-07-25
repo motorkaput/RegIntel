@@ -20,9 +20,6 @@ import Contact from "@/pages/contact";
 import Security from "@/pages/security";
 import PerMeaTeEnterprise from "@/pages/permeate-enterprise";
 import Next from "@/pages/next";
-import SimpleLogin from "@/components/simple-login";
-
-
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
 
@@ -46,9 +43,14 @@ function Router() {
         </>
       )}
       
-      {/* SaaS Application routes - show login if not authenticated */}
+      {/* SaaS Application routes - redirect to auth if not authenticated */}
       <Route path="/app/fetch-patterns">
-        {isAuthenticated ? <FetchPatternsApp /> : <SimpleLogin />}
+        {isAuthenticated ? <FetchPatternsApp /> : (() => {
+          window.location.href = "/api/x9k2m/auth";
+          return <div className="min-h-screen bg-surface-dark flex items-center justify-center">
+            <div className="text-primary">Redirecting to authentication...</div>
+          </div>;
+        })()}
       </Route>
       
       {/* Legal and info pages */}
