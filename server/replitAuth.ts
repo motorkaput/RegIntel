@@ -57,6 +57,21 @@ function updateUserSession(
 async function upsertUser(
   claims: any,
 ) {
+  // Beta invite check - only allow specific emails
+  const BETA_INVITE_EMAILS = [
+    'david.jairaj@gmail.com',
+    'dj.darkbark@gmail.com',
+    'test@darkstreet.tech',
+    'test@example.com',
+    'david@darkstreet.org',
+    // Add the current user email here if different
+  ];
+  
+  const email = claims["email"];
+  if (!BETA_INVITE_EMAILS.includes(email?.toLowerCase())) {
+    throw new Error('Beta access only. Please contact hello@darkstreet.org for an invitation.');
+  }
+
   await storage.upsertUser({
     id: claims["sub"],
     email: claims["email"],
