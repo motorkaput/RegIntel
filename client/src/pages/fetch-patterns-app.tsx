@@ -113,7 +113,7 @@ export default function FetchPatternsApp() {
       }
       
       console.log('Making API request to /api/fetch-patterns/question with documents:', documents.length);
-      const response = await apiRequest("POST", "/api/fetch-patterns/question", { question, documents });
+      const response = await apiRequest("/api/fetch-patterns/question", "POST", { question, documents });
       const result = await response.json();
       console.log('API response received:', result);
       return result;
@@ -149,7 +149,7 @@ export default function FetchPatternsApp() {
       }
       
       console.log('Making API request to /api/fetch-patterns/context-analysis with documents:', documents.length);
-      const response = await apiRequest("POST", "/api/fetch-patterns/context-analysis", { context, documents });
+      const response = await apiRequest("/api/fetch-patterns/context-analysis", "POST", { context, documents });
       const result = await response.json();
       console.log('API response received:', result);
       return result;
