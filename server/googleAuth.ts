@@ -69,10 +69,13 @@ export async function setupAuth(app: Express) {
     app.use(passport.session());
 
     // Configure Google OAuth strategy
+    const domains = process.env.REPLIT_DOMAINS?.split(",") || ["darkstreet.tech"];
+    const callbackURL = `https://${domains[0]}/api/x9k2m/callback`;
+    
     passport.use(new GoogleStrategy({
       clientID: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-      callbackURL: "/api/x9k2m/callback"
+      callbackURL: callbackURL
     }, async (accessToken, refreshToken, profile, done) => {
       try {
         await upsertUser(profile);
