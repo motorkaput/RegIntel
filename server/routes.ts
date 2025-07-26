@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./replitAuth";
+import { setupAuth, isAuthenticated } from "./googleAuth";
 import { initializeRazorpay, createSubscription, verifyPayment } from "./services/razorpay";
 import { processDocument } from "./services/documentProcessor";
 import { generatePerformanceAnalytics } from "./services/performanceAnalytics";
@@ -32,7 +32,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const user = await storage.getUser(userId);
       res.json(user);
     } catch (error) {
@@ -54,7 +54,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/subscription', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const subscription = await storage.getUserSubscription(userId);
       res.json(subscription);
     } catch (error) {
@@ -65,7 +65,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/subscription/create', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const { planId } = req.body;
       
       const plan = await storage.getSubscriptionPlan(planId);
@@ -100,7 +100,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (isValid) {
         // Update subscription status
-        const subscription = await storage.getUserSubscription(req.user.claims.sub);
+        const subscription = await storage.getUserSubscription(req.user.id);
         if (subscription) {
           await storage.updateSubscription(subscription.id, { status: 'active' });
         }
@@ -117,7 +117,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Document routes
   app.get('/api/documents', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const documents = await storage.getUserDocuments(userId);
       res.json(documents);
     } catch (error) {
@@ -128,7 +128,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/documents/upload', isAuthenticated, upload.single('file'), async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const file = req.file;
       
       if (!file) {
@@ -194,7 +194,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/documents/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const documentId = parseInt(req.params.id);
       
       const document = await storage.getDocument(documentId);
@@ -211,7 +211,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete('/api/documents/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const documentId = parseInt(req.params.id);
       
       const document = await storage.getDocument(documentId);
@@ -230,7 +230,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Fetch Patterns API routes
   app.get('/api/fetch-patterns/analyses', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const analyses = await storage.getUserDocumentAnalyses(userId);
       res.json(analyses);
     } catch (error) {
@@ -241,7 +241,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/fetch-patterns/upload', isAuthenticated, upload.array('files'), async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const files = req.files as Express.Multer.File[];
       
       if (!files || files.length === 0) {
@@ -309,7 +309,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/fetch-patterns/analysis/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const analysisId = req.params.id;
       
       const analysis = await storage.getDocumentAnalysis(analysisId);
@@ -326,7 +326,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete('/api/fetch-patterns/analysis/:id', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const analysisId = req.params.id;
       
       const analysis = await storage.getDocumentAnalysis(analysisId);
@@ -398,7 +398,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Performance analytics routes
   app.get('/api/analytics/dashboard', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const analytics = await generatePerformanceAnalytics(userId);
       res.json(analytics);
     } catch (error) {
@@ -409,7 +409,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/analytics/metrics', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.id;
       const { type, startDate, endDate } = req.query;
       
       let metrics;
