@@ -112,8 +112,11 @@ export default function FetchPatternsApp() {
         };
       }
       
+      console.log('Making API request to /api/fetch-patterns/question with documents:', documents.length);
       const response = await apiRequest("POST", "/api/fetch-patterns/question", { question, documents });
-      return response.json();
+      const result = await response.json();
+      console.log('API response received:', result);
+      return result;
     },
     onSuccess: (data, variables) => {
       console.log('Question mutation success:', data);
@@ -145,8 +148,11 @@ export default function FetchPatternsApp() {
         };
       }
       
+      console.log('Making API request to /api/fetch-patterns/context-analysis with documents:', documents.length);
       const response = await apiRequest("POST", "/api/fetch-patterns/context-analysis", { context, documents });
-      return response.json();
+      const result = await response.json();
+      console.log('API response received:', result);
+      return result;
     },
     onSuccess: (data, variables) => {
       console.log('Context mutation success:', data);
