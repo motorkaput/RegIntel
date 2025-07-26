@@ -64,7 +64,8 @@ async function upsertUser(
     'test@darkstreet.tech',
     'test@example.com',
     'david@darkstreet.org',
-    // Add the current user email here if different
+    'barsha@darkstreet.org',
+    'barshapanda.project@gmail.com',
   ];
   
   const email = claims["email"];
