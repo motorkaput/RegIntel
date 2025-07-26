@@ -116,9 +116,13 @@ export default function FetchPatternsApp() {
       return response.json();
     },
     onSuccess: (data, variables) => {
+      console.log('Question mutation success:', data);
       // Add to history instead of replacing
       setQuestionHistory(prev => [{ question: variables, data }, ...prev]);
       setQuestion(""); // Clear input after successful submission
+    },
+    onError: (error) => {
+      console.error('Question mutation error:', error);
     },
   });
 
@@ -145,9 +149,13 @@ export default function FetchPatternsApp() {
       return response.json();
     },
     onSuccess: (data, variables) => {
+      console.log('Context mutation success:', data);
       // Add to history instead of replacing
       setContextHistory(prev => [{ query: variables, data }, ...prev]);
       setContextQuery(""); // Clear input after successful submission
+    },
+    onError: (error) => {
+      console.error('Context mutation error:', error);
     },
   });
 
@@ -319,12 +327,16 @@ export default function FetchPatternsApp() {
 
   const handleAskQuestion = () => {
     if (question.trim()) {
+      console.log('Asking question:', question);
+      console.log('Session analyses:', sessionAnalyses.length);
       questionMutation.mutate(question);
     }
   };
 
   const handleContextAnalysis = () => {
     if (contextQuery.trim()) {
+      console.log('Analyzing context:', contextQuery);
+      console.log('Session analyses:', sessionAnalyses.length);
       contextMutation.mutate(contextQuery);
     }
   };
@@ -451,7 +463,7 @@ export default function FetchPatternsApp() {
       
       {/* Free user preview header bar */}
       <div className="bg-blue-50 border-b border-blue-200 py-2 sticky top-24 z-30">
-        <div className="flex items-center justify-center">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <span className="text-xs text-blue-800 font-medium">
             Free user preview. Limited time. Send your feedback to hello@darkstreet.org
           </span>
