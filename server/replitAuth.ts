@@ -15,7 +15,7 @@ if (!process.env.REPLIT_DOMAINS) {
 const getOidcConfig = memoize(
   async () => {
     return await client.discovery(
-      new URL(process.env.ISSUER_URL ?? "https://replit.com/oidc"),
+      new URL("https://replit.com/oidc"),
       process.env.REPL_ID!
     );
   },
@@ -79,10 +79,15 @@ export async function setupAuth(app: Express) {
     tokens: client.TokenEndpointResponse & client.TokenEndpointResponseHelpers,
     verified: passport.AuthenticateCallback
   ) => {
-    const user = {};
-    updateUserSession(user, tokens);
-    await upsertUser(tokens.claims());
-    verified(null, user);
+    try {
+      const user = {};
+      updateUserSession(user, tokens);
+      await upsertUser(tokens.claims());
+      verified(null, user);
+    } catch (error) {
+      console.error("Error in auth verification:", error);
+      verified(error, null);
+    }
   };
 
   for (const domain of process.env
@@ -113,6 +118,7 @@ export async function setupAuth(app: Express) {
     passport.authenticate(`replitauth:${req.hostname}`, {
       successReturnToOrRedirect: "/",
       failureRedirect: "/api/x9k2m/auth",
+      failureMessage: true
     })(req, res, next);
   });
 
