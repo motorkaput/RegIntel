@@ -449,9 +449,18 @@ export default function FetchPatternsApp() {
     <div className="min-h-screen bg-surface-white">
       <Navbar />
       
-      <main className="pt-24 pb-6">
+      {/* Free user preview header bar */}
+      <div className="bg-blue-50 border-b border-blue-200 py-2 sticky top-24 z-30">
+        <div className="flex items-center justify-center">
+          <span className="text-xs text-blue-800 font-medium">
+            Free user preview. Limited time. Send your feedback to hello@darkstreet.org
+          </span>
+        </div>
+      </div>
+      
+      <main className="pt-0 pb-6">
         {/* FetchPatterns specific header - sticky and compact */}
-        <div className="bg-gray-50 border-b border-gray-200 py-3 sticky top-36 z-20">
+        <div className="bg-gray-50 border-b border-gray-200 py-3 sticky top-32 z-20">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <img src={fetchPatternsIcon} alt="FetchPatterns" className="h-10 w-auto" />
