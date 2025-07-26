@@ -52,13 +52,19 @@ async function upsertUser(profile: any) {
     throw new Error('Beta access only. Please contact hello@darkstreet.org for an invitation.');
   }
 
-  await storage.upsertUser({
-    id: profile.id,
-    email: email,
-    firstName: profile.name?.givenName || '',
-    lastName: profile.name?.familyName || '',
-    profileImageUrl: profile.photos?.[0]?.value || null,
-  });
+  try {
+    await storage.upsertUser({
+      id: profile.id,
+      email: email,
+      firstName: profile.name?.givenName || '',
+      lastName: profile.name?.familyName || '',
+      profileImageUrl: profile.photos?.[0]?.value || null,
+    });
+    console.log(`User upserted successfully: ${email} (ID: ${profile.id})`);
+  } catch (error) {
+    console.error(`Error upserting user ${email}:`, error);
+    throw error;
+  }
 }
 
 export async function setupAuth(app: Express) {
@@ -115,8 +121,14 @@ export async function setupAuth(app: Express) {
         failureMessage: true 
       }),
       (req, res) => {
-        // Successful authentication, redirect to app
-        res.redirect('/');
+        try {
+          console.log(`Authentication successful for user: ${(req.user as any)?.email}`);
+          // Successful authentication, redirect to app
+          res.redirect('/');
+        } catch (error) {
+          console.error('Error in authentication callback:', error);
+          res.redirect('/api/x9k2m/auth');
+        }
       }
     );
 
