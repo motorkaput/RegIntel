@@ -68,9 +68,13 @@ export async function setupAuth(app: Express) {
     app.use(passport.initialize());
     app.use(passport.session());
 
-    // Configure Google OAuth strategy
-    const domains = process.env.REPLIT_DOMAINS?.split(",") || ["darkstreet.tech"];
-    const callbackURL = `https://${domains[0]}/api/x9k2m/callback`;
+    // Configure Google OAuth strategy - use the actual Replit domain
+    const domains = process.env.REPLIT_DOMAINS?.split(",") || [];
+    const callbackURL = domains.length > 0 ? 
+      `https://${domains[0]}/api/x9k2m/callback` : 
+      `https://darkstreet.tech/api/x9k2m/callback`;
+    
+    console.log("Google Auth Callback URL:", callbackURL);
     
     passport.use(new GoogleStrategy({
       clientID: process.env.GOOGLE_CLIENT_ID!,
