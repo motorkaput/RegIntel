@@ -17,6 +17,9 @@ const upload = multer({
   },
 });
 
+// In-memory storage for free version
+const freeVersionAnalyses = new Map<string, any>();
+
 export async function registerRoutes(app: Express): Promise<Server> {
   try {
     // Auth middleware
@@ -230,8 +233,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Fetch Patterns API routes - now free
   app.get('/api/fetch-patterns/analyses', async (req: any, res) => {
     try {
-      // Return empty array for free version - session-based storage only
-      res.json([]);
+      // Return analyses from in-memory storage for free version
+      const analyses = Array.from(freeVersionAnalyses.values());
+      res.json(analyses);
     } catch (error) {
       console.error("Error fetching document analyses:", error);
       res.status(500).json({ message: "Failed to fetch document analyses" });
@@ -268,16 +272,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
           uploadDate: new Date(),
         };
 
+        // Store initial analysis in memory
+        freeVersionAnalyses.set(analysisId, analysis);
+
         // Process document asynchronously with AI analysis
         setImmediate(async () => {
           try {
             const result = await processDocumentWithAI(file.buffer, file.mimetype);
             
-            // For free version, store results in temporary storage (could use Redis or in-memory)
-            // For now, we'll just process but not persist to database
+            // Update analysis with completed results in memory
+            const completedAnalysis = {
+              ...analysis,
+              status: 'completed',
+              extractedText: result.extractedText,
+              classification: result.classification,
+              sentiment: result.sentiment,
+              keywords: result.keywords,
+              insights: result.insights,
+              riskFlags: result.riskFlags,
+              summary: result.summary,
+              wordCloud: result.wordCloud,
+              completedAt: new Date(),
+            };
+            
+            freeVersionAnalyses.set(analysisId, completedAnalysis);
             console.log(`Document ${file.originalname} processed successfully (free version)`);
           } catch (error) {
             console.error(`Error processing document ${file.originalname}:`, error);
+            // Update with error status
+            const errorAnalysis = {
+              ...analysis,
+              status: 'error',
+              processingError: (error as Error).message,
+            };
+            freeVersionAnalyses.set(analysisId, errorAnalysis);
           }
         });
 
@@ -296,8 +324,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const analysisId = req.params.id;
       
-      // For free version, return not found - session-based only
-      res.status(404).json({ message: "Analysis not found - use session-based storage" });
+      // Get analysis from in-memory storage
+      const analysis = freeVersionAnalyses.get(analysisId);
+      if (!analysis) {
+        return res.status(404).json({ message: "Analysis not found" });
+      }
+      
+      res.json(analysis);
     } catch (error) {
       console.error("Error fetching analysis:", error);
       res.status(500).json({ message: "Failed to fetch analysis" });
@@ -306,7 +339,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete('/api/fetch-patterns/analysis/:id', async (req: any, res) => {
     try {
-      // For free version, always return success - session-based only
+      const analysisId = req.params.id;
+      
+      // Delete from in-memory storage
+      freeVersionAnalyses.delete(analysisId);
       res.json({ success: true });
     } catch (error) {
       console.error("Error deleting analysis:", error);
