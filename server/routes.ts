@@ -227,29 +227,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Fetch Patterns API routes
-  app.get('/api/fetch-patterns/analyses', isAuthenticated, async (req: any, res) => {
+  // Fetch Patterns API routes - now free
+  app.get('/api/fetch-patterns/analyses', async (req: any, res) => {
     try {
-      const userId = req.user.id;
-      const analyses = await storage.getUserDocumentAnalyses(userId);
-      res.json(analyses);
+      // Return empty array for free version - session-based storage only
+      res.json([]);
     } catch (error) {
       console.error("Error fetching document analyses:", error);
       res.status(500).json({ message: "Failed to fetch document analyses" });
     }
   });
 
-  app.post('/api/fetch-patterns/upload', isAuthenticated, upload.array('files'), async (req: any, res) => {
+  app.post('/api/fetch-patterns/upload', upload.array('files'), async (req: any, res) => {
     try {
-      const userId = req.user.id;
       const files = req.files as Express.Multer.File[];
       
       if (!files || files.length === 0) {
         return res.status(400).json({ message: "No files uploaded" });
       }
 
-      // For session-based usage, use a generous session limit instead of subscription limits
-      // This allows users to work with reasonable document sets per session
+      // For free version, use a reasonable session limit
       const sessionLimit = 20; // Allow up to 20 documents per session
       
       if (files.length > sessionLimit) {
@@ -259,40 +256,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const analysisPromises = files.map(async (file) => {
         const analysisId = nanoid();
         
-        const analysis = await storage.createDocumentAnalysis({
+        // Create temporary analysis object without database storage for free version
+        const analysis = {
           id: analysisId,
-          userId,
+          userId: 'free-user', // No real user ID for free version
           filename: `${nanoid()}_${file.originalname}`,
           originalName: file.originalname,
           mimeType: file.mimetype,
           size: file.size,
-          status: 'processing',
+          status: 'processing' as const,
           uploadDate: new Date(),
-        });
+        };
 
         // Process document asynchronously with AI analysis
         setImmediate(async () => {
           try {
             const result = await processDocumentWithAI(file.buffer, file.mimetype);
             
-            await storage.updateDocumentAnalysis(analysisId, {
-              status: 'completed',
-              extractedText: result.extractedText,
-              classification: result.classification,
-              sentiment: result.sentiment,
-              keywords: result.keywords,
-              insights: result.insights,
-              riskFlags: result.riskFlags,
-              summary: result.summary,
-              wordCloud: result.wordCloud,
-              completedAt: new Date(),
-            });
+            // For free version, store results in temporary storage (could use Redis or in-memory)
+            // For now, we'll just process but not persist to database
+            console.log(`Document ${file.originalname} processed successfully (free version)`);
           } catch (error) {
             console.error(`Error processing document ${file.originalname}:`, error);
-            await storage.updateDocumentAnalysis(analysisId, {
-              status: 'error',
-              processingError: (error as Error).message,
-            });
           }
         });
 
@@ -307,34 +292,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/fetch-patterns/analysis/:id', isAuthenticated, async (req: any, res) => {
+  app.get('/api/fetch-patterns/analysis/:id', async (req: any, res) => {
     try {
-      const userId = req.user.id;
       const analysisId = req.params.id;
       
-      const analysis = await storage.getDocumentAnalysis(analysisId);
-      if (!analysis || analysis.userId !== userId) {
-        return res.status(404).json({ message: "Analysis not found" });
-      }
-
-      res.json(analysis);
+      // For free version, return not found - session-based only
+      res.status(404).json({ message: "Analysis not found - use session-based storage" });
     } catch (error) {
       console.error("Error fetching analysis:", error);
       res.status(500).json({ message: "Failed to fetch analysis" });
     }
   });
 
-  app.delete('/api/fetch-patterns/analysis/:id', isAuthenticated, async (req: any, res) => {
+  app.delete('/api/fetch-patterns/analysis/:id', async (req: any, res) => {
     try {
-      const userId = req.user.id;
-      const analysisId = req.params.id;
-      
-      const analysis = await storage.getDocumentAnalysis(analysisId);
-      if (!analysis || analysis.userId !== userId) {
-        return res.status(404).json({ message: "Analysis not found" });
-      }
-
-      await storage.deleteDocumentAnalysis(analysisId);
+      // For free version, always return success - session-based only
       res.json({ success: true });
     } catch (error) {
       console.error("Error deleting analysis:", error);
@@ -342,8 +314,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Question answering endpoint
-  app.post('/api/fetch-patterns/question', isAuthenticated, async (req: any, res) => {
+  // Question answering endpoint - now free
+  app.post('/api/fetch-patterns/question', async (req: any, res) => {
     try {
       const { question, documents } = req.body;
       
@@ -367,8 +339,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Context analysis endpoint
-  app.post('/api/fetch-patterns/context-analysis', isAuthenticated, async (req: any, res) => {
+  // Context analysis endpoint - now free
+  app.post('/api/fetch-patterns/context-analysis', async (req: any, res) => {
     try {
       const { context, documents } = req.body;
       

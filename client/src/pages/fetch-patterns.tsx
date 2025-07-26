@@ -94,12 +94,13 @@ export default function FetchPatterns() {
         <section className="py-6 section-divider">
           <div className="container-section">
             <div>
-              <Link href="/app/fetch-patterns">
-                <Button className="btn-primary px-8 py-4 text-lg flex items-center gap-2">
-                  Launch Fetch Patterns
-                  <ArrowRight className="w-5 h-5" />
-                </Button>
-              </Link>
+              <Button 
+                className="btn-primary px-8 py-4 text-lg flex items-center gap-2"
+                onClick={() => window.open('/x7k9p/fp-analyzer', '_blank')}
+              >
+                Launch Fetch Patterns
+                <ArrowRight className="w-5 h-5" />
+              </Button>
             </div>
           </div>
         </section>

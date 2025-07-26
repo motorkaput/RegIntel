@@ -1,4 +1,4 @@
-import { useAuth } from "@/hooks/useAuth";
+
 import { useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import WordCloud from "@/components/WordCloud";
@@ -62,7 +62,6 @@ interface ContextAnalysis {
 
 export default function FetchPatternsApp() {
   const { toast } = useToast();
-  const { isAuthenticated, isLoading } = useAuth();
   const queryClient = useQueryClient();
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
   const [pendingFiles, setPendingFiles] = useState<File[]>([]); // For cumulative uploads
@@ -83,20 +82,7 @@ export default function FetchPatternsApp() {
     document.body.scrollTop = 0;
   }, []);
 
-  // Redirect to login if not authenticated
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      toast({
-        title: "Authentication Required",
-        description: "Please sign in to access Fetch Patterns.",
-        variant: "destructive",
-      });
-      setTimeout(() => {
-        window.location.href = "/api/login";
-      }, 500);
-      return;
-    }
-  }, [isAuthenticated, isLoading, toast]);
+  // App is now free - no authentication required
 
   // Cleanup polling on unmount
   useEffect(() => {
@@ -457,13 +443,7 @@ export default function FetchPatternsApp() {
     }
   };
 
-  if (!isAuthenticated || isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-gray-600 text-xl">Loading...</div>
-      </div>
-    );
-  }
+  // App is now free and accessible without authentication
 
   return (
     <div className="min-h-screen bg-surface-white">

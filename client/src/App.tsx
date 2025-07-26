@@ -43,15 +43,8 @@ function Router() {
         </>
       )}
       
-      {/* SaaS Application routes - redirect to auth if not authenticated */}
-      <Route path="/app/fetch-patterns">
-        {isAuthenticated ? <FetchPatternsApp /> : (() => {
-          window.location.href = "/api/x9k2m/auth";
-          return <div className="min-h-screen bg-surface-dark flex items-center justify-center">
-            <div className="text-primary">Redirecting to authentication...</div>
-          </div>;
-        })()}
-      </Route>
+      {/* SaaS Application routes - now free and accessible */}
+      <Route path="/x7k9p/fp-analyzer" component={FetchPatternsApp} />
       
       {/* Legal and info pages */}
       <Route path="/privacy" component={Privacy} />
