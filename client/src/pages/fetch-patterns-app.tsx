@@ -469,7 +469,7 @@ export default function FetchPatternsApp() {
       
       {/* Free user preview header bar */}
       <div className="bg-blue-50 border-b border-blue-200 py-2 sticky top-24 z-30">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center">
           <span className="text-xs text-blue-800 font-medium">
             Free user preview. Limited time. Send your feedback to hello@darkstreet.org
           </span>
@@ -690,7 +690,10 @@ export default function FetchPatternsApp() {
                 onKeyPress={(e) => e.key === 'Enter' && handleAskQuestion()}
               />
               <Button 
-                onClick={handleAskQuestion}
+                onClick={() => {
+                  console.log('ASK QUESTION BUTTON CLICKED!');
+                  handleAskQuestion();
+                }}
                 disabled={!question.trim() || questionMutation.isPending}
                 className="bg-gray-600 hover:bg-gray-700"
               >
@@ -765,7 +768,10 @@ export default function FetchPatternsApp() {
                 onKeyPress={(e) => e.key === 'Enter' && handleContextAnalysis()}
               />
               <Button 
-                onClick={handleContextAnalysis}
+                onClick={() => {
+                  console.log('CONTEXT ANALYSIS BUTTON CLICKED!');
+                  handleContextAnalysis();
+                }}
                 disabled={!contextQuery.trim() || contextMutation.isPending}
                 className="bg-gray-600 hover:bg-gray-700"
               >
