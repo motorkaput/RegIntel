@@ -96,7 +96,7 @@ export default function FetchPatterns() {
             <div>
               <Button 
                 className="btn-primary px-8 py-4 text-lg flex items-center gap-2"
-                onClick={() => window.open('/x7k9p/fp-analyzer', '_blank')}
+                onClick={() => window.location.href = '/beta-login'}
               >
                 Launch Fetch Patterns
                 <ArrowRight className="w-5 h-5" />

@@ -23,6 +23,7 @@ import fetchPatternsIcon from "@assets/FetchPatterns_Icon_1752663550310_17531487
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import html2canvas from 'html2canvas';
+import { useLocation } from "wouter";
 
 interface DocumentAnalysis {
   id: string;
@@ -63,6 +64,15 @@ interface ContextAnalysis {
 export default function FetchPatternsApp() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [, setLocation] = useLocation();
+
+  // Check beta authentication
+  useEffect(() => {
+    const betaAuth = sessionStorage.getItem("betaAuth");
+    if (!betaAuth) {
+      setLocation("/beta-login");
+    }
+  }, [setLocation]);
   const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
   const [pendingFiles, setPendingFiles] = useState<File[]>([]); // For cumulative uploads
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -420,21 +430,63 @@ export default function FetchPatternsApp() {
 
   const exportPNG = async (elementId: string, filename: string) => {
     try {
-      const element = document.getElementById(elementId);
-      if (!element) {
-        toast({
-          title: "Export Error",
-          description: "Element not found for export",
-          variant: "destructive",
-        });
-        return;
+      // Create a clean export element
+      const exportDiv = document.createElement('div');
+      exportDiv.style.width = '800px';
+      exportDiv.style.height = '600px';
+      exportDiv.style.backgroundColor = '#ffffff';
+      exportDiv.style.padding = '40px';
+      exportDiv.style.fontFamily = 'Roboto, sans-serif';
+      exportDiv.style.position = 'absolute';
+      exportDiv.style.left = '-9999px';
+      
+      // Add header text
+      const headerDiv = document.createElement('div');
+      headerDiv.style.marginBottom = '20px';
+      headerDiv.innerHTML = `
+        <div style="font-size: 24px; font-weight: bold; color: #1f2937; margin-bottom: 4px;">
+          Fetch Patterns Word Cloud
+        </div>
+        <div style="font-size: 14px; color: #6b7280;">
+          ${new Date().toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+          })}
+        </div>
+      `;
+      exportDiv.appendChild(headerDiv);
+      
+      // Add word cloud container
+      const wordCloudDiv = document.createElement('div');
+      wordCloudDiv.style.width = '720px';
+      wordCloudDiv.style.height = '480px';
+      wordCloudDiv.style.position = 'relative';
+      
+      // Clone the original word cloud content
+      const originalWordCloud = document.querySelector('#word-cloud .bg-white.p-8');
+      if (originalWordCloud) {
+        const wordCloudClone = originalWordCloud.cloneNode(true) as HTMLElement;
+        wordCloudClone.style.width = '100%';
+        wordCloudClone.style.height = '100%';
+        wordCloudClone.style.padding = '20px';
+        wordCloudDiv.appendChild(wordCloudClone);
       }
+      
+      exportDiv.appendChild(wordCloudDiv);
+      document.body.appendChild(exportDiv);
 
-      const canvas = await (html2canvas as any)(element, {
+      // Capture the clean export
+      const canvas = await (html2canvas as any)(exportDiv, {
         backgroundColor: '#ffffff',
-        scale: 2, // Higher quality
+        scale: 2,
         useCORS: true,
+        width: 800,
+        height: 600,
       });
+
+      // Remove the temporary element
+      document.body.removeChild(exportDiv);
 
       canvas.toBlob((blob: Blob | null) => {
         if (blob) {
@@ -444,11 +496,6 @@ export default function FetchPatternsApp() {
           a.download = filename;
           a.click();
           window.URL.revokeObjectURL(url);
-          
-          toast({
-            title: "Export Successful",
-            description: `Word cloud saved as ${filename}`,
-          });
         }
       }, 'image/png');
     } catch (error) {

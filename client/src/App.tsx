@@ -13,6 +13,7 @@ import Pricing from "@/pages/pricing";
 import Subscription from "@/pages/subscription";
 import FetchPatterns from "@/pages/fetch-patterns";
 import FetchPatternsApp from "@/pages/fetch-patterns-app";
+import BetaLogin from "@/pages/beta-login";
 import Privacy from "@/pages/privacy";
 import Terms from "@/pages/terms";
 import AboutPage from "@/pages/about";
@@ -43,7 +44,8 @@ function Router() {
         </>
       )}
       
-      {/* SaaS Application routes - now free and accessible */}
+      {/* SaaS Application routes - beta protected */}
+      <Route path="/beta-login" component={BetaLogin} />
       <Route path="/x7k9p/fp-analyzer" component={FetchPatternsApp} />
       
       {/* Legal and info pages */}
