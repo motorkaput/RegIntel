@@ -20,10 +20,44 @@ export default function PerMeateBetaLogin() {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simple validation
-    if (username === "EnterpriseUser" && password === BETA_PASSWORD) {
-      // Set session storage to remember auth
+    // Define user credentials and types
+    const validUsers = {
+      "EnterpriseUser": {
+        password: "7c2f5a1d8b4e9c6f3a0d2b5e8c1f4a7b",
+        userType: "administrator",
+        name: "Administrator User",
+        employeeId: "ADM001"
+      },
+      "ProjectLeader": {
+        password: "pl_a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6",
+        userType: "project_leader", 
+        name: "John Smith",
+        employeeId: "EMP001"
+      },
+      "TeamMember": {
+        password: "tm_x9y8z7w6v5u4t3s2r1q0p9o8n7m6l5k4",
+        userType: "team_member",
+        name: "Sarah Johnson", 
+        employeeId: "EMP002"
+      },
+      "OrgLeader": {
+        password: "ol_z3x1c5v7b9n2m4k6j8h0g2f4d6s8a0q2",
+        userType: "organization_leader",
+        name: "Michael Brown",
+        employeeId: "EMP003"
+      }
+    };
+
+    const user = validUsers[username as keyof typeof validUsers];
+    
+    if (user && password === user.password) {
       sessionStorage.setItem("perMeateBetaAuth", "true");
+      sessionStorage.setItem("perMeateCurrentUser", JSON.stringify({
+        username,
+        userType: user.userType,
+        name: user.name,
+        employeeId: user.employeeId
+      }));
       setLocation("/z9m3k/pe-workspace");
     } else {
       toast({
@@ -50,6 +84,15 @@ export default function PerMeateBetaLogin() {
               <p className="text-gray-600 text-sm mt-2">
                 Enter your credentials to access PerMeaTe Enterprise
               </p>
+              <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="text-xs text-blue-800 font-medium">Demo Users:</p>
+                <div className="text-xs text-blue-700 mt-1 space-y-1">
+                  <div>EnterpriseUser (Administrator)</div>
+                  <div>ProjectLeader (Project Leader)</div>
+                  <div>TeamMember (Team Member)</div>
+                  <div>OrgLeader (Organization Leader)</div>
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleLogin} className="space-y-4">

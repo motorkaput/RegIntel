@@ -438,6 +438,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // PerMeaTe Enterprise routes
+  app.post('/api/permeate/analyze-csv', async (req, res) => {
+    try {
+      const { csvContent } = req.body;
+      
+      if (!csvContent) {
+        return res.status(400).json({ message: 'CSV content is required' });
+      }
+
+      const { analyzeCSVData } = await import('./services/permeateAI');
+      const result = await analyzeCSVData(csvContent);
+      
+      res.json(result);
+    } catch (error) {
+      console.error('CSV analysis error:', error);
+      res.status(500).json({ message: 'Failed to analyze CSV data' });
+    }
+  });
+
+  app.post('/api/permeate/generate-breakdown', async (req, res) => {
+    try {
+      const { goalTitle, goalDescription, companyContext } = req.body;
+      
+      if (!goalTitle || !goalDescription) {
+        return res.status(400).json({ message: 'Goal title and description are required' });
+      }
+
+      const { generateGoalBreakdown } = await import('./services/permeateAI');
+      const result = await generateGoalBreakdown(goalTitle, goalDescription, companyContext || '');
+      
+      res.json(result);
+    } catch (error) {
+      console.error('Goal breakdown error:', error);
+      res.status(500).json({ message: 'Failed to generate goal breakdown' });
+    }
+  });
+
+  app.post('/api/permeate/analyze-performance', async (req, res) => {
+    try {
+      const { goalsData, projectsData, tasksData } = req.body;
+      
+      const { analyzePerformanceData } = await import('./services/permeateAI');
+      const result = await analyzePerformanceData(goalsData || [], projectsData || [], tasksData || []);
+      
+      res.json(result);
+    } catch (error) {
+      console.error('Performance analysis error:', error);
+      res.status(500).json({ message: 'Failed to analyze performance data' });
+    }
+  });
+
   // Initialize default subscription plans
   const initializePlans = async () => {
     try {

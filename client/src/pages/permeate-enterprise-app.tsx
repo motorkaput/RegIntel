@@ -24,6 +24,185 @@ import permeateIcon from "@assets/PerMeaTeEnterprise_Icon_1752664675820.png";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 
+// AI Analytics Component
+function AIAnalyticsTab({ goals, company, employees }: { goals: Goal[], company: Company | null, employees: Employee[] }) {
+  const [analyticsData, setAnalyticsData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  
+  const generateAnalytics = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/permeate/analyze-performance', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          goalsData: goals,
+          projectsData: goals.flatMap(g => g.projects),
+          tasksData: goals.flatMap(g => g.projects).flatMap(p => p.tasks)
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setAnalyticsData(data);
+      }
+    } catch (error) {
+      console.error('Analytics generation error:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (goals.length > 0) {
+      generateAnalytics();
+    }
+  }, [goals]);
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold text-gray-900">AI-Powered Performance Analytics</h2>
+        <Button onClick={generateAnalytics} disabled={isLoading}>
+          {isLoading ? 'Analyzing...' : 'Refresh Analysis'}
+        </Button>
+      </div>
+      
+      {isLoading && (
+        <Card>
+          <CardContent className="p-8 text-center">
+            <div className="animate-pulse">
+              <div className="h-4 bg-gray-200 rounded w-3/4 mx-auto mb-4"></div>
+              <div className="h-4 bg-gray-200 rounded w-1/2 mx-auto"></div>
+            </div>
+            <p className="text-gray-600 mt-4">OpenAI is analyzing your organizational performance...</p>
+          </CardContent>
+        </Card>
+      )}
+      
+      {analyticsData && (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-gray-900">Overall Performance Score</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-4xl font-bold text-green-600 mb-2">
+                  {analyticsData.overallScore}/100
+                </div>
+                <p className="text-sm text-gray-600">AI-calculated performance rating</p>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-gray-900">Goals Progress</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-4xl font-bold text-blue-600 mb-2">
+                  {goals.filter(g => g.status === 'completed').length}/{goals.length}
+                </div>
+                <p className="text-sm text-gray-600">
+                  {goals.length > 0 ? Math.round((goals.filter(g => g.status === 'completed').length / goals.length) * 100) : 0}% completion rate
+                </p>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-gray-900">Risk Areas</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-4xl font-bold text-red-600 mb-2">
+                  {analyticsData.riskAreas?.length || 0}
+                </div>
+                <p className="text-sm text-gray-600">Areas needing attention</p>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-green-900">Key Insights</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {analyticsData.insights?.map((insight: string, index: number) => (
+                    <div key={index} className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                      <p className="text-sm text-green-800">{insight}</p>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-blue-900">AI Recommendations</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {analyticsData.recommendations?.map((rec: string, index: number) => (
+                    <div key={index} className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                      <p className="text-sm text-blue-800">{rec}</p>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {analyticsData.topPerformers?.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-purple-900">Top Performers</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {analyticsData.topPerformers.map((performer: string, index: number) => (
+                    <div key={index} className="p-3 bg-purple-50 border border-purple-200 rounded-lg text-center">
+                      <p className="text-sm font-medium text-purple-800">{performer}</p>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {analyticsData.riskAreas?.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-red-900">Risk Areas & Improvement Needed</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {analyticsData.riskAreas.map((risk: string, index: number) => (
+                    <div key={index} className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                      <p className="text-sm text-red-800">{risk}</p>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </>
+      )}
+      
+      {!analyticsData && !isLoading && goals.length === 0 && (
+        <Card>
+          <CardContent className="p-8 text-center">
+            <p className="text-gray-600">Create some goals to see AI-powered analytics</p>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}
+
 interface Company {
   id: string;
   name: string;
@@ -96,15 +275,37 @@ export default function PerMeaTeEnterpriseApp() {
   }, [setLocation]);
 
   // User type and company setup state
-  const [currentUser, setCurrentUser] = useState<Employee>({
-    id: '1',
-    employeeId: 'ADM001',
-    name: 'Administrator User',
-    alias: 'admin@company.com',
-    location: 'New York, USA',
-    role: 'System Administrator',
-    keySkills: ['System Setup', 'User Management'],
-    userType: 'administrator'
+  const [currentUser, setCurrentUser] = useState<Employee>(() => {
+    const savedUser = sessionStorage.getItem("perMeateCurrentUser");
+    if (savedUser) {
+      const userData = JSON.parse(savedUser);
+      return {
+        id: userData.employeeId,
+        employeeId: userData.employeeId,
+        name: userData.name,
+        alias: `${userData.name.toLowerCase().replace(' ', '.')}@company.com`,
+        location: 'New York, USA',
+        role: userData.userType === 'administrator' ? 'System Administrator' :
+              userData.userType === 'project_leader' ? 'Project Manager' :
+              userData.userType === 'team_member' ? 'Software Developer' : 'CEO',
+        keySkills: userData.userType === 'administrator' ? ['System Setup', 'User Management'] :
+                   userData.userType === 'project_leader' ? ['Project Management', 'Leadership'] :
+                   userData.userType === 'team_member' ? ['React', 'TypeScript', 'Node.js'] : ['Strategic Planning', 'Leadership'],
+        userType: userData.userType
+      };
+    }
+    
+    // Default to administrator if no saved user
+    return {
+      id: '1',
+      employeeId: 'ADM001',
+      name: 'Administrator User',
+      alias: 'admin@company.com',
+      location: 'New York, USA',
+      role: 'System Administrator',
+      keySkills: ['System Setup', 'User Management'],
+      userType: 'administrator'
+    };
   });
 
   const [company, setCompany] = useState<Company | null>(null);
@@ -171,49 +372,48 @@ export default function PerMeaTeEnterpriseApp() {
     setOnboardingStep(2);
   };
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file && (file.type === 'text/csv' || file.name.endsWith('.csv') || file.name.endsWith('.xlsx'))) {
       setCsvFile(file);
-      // Mock processing the CSV file
-      setTimeout(() => {
-        const mockEmployees: Employee[] = [
-          {
-            id: '1',
-            employeeId: 'EMP001',
-            name: 'John Smith',
-            alias: 'john.smith@company.com',
-            location: 'New York, USA',
-            role: 'Project Manager',
-            reportingTo: 'ADM001',
-            keySkills: ['Project Management', 'Leadership'],
-            userType: 'project_leader'
+      
+      try {
+        // Read file content
+        const fileContent = await file.text();
+        
+        // Call OpenAI analysis API
+        const response = await fetch('/api/permeate/analyze-csv', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
           },
-          {
-            id: '2',
-            employeeId: 'EMP002',
-            name: 'Sarah Johnson',
-            alias: 'sarah.johnson@company.com',
-            location: 'London, UK',
-            role: 'Software Developer',
-            reportingTo: 'EMP001',
-            keySkills: ['React', 'TypeScript', 'Node.js'],
-            userType: 'team_member'
-          },
-          {
-            id: '3',
-            employeeId: 'EMP003',
-            name: 'Michael Brown',
-            alias: 'michael.brown@company.com',
-            location: 'New York, USA',
-            role: 'CEO',
-            keySkills: ['Strategic Planning', 'Leadership'],
-            userType: 'organization_leader'
-          }
-        ];
-        setEmployees(mockEmployees);
+          body: JSON.stringify({ csvContent: fileContent })
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to analyze CSV');
+        }
+
+        const { employees: analyzedEmployees, insights } = await response.json();
+        
+        // Store the AI-analyzed employees
+        setEmployees(analyzedEmployees);
+        localStorage.setItem('permeate_org_insights', JSON.stringify(insights));
+        
         setOnboardingStep(3);
-      }, 2000);
+        
+        toast({
+          title: "Analysis Complete",
+          description: `Analyzed ${analyzedEmployees.length} employees with AI insights`,
+        });
+      } catch (error) {
+        console.error('CSV analysis error:', error);
+        toast({
+          title: "Analysis Failed",
+          description: "Could not analyze the CSV file. Please check the format.",
+          variant: "destructive",
+        });
+      }
     } else {
       toast({
         title: "Invalid File",
@@ -238,29 +438,87 @@ export default function PerMeaTeEnterpriseApp() {
     }
   };
 
-  const createGoal = () => {
+  const createGoal = async () => {
     if (!newGoalTitle.trim()) return;
     
-    const newGoal: Goal = {
-      id: Date.now().toString(),
-      title: newGoalTitle,
-      description: newGoalDescription,
-      status: 'active',
-      createdAt: new Date().toISOString(),
-      progress: 0,
-      projects: [],
-      createdBy: currentUser.employeeId
-    };
-    
-    setGoals([...goals, newGoal]);
-    setNewGoalTitle("");
-    setNewGoalDescription("");
-    setShowNewGoalForm(false);
-    
-    toast({
-      title: "Goal Created",
-      description: `"${newGoalTitle}" has been added to your goals`,
-    });
+    try {
+      // Generate AI-powered goal breakdown
+      const response = await fetch('/api/permeate/generate-breakdown', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          goalTitle: newGoalTitle,
+          goalDescription: newGoalDescription,
+          companyContext: `Company: ${company?.name}, Business Areas: ${company?.businessAreas.join(', ')}, Employees: ${company?.numberOfEmployees}`
+        })
+      });
+
+      const breakdown = await response.json();
+      
+      const newGoal: Goal = {
+        id: Date.now().toString(),
+        title: newGoalTitle,
+        description: newGoalDescription,
+        status: 'active',
+        createdAt: new Date().toISOString(),
+        progress: 0,
+        projects: breakdown.projects?.map((project: any, index: number) => ({
+          id: `${Date.now()}-${index}`,
+          goalId: Date.now().toString(),
+          title: project.title,
+          description: project.description,
+          status: 'planning' as const,
+          progress: 0,
+          tasks: project.tasks?.map((task: any, taskIndex: number) => ({
+            id: `${Date.now()}-${index}-${taskIndex}`,
+            projectId: `${Date.now()}-${index}`,
+            title: task.title,
+            description: task.description,
+            status: 'todo' as const,
+            priority: task.priority,
+            score: 0,
+            dueDate: task.estimatedDays ? new Date(Date.now() + task.estimatedDays * 24 * 60 * 60 * 1000).toISOString().split('T')[0] : undefined
+          })) || [],
+          createdBy: currentUser.employeeId
+        })) || [],
+        createdBy: currentUser.employeeId
+      };
+
+      setGoals([...goals, newGoal]);
+      setNewGoalTitle("");
+      setNewGoalDescription("");
+      setShowNewGoalForm(false);
+      
+      toast({
+        title: "AI-Powered Goal Created",
+        description: `Generated ${breakdown.projects?.length || 0} projects with detailed tasks using OpenAI analysis.`,
+      });
+    } catch (error) {
+      console.error('Goal creation error:', error);
+      // Fallback to basic goal creation
+      const basicGoal: Goal = {
+        id: Date.now().toString(),
+        title: newGoalTitle,
+        description: newGoalDescription,
+        status: 'active',
+        createdAt: new Date().toISOString(),
+        progress: 0,
+        projects: [],
+        createdBy: currentUser.employeeId
+      };
+      
+      setGoals([...goals, basicGoal]);
+      setNewGoalTitle("");
+      setNewGoalDescription("");
+      setShowNewGoalForm(false);
+      
+      toast({
+        title: "Goal Created",
+        description: "Goal created successfully (AI breakdown unavailable).",
+      });
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -508,7 +766,7 @@ export default function PerMeaTeEnterpriseApp() {
       <Navbar />
       
       {/* PerMeaTe Enterprise Header */}
-      <div className="sticky top-36 z-40 bg-white border-b border-gray-200 shadow-sm">
+<div className="sticky top-24 z-40 bg-white border-b border-gray-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between py-3">
             <div className="flex items-center space-x-3">
@@ -905,78 +1163,7 @@ export default function PerMeaTeEnterpriseApp() {
 
         {/* Analytics Tab */}
         {activeTab === 'analytics' && (
-          <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-gray-900">Performance Analytics</h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-gray-900">Goal Completion Rate</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-4xl font-bold text-green-600 mb-2">
-                    {goals.filter(g => g.status === 'completed').length}/{goals.length}
-                  </div>
-                  <p className="text-sm text-gray-600">
-                    {goals.length > 0 ? Math.round((goals.filter(g => g.status === 'completed').length / goals.length) * 100) : 0}% completion rate
-                  </p>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-gray-900">Task Performance</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {goals.flatMap(g => g.projects).flatMap(p => p.tasks)
-                      .filter(t => t.status === 'completed')
-                      .slice(0, 3)
-                      .map((task) => (
-                        <div key={task.id} className="flex items-center justify-between">
-                          <span className="text-sm text-gray-900">{task.title}</span>
-                          <span className="text-sm font-medium text-blue-600">Score: {task.score}</span>
-                        </div>
-                      ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-gray-900">Performance Summary</CardTitle>
-                <CardDescription>Overall organizational performance metrics</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-blue-600">
-                      {goals.reduce((acc, goal) => acc + goal.projects.length, 0)}
-                    </div>
-                    <p className="text-sm text-gray-600">Active Projects</p>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-purple-600">
-                      {goals.flatMap(g => g.projects).flatMap(p => p.tasks).length}
-                    </div>
-                    <p className="text-sm text-gray-600">Total Tasks</p>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-green-600">
-                      {Math.round(
-                        goals.flatMap(g => g.projects).flatMap(p => p.tasks)
-                          .filter(t => t.status === 'completed')
-                          .reduce((acc, task) => acc + task.score, 0) / 
-                        Math.max(1, goals.flatMap(g => g.projects).flatMap(p => p.tasks).filter(t => t.status === 'completed').length)
-                      )}
-                    </div>
-                    <p className="text-sm text-gray-600">Avg Task Score</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+          <AIAnalyticsTab goals={goals} company={company} employees={employees} />
         )}
       </main>
       
