@@ -22,7 +22,7 @@ export default function PerMeateBetaLogin() {
 
     // Define user credentials and types
     const validUsers = {
-      "EnterpriseUser": {
+      "AdminUser": {
         password: "7c2f5a1d8b4e9c6f3a0d2b5e8c1f4a7b",
         userType: "administrator",
         name: "Administrator User",
@@ -79,7 +79,7 @@ export default function PerMeateBetaLogin() {
           <Card className="bg-white border border-gray-200 shadow-lg">
             <CardHeader className="text-center pb-6">
               <CardTitle className="text-2xl font-bold text-gray-900">
-                Enterprise Beta Access
+                PerMeaTe Enterprise Beta Access
               </CardTitle>
               <p className="text-gray-600 text-sm mt-2">
                 Enter your credentials to access PerMeaTe Enterprise
@@ -87,7 +87,7 @@ export default function PerMeateBetaLogin() {
               <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                 <p className="text-xs text-blue-800 font-medium">Demo Users:</p>
                 <div className="text-xs text-blue-700 mt-1 space-y-1">
-                  <div>EnterpriseUser (Administrator)</div>
+                  <div>AdminUser (Administrator)</div>
                   <div>ProjectLeader (Project Leader)</div>
                   <div>TeamMember (Team Member)</div>
                   <div>OrgLeader (Organization Leader)</div>

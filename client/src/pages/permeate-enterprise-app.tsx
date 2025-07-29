@@ -16,7 +16,8 @@ import {
   User,
   LogOut,
   Settings,
-  TrendingUp
+  TrendingUp,
+  RefreshCcw
 } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -328,11 +329,38 @@ export default function PerMeaTeEnterpriseApp() {
   // Session management
   const handleLogout = () => {
     sessionStorage.removeItem("perMeateBetaAuth");
+    sessionStorage.removeItem("perMeateCurrentUser");
     setLocation("/permeate-enterprise");
   };
 
   const handleRefreshSession = () => {
     window.location.reload();
+  };
+
+  // Clear data and restart onboarding (for administrators)
+  const handleReOnboard = () => {
+    if (currentUser.userType === 'administrator') {
+      // Clear all company and employee data
+      localStorage.removeItem('permeate_company');
+      localStorage.removeItem('permeate_employees');
+      localStorage.removeItem('permeate_org_insights');
+      
+      // Reset state
+      setCompany(null);
+      setEmployees([]);
+      setShowOnboarding(true);
+      setOnboardingStep(1);
+      setCompanyName("");
+      setBusinessAreas("");
+      setNumberOfEmployees("");
+      setLocations("");
+      setCsvFile(null);
+      
+      toast({
+        title: "Data Cleared",
+        description: "Ready for fresh organizational setup",
+      });
+    }
   };
 
   // Check if company is set up
@@ -803,9 +831,22 @@ export default function PerMeaTeEnterpriseApp() {
             </div>
             
             <div className="flex items-center space-x-4">
+              {/* Re-onboard button for administrators */}
+              {currentUser.userType === 'administrator' && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleReOnboard}
+                  className="text-blue-600 border-blue-200 hover:bg-blue-50"
+                >
+                  <RefreshCcw className="w-4 h-4 mr-2" />
+                  Re-onboard
+                </Button>
+              )}
+              
               <div className="flex items-center space-x-3 bg-gray-50 px-3 py-2 rounded-lg">
                 <User className="w-4 h-4 text-gray-600" />
-                <span className="text-sm text-gray-700">EnterpriseUser</span>
+                <span className="text-sm text-gray-700">{currentUser.name}</span>
                 <Button
                   variant="ghost"
                   size="sm"
