@@ -22,7 +22,6 @@ import {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import permeateIcon from "@assets/PerMeaTeEnterprise_Icon_1752664675820.png";
-import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 
 // AI Analytics Component
@@ -600,11 +599,25 @@ export default function PerMeaTeEnterpriseApp() {
     }
   };
 
+  // Custom PerMeaTe Navbar Component
+  const PerMeaTeNavbar = () => (
+    <nav className="nav-minimal fixed top-0 left-0 right-0 z-50 backdrop-blur-sm section-divider">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-24">
+          <div className="flex items-center space-x-3">
+            <img src={permeateIcon} alt="PerMeaTe Enterprise" className="h-10 w-10" />
+            <span className="text-xl font-bold text-gray-900">PerMeaTe Enterprise</span>
+          </div>
+        </div>
+      </div>
+    </nav>
+  );
+
   // Onboarding Wizard Component
   if (showOnboarding) {
     return (
       <div className="min-h-screen bg-surface-white">
-        <Navbar />
+        <PerMeaTeNavbar />
         
         <main className="pt-24 pb-12">
           <div className="max-w-4xl mx-auto px-4">
@@ -821,7 +834,7 @@ export default function PerMeaTeEnterpriseApp() {
 
   return (
     <div className="min-h-screen bg-surface-white">
-      <Navbar />
+      <PerMeaTeNavbar />
       
       {/* PerMeaTe Enterprise Header */}
 <div className="sticky top-24 z-40 bg-white border-b border-gray-200 shadow-sm">
