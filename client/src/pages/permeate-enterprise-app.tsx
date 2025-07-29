@@ -24,6 +24,27 @@ import permeateIcon from "@assets/PerMeaTeEnterprise_Icon_1752664675820.png";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 
+interface Company {
+  id: string;
+  name: string;
+  businessAreas: string[];
+  numberOfEmployees: number;
+  locations: string[];
+  isSetup: boolean;
+}
+
+interface Employee {
+  id: string;
+  employeeId: string;
+  name: string;
+  alias: string; // email
+  location: string;
+  role: string;
+  reportingTo?: string;
+  keySkills: string[];
+  userType: 'administrator' | 'project_leader' | 'team_member' | 'organization_leader';
+}
+
 interface Goal {
   id: string;
   title: string;
@@ -33,6 +54,7 @@ interface Goal {
   targetDate?: string;
   progress: number;
   projects: Project[];
+  createdBy: string;
 }
 
 interface Project {
@@ -44,6 +66,7 @@ interface Project {
   assignedTo?: string;
   progress: number;
   tasks: Task[];
+  createdBy: string;
 }
 
 interface Task {
@@ -56,6 +79,7 @@ interface Task {
   priority: 'low' | 'medium' | 'high';
   score: number;
   dueDate?: string;
+  selfScore?: number;
 }
 
 export default function PerMeaTeEnterpriseApp() {
@@ -71,7 +95,31 @@ export default function PerMeaTeEnterpriseApp() {
     }
   }, [setLocation]);
 
-  const [activeTab, setActiveTab] = useState<'overview' | 'goals' | 'projects' | 'analytics'>('overview');
+  // User type and company setup state
+  const [currentUser, setCurrentUser] = useState<Employee>({
+    id: '1',
+    employeeId: 'ADM001',
+    name: 'Administrator User',
+    alias: 'admin@company.com',
+    location: 'New York, USA',
+    role: 'System Administrator',
+    keySkills: ['System Setup', 'User Management'],
+    userType: 'administrator'
+  });
+
+  const [company, setCompany] = useState<Company | null>(null);
+  const [showOnboarding, setShowOnboarding] = useState(true);
+  const [onboardingStep, setOnboardingStep] = useState(1);
+  const [employees, setEmployees] = useState<Employee[]>([]);
+
+  // Onboarding form states
+  const [companyName, setCompanyName] = useState("");
+  const [businessAreas, setBusinessAreas] = useState("");
+  const [numberOfEmployees, setNumberOfEmployees] = useState("");
+  const [locations, setLocations] = useState("");
+  const [csvFile, setCsvFile] = useState<File | null>(null);
+  
+  const [activeTab, setActiveTab] = useState<'overview' | 'goals' | 'projects' | 'analytics' | 'users'>('overview');
   const [newGoalTitle, setNewGoalTitle] = useState("");
   const [newGoalDescription, setNewGoalDescription] = useState("");
   const [showNewGoalForm, setShowNewGoalForm] = useState(false);
@@ -86,53 +134,109 @@ export default function PerMeaTeEnterpriseApp() {
     window.location.reload();
   };
 
-  // Mock data for development
-  const [goals, setGoals] = useState<Goal[]>([
-    {
-      id: '1',
-      title: 'Increase Revenue by 25%',
-      description: 'Achieve 25% revenue growth through new product launches and market expansion',
-      status: 'active',
-      createdAt: new Date().toISOString(),
-      targetDate: '2025-12-31',
-      progress: 35,
-      projects: [
-        {
-          id: 'p1',
-          goalId: '1',
-          title: 'Product Launch - Mobile App',
-          description: 'Launch new mobile application with core features',
-          status: 'in_progress',
-          assignedTo: 'Product Team',
-          progress: 60,
-          tasks: [
-            {
-              id: 't1',
-              projectId: 'p1',
-              title: 'Design User Interface',
-              description: 'Create UI/UX designs for mobile app',
-              status: 'completed',
-              assignedTo: 'Design Team',
-              priority: 'high',
-              score: 85,
-              dueDate: '2025-08-15'
-            },
-            {
-              id: 't2',
-              projectId: 'p1',
-              title: 'Develop Core Features',
-              description: 'Implement main functionality',
-              status: 'in_progress',
-              assignedTo: 'Dev Team',
-              priority: 'high',
-              score: 0,
-              dueDate: '2025-09-30'
-            }
-          ]
-        }
-      ]
+  // Check if company is set up
+  useEffect(() => {
+    const savedCompany = localStorage.getItem('permeate_company');
+    if (savedCompany) {
+      const companyData = JSON.parse(savedCompany);
+      setCompany(companyData);
+      setShowOnboarding(!companyData.isSetup);
     }
-  ]);
+  }, []);
+
+  // Sample data after setup
+  const [goals, setGoals] = useState<Goal[]>([]);
+
+  // Onboarding functions
+  const handleCompanySetup = () => {
+    if (!companyName || !businessAreas || !numberOfEmployees || !locations) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all company details",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const newCompany: Company = {
+      id: Date.now().toString(),
+      name: companyName,
+      businessAreas: businessAreas.split(',').map(area => area.trim()),
+      numberOfEmployees: parseInt(numberOfEmployees),
+      locations: locations.split(',').map(loc => loc.trim()),
+      isSetup: false
+    };
+
+    setCompany(newCompany);
+    setOnboardingStep(2);
+  };
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file && (file.type === 'text/csv' || file.name.endsWith('.csv') || file.name.endsWith('.xlsx'))) {
+      setCsvFile(file);
+      // Mock processing the CSV file
+      setTimeout(() => {
+        const mockEmployees: Employee[] = [
+          {
+            id: '1',
+            employeeId: 'EMP001',
+            name: 'John Smith',
+            alias: 'john.smith@company.com',
+            location: 'New York, USA',
+            role: 'Project Manager',
+            reportingTo: 'ADM001',
+            keySkills: ['Project Management', 'Leadership'],
+            userType: 'project_leader'
+          },
+          {
+            id: '2',
+            employeeId: 'EMP002',
+            name: 'Sarah Johnson',
+            alias: 'sarah.johnson@company.com',
+            location: 'London, UK',
+            role: 'Software Developer',
+            reportingTo: 'EMP001',
+            keySkills: ['React', 'TypeScript', 'Node.js'],
+            userType: 'team_member'
+          },
+          {
+            id: '3',
+            employeeId: 'EMP003',
+            name: 'Michael Brown',
+            alias: 'michael.brown@company.com',
+            location: 'New York, USA',
+            role: 'CEO',
+            keySkills: ['Strategic Planning', 'Leadership'],
+            userType: 'organization_leader'
+          }
+        ];
+        setEmployees(mockEmployees);
+        setOnboardingStep(3);
+      }, 2000);
+    } else {
+      toast({
+        title: "Invalid File",
+        description: "Please upload a CSV or Excel file",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const completeOnboarding = () => {
+    if (company) {
+      const completedCompany = { ...company, isSetup: true };
+      setCompany(completedCompany);
+      localStorage.setItem('permeate_company', JSON.stringify(completedCompany));
+      localStorage.setItem('permeate_employees', JSON.stringify(employees));
+      setShowOnboarding(false);
+      
+      toast({
+        title: "Setup Complete",
+        description: "Welcome to PerMeaTe Enterprise!",
+      });
+    }
+  };
 
   const createGoal = () => {
     if (!newGoalTitle.trim()) return;
@@ -179,6 +283,225 @@ export default function PerMeaTeEnterpriseApp() {
     }
   };
 
+  // Onboarding Wizard Component
+  if (showOnboarding) {
+    return (
+      <div className="min-h-screen bg-surface-white">
+        <Navbar />
+        
+        <main className="pt-24 pb-12">
+          <div className="max-w-4xl mx-auto px-4">
+            <div className="text-center mb-8">
+              <img src={permeateIcon} alt="PerMeaTe Enterprise" className="h-16 w-16 mx-auto mb-4" />
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome to PerMeaTe Enterprise</h1>
+              <p className="text-gray-600">Let's set up your organization to get started</p>
+            </div>
+
+            {/* Step Indicators */}
+            <div className="flex items-center justify-center mb-8">
+              <div className="flex items-center space-x-4">
+                {[1, 2, 3].map((step) => (
+                  <div key={step} className="flex items-center">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                      onboardingStep >= step 
+                        ? 'bg-blue-600 text-white' 
+                        : 'bg-gray-200 text-gray-600'
+                    }`}>
+                      {step}
+                    </div>
+                    {step < 3 && (
+                      <div className={`w-16 h-1 mx-2 ${
+                        onboardingStep > step ? 'bg-blue-600' : 'bg-gray-200'
+                      }`} />
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <Card className="bg-white shadow-lg">
+              <CardHeader>
+                <CardTitle className="text-2xl text-gray-900">
+                  {onboardingStep === 1 && "Company Information"}
+                  {onboardingStep === 2 && "Employee Data Upload"}
+                  {onboardingStep === 3 && "Review & Complete Setup"}
+                </CardTitle>
+                <CardDescription>
+                  {onboardingStep === 1 && "Tell us about your organization"}
+                  {onboardingStep === 2 && "Upload your employee information"}
+                  {onboardingStep === 3 && "Review the imported data"}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                
+                {/* Step 1: Company Information */}
+                {onboardingStep === 1 && (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Company Name *
+                      </label>
+                      <Input
+                        value={companyName}
+                        onChange={(e) => setCompanyName(e.target.value)}
+                        placeholder="e.g., Acme Corporation"
+                        className="w-full"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Business Areas * (comma-separated)
+                      </label>
+                      <Input
+                        value={businessAreas}
+                        onChange={(e) => setBusinessAreas(e.target.value)}
+                        placeholder="e.g., Technology, Marketing, Sales, Operations"
+                        className="w-full"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Number of Employees *
+                      </label>
+                      <Input
+                        type="number"
+                        value={numberOfEmployees}
+                        onChange={(e) => setNumberOfEmployees(e.target.value)}
+                        placeholder="e.g., 150"
+                        className="w-full"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Locations * (comma-separated)
+                      </label>
+                      <Input
+                        value={locations}
+                        onChange={(e) => setLocations(e.target.value)}
+                        placeholder="e.g., New York USA, London UK, Tokyo Japan"
+                        className="w-full"
+                      />
+                    </div>
+                    
+                    <Button 
+                      onClick={handleCompanySetup}
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                    >
+                      Continue to Employee Upload
+                    </Button>
+                  </div>
+                )}
+
+                {/* Step 2: Employee Data Upload */}
+                {onboardingStep === 2 && (
+                  <div className="space-y-6">
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                      <h3 className="font-medium text-blue-900 mb-2">Required CSV/Excel Columns:</h3>
+                      <ul className="text-sm text-blue-800 space-y-1">
+                        <li>• Employee ID Number (unique identifier)</li>
+                        <li>• Employee Name</li>
+                        <li>• Employee Alias (email)</li>
+                        <li>• Location (city, country)</li>
+                        <li>• Role</li>
+                        <li>• Reporting Relationship (Employee ID of manager)</li>
+                        <li>• Key Skills (comma-separated)</li>
+                      </ul>
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Upload Employee List (CSV or Excel)
+                      </label>
+                      <input
+                        type="file"
+                        accept=".csv,.xlsx,.xls"
+                        onChange={handleFileUpload}
+                        className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                      />
+                      {csvFile && (
+                        <p className="text-sm text-green-600 mt-2">
+                          File uploaded: {csvFile.name} - Processing...
+                        </p>
+                      )}
+                    </div>
+                    
+                    <div className="flex space-x-3">
+                      <Button 
+                        variant="outline"
+                        onClick={() => setOnboardingStep(1)}
+                      >
+                        Back
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Step 3: Review & Complete */}
+                {onboardingStep === 3 && (
+                  <div className="space-y-6">
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                      <h3 className="font-medium text-green-900 mb-2">✓ Employee Data Processed Successfully</h3>
+                      <p className="text-sm text-green-800">
+                        Found {employees.length} employees in your organization
+                      </p>
+                    </div>
+                    
+                    <div>
+                      <h4 className="font-medium text-gray-900 mb-3">Company Summary:</h4>
+                      <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+                        <p><span className="font-medium">Name:</span> {company?.name}</p>
+                        <p><span className="font-medium">Business Areas:</span> {company?.businessAreas.join(', ')}</p>
+                        <p><span className="font-medium">Employees:</span> {company?.numberOfEmployees}</p>
+                        <p><span className="font-medium">Locations:</span> {company?.locations.join(', ')}</p>
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <h4 className="font-medium text-gray-900 mb-3">Sample Employees:</h4>
+                      <div className="space-y-2">
+                        {employees.slice(0, 3).map((emp) => (
+                          <div key={emp.id} className="bg-gray-50 rounded-lg p-3">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <p className="font-medium text-gray-900">{emp.name}</p>
+                                <p className="text-sm text-gray-600">{emp.role} • {emp.location}</p>
+                              </div>
+                              <Badge className="bg-blue-100 text-blue-800 border-blue-200">
+                                {emp.userType.replace('_', ' ')}
+                              </Badge>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <div className="flex space-x-3">
+                      <Button 
+                        variant="outline"
+                        onClick={() => setOnboardingStep(2)}
+                      >
+                        Back
+                      </Button>
+                      <Button 
+                        onClick={completeOnboarding}
+                        className="bg-green-600 hover:bg-green-700 text-white"
+                      >
+                        Complete Setup
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-surface-white">
       <Navbar />
@@ -221,7 +544,8 @@ export default function PerMeaTeEnterpriseApp() {
               { id: 'overview', label: 'Overview', icon: BarChart3 },
               { id: 'goals', label: 'Goals', icon: Target },
               { id: 'projects', label: 'Projects', icon: Settings },
-              { id: 'analytics', label: 'Analytics', icon: TrendingUp }
+              { id: 'analytics', label: 'Analytics', icon: TrendingUp },
+              { id: 'users', label: 'Users', icon: Users }
             ].map((tab) => {
               const Icon = tab.icon;
               return (
@@ -486,6 +810,90 @@ export default function PerMeaTeEnterpriseApp() {
                           </div>
                         </div>
                       )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Users Tab */}
+        {activeTab === 'users' && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-bold text-gray-900">User Management</h2>
+              <div className="text-sm text-gray-600">
+                {employees.length} employees • {company?.name}
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+              <Card>
+                <CardContent className="p-4">
+                  <div className="text-2xl font-bold text-blue-600">
+                    {employees.filter(e => e.userType === 'administrator').length}
+                  </div>
+                  <p className="text-sm text-gray-600">Administrators</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4">
+                  <div className="text-2xl font-bold text-green-600">
+                    {employees.filter(e => e.userType === 'project_leader').length}
+                  </div>
+                  <p className="text-sm text-gray-600">Project Leaders</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4">
+                  <div className="text-2xl font-bold text-purple-600">
+                    {employees.filter(e => e.userType === 'team_member').length}
+                  </div>
+                  <p className="text-sm text-gray-600">Team Members</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardContent className="p-4">
+                  <div className="text-2xl font-bold text-orange-600">
+                    {employees.filter(e => e.userType === 'organization_leader').length}
+                  </div>
+                  <p className="text-sm text-gray-600">Org Leaders</p>
+                </CardContent>
+              </Card>
+            </div>
+            
+            <div className="space-y-4">
+              {employees.map((employee) => (
+                <Card key={employee.id}>
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-4">
+                        <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                          <User className="w-5 h-5 text-gray-600" />
+                        </div>
+                        <div>
+                          <h3 className="font-medium text-gray-900">{employee.name}</h3>
+                          <p className="text-sm text-gray-600">{employee.role} • {employee.location}</p>
+                          <p className="text-xs text-gray-500">{employee.alias}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-3">
+                        <Badge className={
+                          employee.userType === 'administrator' ? 'bg-blue-100 text-blue-800 border-blue-200' :
+                          employee.userType === 'project_leader' ? 'bg-green-100 text-green-800 border-green-200' :
+                          employee.userType === 'team_member' ? 'bg-purple-100 text-purple-800 border-purple-200' :
+                          'bg-orange-100 text-orange-800 border-orange-200'
+                        }>
+                          {employee.userType.replace('_', ' ')}
+                        </Badge>
+                        <div className="text-right">
+                          <p className="text-sm text-gray-600">ID: {employee.employeeId}</p>
+                          <p className="text-xs text-gray-500">
+                            Skills: {employee.keySkills.join(', ')}
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
