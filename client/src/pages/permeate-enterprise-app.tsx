@@ -446,6 +446,8 @@ export default function PerMeaTeEnterpriseApp() {
       }
       
       // Call OpenAI analysis API
+      console.log('Sending CSV content for analysis:', fileContent.substring(0, 200) + '...');
+      
       const response = await fetch('/api/permeate/analyze-csv', {
         method: 'POST',
         headers: {
@@ -454,11 +456,19 @@ export default function PerMeaTeEnterpriseApp() {
         body: JSON.stringify({ csvContent: fileContent })
       });
 
+      console.log('Response status:', response.status);
+      console.log('Response headers:', response.headers);
+
       if (!response.ok) {
-        throw new Error('Failed to analyze file');
+        const errorText = await response.text();
+        console.error('API Error Response:', errorText);
+        throw new Error(`Analysis failed: ${response.status} - ${errorText}`);
       }
 
-      const { employees: analyzedEmployees, insights } = await response.json();
+      const responseData = await response.json();
+      console.log('Analysis response:', responseData);
+      
+      const { employees: analyzedEmployees, insights } = responseData;
       
       // Store the AI-analyzed employees
       setEmployees(analyzedEmployees);
@@ -474,7 +484,7 @@ export default function PerMeaTeEnterpriseApp() {
       console.error('File analysis error:', error);
       toast({
         title: "Analysis Failed",
-        description: "Could not analyze the file. Please check the format and try again.",
+        description: error instanceof Error ? error.message : "Could not analyze the file. Please check the format and try again.",
         variant: "destructive",
       });
     }
