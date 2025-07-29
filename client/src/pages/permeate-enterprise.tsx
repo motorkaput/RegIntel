@@ -90,11 +90,10 @@ export default function PerMeaTeEnterprise() {
               
               <div>
                 <Button 
-                  className="btn-primary px-8 py-4 text-lg flex items-center gap-2"
-                  onClick={() => window.location.href = '/permeate-beta-login'}
+                  disabled 
+                  className="btn-primary px-8 py-4 text-lg opacity-50 cursor-not-allowed"
                 >
-                  Launch PerMeaTe Enterprise
-                  <ArrowRight className="w-5 h-5" />
+                  Coming Soon
                 </Button>
               </div>
             </div>

@@ -248,7 +248,8 @@ export default function PerMeaTeEnterpriseApp() {
       status: 'active',
       createdAt: new Date().toISOString(),
       progress: 0,
-      projects: []
+      projects: [],
+      createdBy: currentUser.employeeId
     };
     
     setGoals([...goals, newGoal]);
