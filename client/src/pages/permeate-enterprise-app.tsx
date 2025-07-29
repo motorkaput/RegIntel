@@ -423,19 +423,24 @@ export default function PerMeaTeEnterpriseApp() {
       let fileContent = '';
       
       if (isExcel) {
-        // Import XLSX library dynamically
-        const XLSX = await import('xlsx');
-        
-        // Read Excel file as array buffer
-        const arrayBuffer = await file.arrayBuffer();
-        const workbook = XLSX.read(arrayBuffer, { type: 'array' });
-        
-        // Get first worksheet
-        const firstSheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[firstSheetName];
-        
-        // Convert to CSV format for consistent processing
-        fileContent = XLSX.utils.sheet_to_csv(worksheet);
+        try {
+          // Import XLSX library dynamically with proper error handling
+          const { default: XLSX } = await import('xlsx');
+          
+          // Read Excel file as array buffer
+          const arrayBuffer = await file.arrayBuffer();
+          const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+          
+          // Get first worksheet
+          const firstSheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[firstSheetName];
+          
+          // Convert to CSV format for consistent processing
+          fileContent = XLSX.utils.sheet_to_csv(worksheet);
+        } catch (xlsxError) {
+          console.error('Excel processing error:', xlsxError);
+          throw new Error('Failed to process Excel file. Please ensure it\'s a valid .xlsx or .xls file.');
+        }
       } else {
         // Read CSV file as text
         fileContent = await file.text();
