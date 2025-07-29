@@ -14,6 +14,8 @@ import Subscription from "@/pages/subscription";
 import FetchPatterns from "@/pages/fetch-patterns";
 import FetchPatternsApp from "@/pages/fetch-patterns-app";
 import BetaLogin from "@/pages/beta-login";
+import PerMeateBetaLogin from "@/pages/permeate-beta-login";
+import PerMeaTeEnterpriseApp from "@/pages/permeate-enterprise-app";
 import Privacy from "@/pages/privacy";
 import Terms from "@/pages/terms";
 import AboutPage from "@/pages/about";
@@ -47,6 +49,8 @@ function Router() {
       {/* SaaS Application routes - beta protected */}
       <Route path="/beta-login" component={BetaLogin} />
       <Route path="/x7k9p/fp-analyzer" component={FetchPatternsApp} />
+      <Route path="/permeate-beta-login" component={PerMeateBetaLogin} />
+      <Route path="/z9m3k/pe-workspace" component={PerMeaTeEnterpriseApp} />
       
       {/* Legal and info pages */}
       <Route path="/privacy" component={Privacy} />
