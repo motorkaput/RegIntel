@@ -374,50 +374,75 @@ export default function PerMeaTeEnterpriseApp() {
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file && (file.type === 'text/csv' || file.name.endsWith('.csv') || file.name.endsWith('.xlsx'))) {
-      setCsvFile(file);
-      
-      try {
-        // Read file content
-        const fileContent = await file.text();
-        
-        // Call OpenAI analysis API
-        const response = await fetch('/api/permeate/analyze-csv', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ csvContent: fileContent })
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to analyze CSV');
-        }
-
-        const { employees: analyzedEmployees, insights } = await response.json();
-        
-        // Store the AI-analyzed employees
-        setEmployees(analyzedEmployees);
-        localStorage.setItem('permeate_org_insights', JSON.stringify(insights));
-        
-        setOnboardingStep(3);
-        
-        toast({
-          title: "Analysis Complete",
-          description: `Analyzed ${analyzedEmployees.length} employees with AI insights`,
-        });
-      } catch (error) {
-        console.error('CSV analysis error:', error);
-        toast({
-          title: "Analysis Failed",
-          description: "Could not analyze the CSV file. Please check the format.",
-          variant: "destructive",
-        });
-      }
-    } else {
+    if (!file) return;
+    
+    // Check file type
+    const isCSV = file.type === 'text/csv' || file.name.endsWith('.csv');
+    const isExcel = file.name.endsWith('.xlsx') || file.name.endsWith('.xls');
+    
+    if (!isCSV && !isExcel) {
       toast({
         title: "Invalid File",
-        description: "Please upload a CSV or Excel file",
+        description: "Please upload a CSV or Excel file (.csv, .xlsx, .xls)",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setCsvFile(file);
+    
+    try {
+      let fileContent = '';
+      
+      if (isExcel) {
+        // Import XLSX library dynamically
+        const XLSX = await import('xlsx');
+        
+        // Read Excel file as array buffer
+        const arrayBuffer = await file.arrayBuffer();
+        const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+        
+        // Get first worksheet
+        const firstSheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheetName];
+        
+        // Convert to CSV format for consistent processing
+        fileContent = XLSX.utils.sheet_to_csv(worksheet);
+      } else {
+        // Read CSV file as text
+        fileContent = await file.text();
+      }
+      
+      // Call OpenAI analysis API
+      const response = await fetch('/api/permeate/analyze-csv', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ csvContent: fileContent })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to analyze file');
+      }
+
+      const { employees: analyzedEmployees, insights } = await response.json();
+      
+      // Store the AI-analyzed employees
+      setEmployees(analyzedEmployees);
+      localStorage.setItem('permeate_org_insights', JSON.stringify(insights));
+      
+      setOnboardingStep(3);
+      
+      toast({
+        title: "AI Analysis Complete",
+        description: `Successfully analyzed ${analyzedEmployees.length} employees from ${isExcel ? 'Excel' : 'CSV'} file`,
+      });
+    } catch (error) {
+      console.error('File analysis error:', error);
+      toast({
+        title: "Analysis Failed",
+        description: "Could not analyze the file. Please check the format and try again.",
         variant: "destructive",
       });
     }
