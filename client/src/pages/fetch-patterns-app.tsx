@@ -516,7 +516,7 @@ export default function FetchPatternsApp() {
       
       <main className="pt-0 pb-6">
         {/* FetchPatterns specific header - sticky and compact */}
-        <div className="bg-gray-50 border-b border-gray-200 py-3 sticky z-20" style={{top: '66px'}}>
+        <div className="bg-gray-50 border-b border-gray-200 py-3 sticky z-20" style={{top: '64px'}}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <img src={fetchPatternsIcon} alt="FetchPatterns" className="h-10 w-auto" />
