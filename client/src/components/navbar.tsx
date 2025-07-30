@@ -39,13 +39,13 @@ export default function Navbar() {
     <nav className="nav-minimal fixed top-0 left-0 right-0 z-50 backdrop-blur-sm section-divider">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Main navigation line */}
-        <div className="flex justify-between items-center h-24">
+        <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center">
             <img 
               src={logoPath} 
               alt="Dark Street Tech" 
-              className="h-10 w-auto"
+              className="h-8 w-auto"
             />
           </Link>
 
@@ -77,9 +77,9 @@ export default function Navbar() {
 
         {/* User authentication line - separate from main navigation */}
         {isAuthenticated && (
-          <div className="hidden md:flex justify-start items-center py-2 border-t border-light bg-gray-50/50">
+          <div className="hidden md:flex justify-start items-center py-1 border-t border-light bg-gray-50/50">
             <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2 px-3 py-2 bg-white rounded-md border border-gray-200 shadow-sm h-10">
+              <div className="flex items-center gap-2 px-2 py-1 bg-white rounded-md border border-gray-200 shadow-sm h-8">
                 <User className="w-4 h-4 text-gray-500" />
                 <span className="text-sm font-medium text-gray-700">{(user as any)?.firstName || (user as any)?.email || 'User'}</span>
               </div>
@@ -87,7 +87,7 @@ export default function Navbar() {
                 variant="outline" 
                 size="sm" 
                 onClick={() => window.location.href = "/api/logout"}
-                className="text-gray-600 border-gray-300 hover:bg-gray-50 h-10"
+                className="text-gray-600 border-gray-300 hover:bg-gray-50 h-8"
               >
                 <LogOut className="w-4 h-4 mr-1" />
                 Sign Out

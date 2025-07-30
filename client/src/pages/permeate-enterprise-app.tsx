@@ -22,7 +22,9 @@ import {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import permeateIcon from "@assets/PerMeaTeEnterprise_Icon_1752664675820.png";
+import logoPath from "@assets/DarkStreetTech_Logo_1752659608844.png";
 import Footer from "@/components/footer";
+import { Link } from "wouter";
 
 // AI Analytics Component
 function AIAnalyticsTab({ goals, company, employees }: { goals: Goal[], company: Company | null, employees: Employee[] }) {
@@ -588,41 +590,78 @@ export default function PerMeaTeEnterpriseApp() {
     }
   };
 
-  // Custom PerMeaTe Header Component (sticky)
-  const PerMeaTeHeader = () => (
-    <div className="sticky top-0 z-50 bg-white border-b border-gray-200 px-6 py-4">
-      <div className="flex justify-between items-center">
-        <div className="flex items-center space-x-3">
-          <img src={permeateIcon} alt="PerMeaTe Enterprise" className="h-8 w-8" />
-          <div>
-            <h1 className="text-lg font-bold text-gray-900">PerMeaTe Enterprise</h1>
-            <p className="text-sm text-gray-500">Performance Measurement & Optimization</p>
+  // Three-Tier Header Components
+  const DarkStreetHeader = () => (
+    <div className="bg-white border-b border-gray-100">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-16">
+          <Link href="/" className="flex items-center">
+            <img 
+              src={logoPath} 
+              alt="Dark Street Tech" 
+              className="h-8 w-auto"
+            />
+          </Link>
+          <div className="hidden md:flex items-center space-x-6">
+            <a href="/" className="text-secondary hover:text-primary text-sm">Home</a>
+            <a href="/fetch-patterns" className="text-secondary hover:text-primary text-sm">Fetch Patterns</a>
+            <a href="/permeate-enterprise" className="text-secondary hover:text-primary text-sm">PerMeaTe Enterprise</a>
+            <a href="/next" className="text-secondary hover:text-primary text-sm">Next</a>
+            <a href="/about" className="text-secondary hover:text-primary text-sm">About</a>
           </div>
         </div>
-        <div className="flex items-center space-x-4">
-          {currentUser.userType === 'administrator' && (
+      </div>
+    </div>
+  );
+
+  const BetaStatusHeader = () => (
+    <div className="bg-blue-50 border-b border-blue-200">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-center py-2">
+          <p className="text-sm text-blue-700">
+            Beta Testing. Send your feedback to <a href="mailto:hello@darkstreet.org" className="underline">hello@darkstreet.org</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+
+  const PerMeaTeAppHeader = () => (
+    <div className="bg-white border-b border-gray-200">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between py-3">
+          <div className="flex items-center space-x-3">
+            <img src={permeateIcon} alt="PerMeaTe Enterprise" className="h-8 w-8" />
+            <div>
+              <h1 className="text-lg font-bold text-gray-900">PerMeaTe Enterprise</h1>
+              <p className="text-xs text-gray-600">Where goals turn into real, measurable work</p>
+            </div>
+          </div>
+          <div className="flex items-center space-x-3">
+            <span className="text-sm text-gray-600">
+              Welcome, {currentUser?.name || 'AdminUser'}
+            </span>
+            {currentUser?.userType === 'administrator' && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleReOnboard}
+                className="text-gray-600 border-gray-300 hover:bg-gray-50 h-8"
+              >
+                <RefreshCcw className="w-3 h-3 mr-1" />
+                Re-onboard
+              </Button>
+            )}
             <Button
               variant="outline"
               size="sm"
-              onClick={handleReOnboard}
-              className="text-blue-600 hover:text-blue-700"
+              onClick={handleLogout}
+              className="text-gray-600 border-gray-300 hover:bg-gray-50 h-8"
             >
-              <RefreshCcw className="w-4 h-4 mr-1" />
-              Re-onboard
+              <LogOut className="w-3 h-3 mr-1" />
+              Logout
             </Button>
-          )}
-          <div className="flex items-center space-x-2">
-            <User className="w-4 h-4 text-gray-500" />
-            <span className="text-sm text-gray-700">{currentUser.name}</span>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleLogout}
-            className="text-red-600 hover:text-red-700"
-          >
-            <LogOut className="w-4 h-4" />
-          </Button>
         </div>
       </div>
     </div>
@@ -630,7 +669,7 @@ export default function PerMeaTeEnterpriseApp() {
 
   // Sticky Navigation Tabs
   const NavigationTabs = () => (
-    <div className="sticky top-16 z-40 bg-white border-b border-gray-200 px-6">
+    <div className="sticky top-[120px] z-40 bg-white border-b border-gray-200 px-6">
       <div className="flex space-x-8">
         {[
           { id: 'overview', label: 'Overview', icon: BarChart3 },
@@ -663,9 +702,13 @@ export default function PerMeaTeEnterpriseApp() {
   if (showOnboarding) {
     return (
       <div className="min-h-screen bg-surface-white">
-        <PerMeaTeHeader />
+        <div className="fixed top-0 left-0 right-0 z-50">
+          <DarkStreetHeader />
+          <BetaStatusHeader />
+          <PerMeaTeAppHeader />
+        </div>
         
-        <main className="pt-6 pb-12">
+        <main className="pt-[140px] pb-12">
           <div className="max-w-4xl mx-auto px-4">
             <div className="text-center mb-8">
               <img src={permeateIcon} alt="PerMeaTe Enterprise" className="h-16 w-16 mx-auto mb-4" />
@@ -880,10 +923,14 @@ export default function PerMeaTeEnterpriseApp() {
 
   return (
     <div className="min-h-screen bg-surface-white">
-      <PerMeaTeHeader />
+      <div className="fixed top-0 left-0 right-0 z-50">
+        <DarkStreetHeader />
+        <BetaStatusHeader />
+        <PerMeaTeAppHeader />
+      </div>
       <NavigationTabs />
       
-      <main className="container mx-auto px-6 py-2 max-w-7xl">
+      <main className="container mx-auto px-6 py-2 max-w-7xl mt-[120px]">
 
         {/* Overview Tab */}
         {activeTab === 'overview' && (
