@@ -77,7 +77,7 @@ function AIAnalyticsTab({ goals, company, employees }: { goals: Goal[], company:
               <div className="h-4 bg-gray-200 rounded w-3/4 mx-auto mb-4"></div>
               <div className="h-4 bg-gray-200 rounded w-1/2 mx-auto"></div>
             </div>
-            <p className="text-gray-600 mt-4">OpenAI is analyzing your organizational performance...</p>
+            <p className="text-gray-600 mt-4">PerMeaTe is analyzing your organizational performance...</p>
           </CardContent>
         </Card>
       )}
@@ -93,7 +93,7 @@ function AIAnalyticsTab({ goals, company, employees }: { goals: Goal[], company:
                 <div className="text-4xl font-bold text-green-600 mb-2">
                   {analyticsData.overallScore}/100
                 </div>
-                <p className="text-sm text-gray-600">AI-calculated performance rating</p>
+                <p className="text-sm text-gray-600">PerMeaTe-calculated performance rating</p>
               </CardContent>
             </Card>
             
@@ -142,7 +142,7 @@ function AIAnalyticsTab({ goals, company, employees }: { goals: Goal[], company:
 
             <Card>
               <CardHeader>
-                <CardTitle className="text-blue-900">AI Recommendations</CardTitle>
+                <CardTitle className="text-blue-900">PerMeaTe Recommendations</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
@@ -195,7 +195,7 @@ function AIAnalyticsTab({ goals, company, employees }: { goals: Goal[], company:
       {!analyticsData && !isLoading && goals.length === 0 && (
         <Card>
           <CardContent className="p-8 text-center">
-            <p className="text-gray-600">Create some goals to see AI-powered analytics</p>
+            <p className="text-gray-600">Create some goals to see PerMeaTe-powered analytics</p>
           </CardContent>
         </Card>
       )}
@@ -883,7 +883,7 @@ export default function PerMeaTeEnterpriseApp() {
       <PerMeaTeHeader />
       <NavigationTabs />
       
-      <main className="container mx-auto px-6 py-6 max-w-7xl">
+      <main className="container mx-auto px-6 py-2 max-w-7xl">
 
         {/* Overview Tab */}
         {activeTab === 'overview' && (
