@@ -162,6 +162,7 @@ export default function Footer() {
               Copyright Dark Street. All rights reserved.
             </p>
             <div className="flex items-center space-x-6">
+              <img src="/assets/DarkStreetTech_Icon_1752659608842.png" alt="Dark Street Tech" className="h-6 w-6" />
             </div>
           </div>
         </div>

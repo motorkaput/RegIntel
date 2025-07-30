@@ -324,6 +324,9 @@ export default function PerMeaTeEnterpriseApp() {
   const [newGoalTitle, setNewGoalTitle] = useState("");
   const [newGoalDescription, setNewGoalDescription] = useState("");
   const [showNewGoalForm, setShowNewGoalForm] = useState(false);
+  const [currentUserName, setCurrentUserName] = useState(() => {
+    return sessionStorage.getItem("perMeateCurrentUser") || "AdminUser";
+  });
 
   // Session management
   const handleLogout = () => {
@@ -403,14 +406,13 @@ export default function PerMeaTeEnterpriseApp() {
     const file = event.target.files?.[0];
     if (!file) return;
     
-    // Check file type
+    // Check file type - only CSV files allowed
     const isCSV = file.type === 'text/csv' || file.name.endsWith('.csv');
-    const isExcel = file.name.endsWith('.xlsx') || file.name.endsWith('.xls');
     
-    if (!isCSV && !isExcel) {
+    if (!isCSV) {
       toast({
         title: "Invalid File",
-        description: "Please upload a CSV or Excel file (.csv, .xlsx, .xls)",
+        description: "Please upload a CSV file (.csv only)",
         variant: "destructive",
       });
       return;
@@ -419,33 +421,8 @@ export default function PerMeaTeEnterpriseApp() {
     setCsvFile(file);
     
     try {
-      let fileContent = '';
-      
-      if (isExcel) {
-        try {
-          // Import XLSX library dynamically with proper error handling
-          const XLSX = await import('xlsx');
-          const xlsxLib = XLSX.default || XLSX;
-          
-          // Read Excel file as array buffer
-          const arrayBuffer = await file.arrayBuffer();
-          const workbook = xlsxLib.read(arrayBuffer, { type: 'array' });
-          
-          // Get first worksheet
-          const firstSheetName = workbook.SheetNames[0];
-          const worksheet = workbook.Sheets[firstSheetName];
-          
-          // Convert to CSV format for consistent processing
-          fileContent = xlsxLib.utils.sheet_to_csv(worksheet);
-          console.log('Excel file converted to CSV format successfully');
-        } catch (xlsxError) {
-          console.error('Excel processing error:', xlsxError);
-          throw new Error('Failed to process Excel file. Please ensure it\'s a valid .xlsx or .xls file.');
-        }
-      } else {
-        // Read CSV file as text
-        fileContent = await file.text();
-      }
+      // Read CSV file as text
+      const fileContent = await file.text();
       
       // Call OpenAI analysis API
       console.log('Sending CSV content for analysis:', fileContent.substring(0, 200) + '...');
@@ -480,7 +457,7 @@ export default function PerMeaTeEnterpriseApp() {
       
       toast({
         title: "AI Analysis Complete",
-        description: `Successfully analyzed ${analyzedEmployees.length} employees from ${isExcel ? 'Excel' : 'CSV'} file`,
+        description: `Successfully analyzed ${analyzedEmployees.length} employees from CSV file`,
       });
     } catch (error) {
       console.error('File analysis error:', error);
@@ -611,25 +588,82 @@ export default function PerMeaTeEnterpriseApp() {
     }
   };
 
-  // Custom PerMeaTe Navbar Component
-  const PerMeaTeNavbar = () => (
-    <nav className="nav-minimal fixed top-0 left-0 right-0 z-50 backdrop-blur-sm section-divider">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-24">
-          <div className="flex items-center space-x-3">
-            <img src={permeateIcon} alt="PerMeaTe Enterprise" className="h-10 w-10" />
-            <span className="text-xl font-bold text-gray-900">PerMeaTe Enterprise</span>
+  // Custom PerMeaTe Header Component (not navbar)
+  const PerMeaTeHeader = () => (
+    <div className="bg-white border-b border-gray-200 px-6 py-4">
+      <div className="flex justify-between items-center">
+        <div className="flex items-center space-x-3">
+          <img src={permeateIcon} alt="PerMeaTe Enterprise" className="h-8 w-8" />
+          <div>
+            <h1 className="text-lg font-bold text-gray-900">PerMeaTe Enterprise</h1>
+            <p className="text-sm text-gray-500">Performance Measurement & Optimization</p>
           </div>
         </div>
+        <div className="flex items-center space-x-4">
+          {currentUser.userType === 'administrator' && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleReOnboard}
+              className="text-blue-600 hover:text-blue-700"
+            >
+              <RefreshCcw className="w-4 h-4 mr-1" />
+              Re-onboard
+            </Button>
+          )}
+          <div className="flex items-center space-x-2">
+            <User className="w-4 h-4 text-gray-500" />
+            <span className="text-sm text-gray-700">{currentUser.name}</span>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleLogout}
+            className="text-red-600 hover:text-red-700"
+          >
+            <LogOut className="w-4 h-4" />
+          </Button>
+        </div>
       </div>
-    </nav>
+    </div>
+  );
+
+  // Sticky Navigation Tabs
+  const NavigationTabs = () => (
+    <div className="sticky top-0 z-40 bg-white border-b border-gray-200 px-6">
+      <div className="flex space-x-8">
+        {[
+          { id: 'overview', label: 'Overview', icon: BarChart3 },
+          { id: 'goals', label: 'Goals', icon: Target },
+          { id: 'projects', label: 'Projects', icon: Settings },
+          { id: 'analytics', label: 'Analytics', icon: TrendingUp },
+          { id: 'users', label: 'Users', icon: Users },
+        ].map((tab) => {
+          const Icon = tab.icon;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center space-x-2 py-4 px-2 border-b-2 text-sm font-medium transition-colors ${
+                activeTab === tab.id
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <Icon className="w-4 h-4" />
+              <span>{tab.label}</span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
   );
 
   // Onboarding Wizard Component
   if (showOnboarding) {
     return (
       <div className="min-h-screen bg-surface-white">
-        <PerMeaTeNavbar />
+        <PerMeaTeHeader />
         
         <main className="pt-24 pb-12">
           <div className="max-w-4xl mx-auto px-4">
@@ -741,7 +775,7 @@ export default function PerMeaTeEnterpriseApp() {
                 {onboardingStep === 2 && (
                   <div className="space-y-6">
                     <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                      <h3 className="font-medium text-blue-900 mb-2">Required CSV/Excel Columns:</h3>
+                      <h3 className="font-medium text-blue-900 mb-2">Required CSV Columns:</h3>
                       <ul className="text-sm text-blue-800 space-y-1">
                         <li>• Employee ID Number (unique identifier)</li>
                         <li>• Employee Name</li>
@@ -755,11 +789,11 @@ export default function PerMeaTeEnterpriseApp() {
                     
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Upload Employee List (CSV or Excel)
+                        Upload Employee List (CSV only)
                       </label>
                       <input
                         type="file"
-                        accept=".csv,.xlsx,.xls"
+                        accept=".csv"
                         onChange={handleFileUpload}
                         className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                       />
@@ -846,80 +880,10 @@ export default function PerMeaTeEnterpriseApp() {
 
   return (
     <div className="min-h-screen bg-surface-white">
-      <PerMeaTeNavbar />
+      <PerMeaTeHeader />
+      <NavigationTabs />
       
-      {/* PerMeaTe Enterprise Header */}
-<div className="sticky top-24 z-40 bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between py-3">
-            <div className="flex items-center space-x-3">
-              <img src={permeateIcon} alt="PerMeaTe Enterprise" className="h-10 w-10" />
-              <div>
-                <h1 className="text-xl font-bold text-gray-900">PerMeaTe Enterprise</h1>
-                <p className="text-sm text-gray-500">Performance Measurement & Optimization</p>
-              </div>
-            </div>
-            
-            <div className="flex items-center space-x-4">
-              {/* Re-onboard button for administrators */}
-              {currentUser.userType === 'administrator' && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleReOnboard}
-                  className="text-blue-600 border-blue-200 hover:bg-blue-50"
-                >
-                  <RefreshCcw className="w-4 h-4 mr-2" />
-                  Re-onboard
-                </Button>
-              )}
-              
-              <div className="flex items-center space-x-3 bg-gray-50 px-3 py-2 rounded-lg">
-                <User className="w-4 h-4 text-gray-600" />
-                <span className="text-sm text-gray-700">{currentUser.name}</span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleLogout}
-                  className="text-gray-600 hover:text-gray-800"
-                >
-                  <LogOut className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Navigation Tabs */}
-        <div className="border-b border-gray-200 mb-8">
-          <nav className="-mb-px flex space-x-8">
-            {[
-              { id: 'overview', label: 'Overview', icon: BarChart3 },
-              { id: 'goals', label: 'Goals', icon: Target },
-              { id: 'projects', label: 'Projects', icon: Settings },
-              { id: 'analytics', label: 'Analytics', icon: TrendingUp },
-              { id: 'users', label: 'Users', icon: Users }
-            ].map((tab) => {
-              const Icon = tab.icon;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id as any)}
-                  className={`${
-                    activeTab === tab.id
-                      ? 'border-blue-500 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center space-x-2`}
-                >
-                  <Icon className="w-4 h-4" />
-                  <span>{tab.label}</span>
-                </button>
-              );
-            })}
-          </nav>
-        </div>
+      <main className="px-6 py-6">
 
         {/* Overview Tab */}
         {activeTab === 'overview' && (
@@ -1173,7 +1137,7 @@ export default function PerMeaTeEnterpriseApp() {
           </div>
         )}
 
-        {/* Users Tab */}
+        {/* Users Tab with Organization Chart */}
         {activeTab === 'users' && (
           <div className="space-y-6">
             <div className="flex items-center justify-between">
