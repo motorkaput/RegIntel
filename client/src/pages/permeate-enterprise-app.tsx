@@ -854,18 +854,9 @@ export default function PerMeaTeEnterpriseApp() {
     <div className="min-h-screen bg-surface-white">
       <Navbar />
       
-      {/* Beta status header bar */}
-      <div className="bg-blue-50 border-b border-blue-200 sticky top-12 z-30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center h-12">
-          <span className="text-xs text-blue-800 font-medium">
-            Beta Testing. Send your feedback to hello@darkstreet.org
-          </span>
-        </div>
-      </div>
-      
       <main className="pt-0 pb-6">
         {/* PerMeaTe specific header - sticky and compact */}
-        <div className="bg-gray-50 border-b border-gray-200 sticky top-24 z-20">
+        <div className="bg-gray-50 border-b border-gray-200 sticky z-20" style={{top: '64px'}}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between py-3">
             <div className="flex items-center gap-3">
               <img src={permeateIcon} alt="PerMeaTe Enterprise" className="h-10 w-auto" />
