@@ -39,13 +39,13 @@ export default function Navbar() {
     <nav className="nav-minimal fixed top-0 left-0 right-0 z-50 backdrop-blur-sm section-divider border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Main navigation line */}
-        <div className="flex justify-between items-center h-12">
+        <div className="flex justify-between items-center py-3">
           {/* Logo */}
           <Link href="/" className="flex items-center">
             <img 
               src={logoPath} 
               alt="Dark Street Tech" 
-              className="h-6 w-auto"
+              className="h-10 w-auto"
             />
           </Link>
 
