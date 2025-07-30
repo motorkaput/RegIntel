@@ -23,6 +23,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import permeateIcon from "@assets/PerMeaTeEnterprise_Icon_1752664675820.png";
 import Footer from "@/components/footer";
+import Navbar from "@/components/navbar";
 
 // AI Analytics Component
 function AIAnalyticsTab({ goals, company, employees }: { goals: Goal[], company: Company | null, employees: Employee[] }) {
@@ -588,49 +589,11 @@ export default function PerMeaTeEnterpriseApp() {
     }
   };
 
-  // PerMeaTe Header Component
-  const PerMeaTeHeader = () => (
-    <div className="sticky top-0 z-50 bg-white border-b border-gray-200 px-6 py-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-3">
-          <img src={permeateIcon} alt="PerMeaTe Enterprise" className="h-10 w-10" />
-          <div>
-            <h1 className="text-xl font-bold text-gray-900">PerMeaTe Enterprise</h1>
-            <p className="text-sm text-gray-600">Where goals turn into real, measurable work</p>
-          </div>
-        </div>
-        <div className="flex items-center space-x-4">
-          <span className="text-sm text-gray-600">
-            Welcome, {currentUser?.name || 'AdminUser'}
-          </span>
-          {currentUser?.userType === 'administrator' && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleReOnboard}
-              className="text-gray-600 border-gray-300 hover:bg-gray-50"
-            >
-              <RefreshCcw className="w-4 h-4 mr-1" />
-              Re-onboard
-            </Button>
-          )}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleLogout}
-            className="text-gray-600 border-gray-300 hover:bg-gray-50"
-          >
-            <LogOut className="w-4 h-4 mr-1" />
-            Logout
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
+
 
   // Sticky Navigation Tabs
   const NavigationTabs = () => (
-    <div className="sticky top-16 z-40 bg-white border-b border-gray-200 px-6">
+    <div className="sticky top-36 z-20 bg-white border-b border-gray-200 px-6">
       <div className="flex space-x-8">
         {[
           { id: 'overview', label: 'Overview', icon: BarChart3 },
@@ -663,7 +626,16 @@ export default function PerMeaTeEnterpriseApp() {
   if (showOnboarding) {
     return (
       <div className="min-h-screen bg-surface-white">
-        <PerMeaTeHeader />
+        <Navbar />
+        
+        {/* Beta status header bar */}
+        <div className="bg-blue-50 border-b border-blue-200 py-2 sticky top-24 z-30">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center">
+            <span className="text-xs text-blue-800 font-medium">
+              Beta Testing. Send your feedback to hello@darkstreet.org
+            </span>
+          </div>
+        </div>
         
         <main className="pt-6 pb-12">
           <div className="max-w-4xl mx-auto px-4">
@@ -880,11 +852,62 @@ export default function PerMeaTeEnterpriseApp() {
 
   return (
     <div className="min-h-screen bg-surface-white">
-      <PerMeaTeHeader />
-      <NavigationTabs />
+      <Navbar />
       
-      <main className="container mx-auto px-6 py-2 max-w-7xl">
-
+      {/* Beta status header bar */}
+      <div className="bg-blue-50 border-b border-blue-200 py-2 sticky top-24 z-30">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center">
+          <span className="text-xs text-blue-800 font-medium">
+            Beta Testing. Send your feedback to hello@darkstreet.org
+          </span>
+        </div>
+      </div>
+      
+      <main className="pt-0 pb-6">
+        {/* PerMeaTe specific header - sticky and compact */}
+        <div className="bg-gray-50 border-b border-gray-200 py-3 sticky top-32 z-20">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <img src={permeateIcon} alt="PerMeaTe Enterprise" className="h-10 w-auto" />
+              <div>
+                <h1 className="text-xl font-bold text-gray-900">PerMeaTe Enterprise</h1>
+                <p className="text-gray-600 text-xs">Where goals turn into real, measurable work</p>
+              </div>
+            </div>
+            
+            {/* User Controls aligned with session styling */}
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 px-3 py-2 bg-white rounded-md border border-gray-200 shadow-sm h-10">
+                <User className="w-4 h-4 text-gray-500" />
+                <span className="text-sm font-medium text-gray-700">{currentUser?.name || 'AdminUser'}</span>
+              </div>
+              {currentUser?.userType === 'administrator' && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleReOnboard}
+                  className="text-gray-600 border-gray-300 hover:bg-gray-50 h-10"
+                >
+                  <RefreshCcw className="w-4 h-4 mr-1" />
+                  Re-onboard
+                </Button>
+              )}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleLogout}
+                className="text-gray-600 border-gray-300 hover:bg-gray-50 h-10"
+              >
+                <LogOut className="w-4 h-4 mr-1" />
+                Logout
+              </Button>
+            </div>
+          </div>
+        </div>
+        
+        <NavigationTabs />
+        
+        <div className="container mx-auto px-6 py-2 max-w-7xl">
         {/* Overview Tab */}
         {activeTab === 'overview' && (
           <div className="space-y-6">
@@ -1225,6 +1248,8 @@ export default function PerMeaTeEnterpriseApp() {
         {activeTab === 'analytics' && (
           <AIAnalyticsTab goals={goals} company={company} employees={employees} />
         )}
+        
+        </div>
       </main>
       
       <Footer />
