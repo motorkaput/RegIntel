@@ -856,7 +856,7 @@ export default function PerMeaTeEnterpriseApp() {
       
       {/* Beta status header bar */}
       <div className="bg-blue-50 border-b border-blue-200 sticky top-12 z-30">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center h-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center h-12">
           <span className="text-xs text-blue-800 font-medium">
             Beta Testing. Send your feedback to hello@darkstreet.org
           </span>
