@@ -588,9 +588,9 @@ export default function PerMeaTeEnterpriseApp() {
     }
   };
 
-  // Custom PerMeaTe Header Component (not navbar)
+  // Custom PerMeaTe Header Component (sticky)
   const PerMeaTeHeader = () => (
-    <div className="bg-white border-b border-gray-200 px-6 py-4">
+    <div className="sticky top-0 z-50 bg-white border-b border-gray-200 px-6 py-4">
       <div className="flex justify-between items-center">
         <div className="flex items-center space-x-3">
           <img src={permeateIcon} alt="PerMeaTe Enterprise" className="h-8 w-8" />
@@ -630,7 +630,7 @@ export default function PerMeaTeEnterpriseApp() {
 
   // Sticky Navigation Tabs
   const NavigationTabs = () => (
-    <div className="sticky top-0 z-40 bg-white border-b border-gray-200 px-6">
+    <div className="sticky top-16 z-40 bg-white border-b border-gray-200 px-6">
       <div className="flex space-x-8">
         {[
           { id: 'overview', label: 'Overview', icon: BarChart3 },
@@ -643,7 +643,7 @@ export default function PerMeaTeEnterpriseApp() {
           return (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => setActiveTab(tab.id as typeof activeTab)}
               className={`flex items-center space-x-2 py-4 px-2 border-b-2 text-sm font-medium transition-colors ${
                 activeTab === tab.id
                   ? 'border-blue-500 text-blue-600'
@@ -665,7 +665,7 @@ export default function PerMeaTeEnterpriseApp() {
       <div className="min-h-screen bg-surface-white">
         <PerMeaTeHeader />
         
-        <main className="pt-24 pb-12">
+        <main className="pt-6 pb-12">
           <div className="max-w-4xl mx-auto px-4">
             <div className="text-center mb-8">
               <img src={permeateIcon} alt="PerMeaTe Enterprise" className="h-16 w-16 mx-auto mb-4" />
@@ -883,7 +883,7 @@ export default function PerMeaTeEnterpriseApp() {
       <PerMeaTeHeader />
       <NavigationTabs />
       
-      <main className="px-6 py-6">
+      <main className="container mx-auto px-6 py-6 max-w-7xl">
 
         {/* Overview Tab */}
         {activeTab === 'overview' && (
