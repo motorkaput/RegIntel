@@ -168,6 +168,8 @@ export default function PerMeaTeEnhanced() {
   const [isAnalyzingCSV, setIsAnalyzingCSV] = useState(false);
   const [analysisProgress, setAnalysisProgress] = useState("");
   const [isGeneratingPasswords, setIsGeneratingPasswords] = useState(false);
+  const [selectedEmployees, setSelectedEmployees] = useState<Set<string>>(new Set());
+  const [employeeSearchTerm, setEmployeeSearchTerm] = useState("");
 
   // App state
   const [activeTab, setActiveTab] = useState('overview');
@@ -289,10 +291,10 @@ export default function PerMeaTeEnhanced() {
       if (response.ok) {
         const company = await response.json();
         setCompanyId(company.id);
-        setOnboardingStep(2);
+        setOnboardingStep(3);
         toast({
           title: "Company Created",
-          description: "Now let's set up your employees"
+          description: "Now select employees for PerMeaTe access"
         });
       }
     } catch (error) {
@@ -331,6 +333,17 @@ export default function PerMeaTeEnhanced() {
           setAnalysisProgress("Processing employee roles and assignments...");
           const data = await response.json();
           setEmployeeData(data.employees);
+          
+          // Auto-populate company details from CSV analysis
+          if (data.companyDetails) {
+            setCompanyForm({
+              name: data.companyDetails.name || '',
+              businessAreas: data.companyDetails.businessAreas || '',
+              employeeCount: data.companyDetails.employeeCount || '',
+              locations: data.companyDetails.locations || ''
+            });
+          }
+          
           setAnalysisProgress("Analysis complete!");
           
           setTimeout(() => {
@@ -340,7 +353,7 @@ export default function PerMeaTeEnhanced() {
           
           toast({
             title: "CSV Analysis Complete",
-            description: `Analyzed ${data.employees.length} employees with auto-assigned roles`
+            description: `Analyzed ${data.employees.length} employees with auto-populated company details`
           });
         } else {
           throw new Error('Analysis failed');
@@ -660,83 +673,23 @@ export default function PerMeaTeEnhanced() {
           <Card className="p-8">
             <div className="mb-8">
               <div className="flex items-center justify-between mb-4">
-                <span className="text-sm font-medium text-gray-500">Step {onboardingStep} of 3</span>
+                <span className="text-sm font-medium text-gray-500">Step {onboardingStep} of 4</span>
                 <span className="text-sm font-medium text-gray-500">
-                  {onboardingStep === 1 ? 'Company Information' : 
-                   onboardingStep === 2 ? 'Employee Setup' : 'Review & Complete'}
+                  {onboardingStep === 1 ? 'CSV Upload' : 
+                   onboardingStep === 2 ? 'Company Details' : 
+                   onboardingStep === 3 ? 'Employee Selection' : 'Review & Complete'}
                 </span>
               </div>
-              <Progress value={onboardingStep * 33.33} className="w-full" />
+              <Progress value={onboardingStep * 25} className="w-full" />
             </div>
 
-            {/* Step 1: Company Information */}
+            {/* Step 1: CSV Upload & Organization Analysis */}
             {onboardingStep === 1 && (
               <div className="space-y-6">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Company Information</h3>
-                  <div className="grid grid-cols-1 gap-6">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Company Name</label>
-                      <Input
-                        value={companyForm.name}
-                        onChange={(e) => setCompanyForm({...companyForm, name: e.target.value})}
-                        placeholder="Enter your company name"
-                        className="mt-1"
-                      />
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Business Areas</label>
-                      <Input
-                        value={companyForm.businessAreas}
-                        onChange={(e) => setCompanyForm({...companyForm, businessAreas: e.target.value})}
-                        placeholder="Technology, Marketing, Sales (comma-separated)"
-                        className="mt-1"
-                      />
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Employee Count</label>
-                      <Input
-                        type="number"
-                        value={companyForm.employeeCount}
-                        onChange={(e) => setCompanyForm({...companyForm, employeeCount: e.target.value})}
-                        placeholder="Number of employees"
-                        className="mt-1"
-                      />
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">Office Locations</label>
-                      <Input
-                        value={companyForm.locations}
-                        onChange={(e) => setCompanyForm({...companyForm, locations: e.target.value})}
-                        placeholder="New York, London, Tokyo (comma-separated)"
-                        className="mt-1"
-                      />
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="flex justify-end">
-                  <Button 
-                    onClick={handleCompanySubmit}
-                    disabled={!companyForm.name}
-                    className="bg-blue-600 hover:bg-blue-700 text-white"
-                  >
-                    Continue
-                  </Button>
-                </div>
-              </div>
-            )}
-
-            {/* Step 2: Employee Setup */}
-            {onboardingStep === 2 && (
-              <div className="space-y-6">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Employee Data & Role Assignment</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Upload Organization Data</h3>
                   <p className="text-gray-600 mb-4">
-                    Upload a CSV file containing your employee information. PerMeaTe will auto-assign roles based on organizational structure.
+                    Upload your employee CSV file. PerMeaTe will analyze your organizational structure and auto-populate company details.
                   </p>
                   
                   <div className="border-2 border-dashed border-gray-300 rounded-lg p-6">
@@ -764,86 +717,75 @@ export default function PerMeaTeEnhanced() {
                           <div className="bg-blue-600 h-2 rounded-full animate-pulse" style={{ width: '60%' }}></div>
                         </div>
                         <p className="text-xs text-gray-500">
-                          AI is analyzing your organizational structure and auto-assigning employee roles. This may take 1-2 minutes.
+                          AI is analyzing your organizational structure and extracting company details. This may take 1-2 minutes.
                         </p>
                       </div>
                     )}
                   </div>
+                </div>
+                
+                <div className="flex justify-end">
+                  <Button 
+                    onClick={() => setOnboardingStep(2)}
+                    disabled={employeeData.length === 0 || isAnalyzingCSV}
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    Continue to Company Details
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Step 2: Company Details Review */}
+            {onboardingStep === 2 && (
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Review Company Details</h3>
+                  <p className="text-gray-600 mb-4">
+                    Review and edit the company information extracted from your CSV data.
+                  </p>
                   
-                  {/* Role Assignment Section */}
-                  {employeeData.length > 0 && (
-                    <div className="mt-6 space-y-4">
-                      <div className="flex justify-between items-center">
-                        <h4 className="font-medium text-gray-900">Auto-assigned Roles ({employeeData.length} employees)</h4>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setShowRoleEditor(!showRoleEditor)}
-                        >
-                          {showRoleEditor ? 'Hide Editor' : 'Edit Roles'}
-                        </Button>
-                      </div>
-                      
-                      {/* Role Summary */}
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-gray-50 rounded-lg">
-                        {Object.entries(roleCounts).map(([role, count]) => (
-                          <div key={role} className="text-center">
-                            <div className="text-lg font-bold text-blue-600">{count}</div>
-                            <div className="text-xs text-gray-600 capitalize">{role.replace('_', ' ')}</div>
-                          </div>
-                        ))}
-                      </div>
-                      
-                      {/* Role Editor */}
-                      {showRoleEditor && (
-                        <div className="max-h-64 overflow-y-auto border border-gray-200 rounded-md">
-                          {employeeData.map((employee, index) => (
-                            <div key={index} className="p-3 border-b border-gray-100 last:border-b-0">
-                              <div className="flex justify-between items-center">
-                                <div className="flex-1">
-                                  <p className="font-medium text-gray-900">{employee.name}</p>
-                                  <p className="text-sm text-gray-600">{employee.alias} • {employee.role}</p>
-                                </div>
-                                <select
-                                  value={employee.userType}
-                                  onChange={(e) => updateEmployeeRole(index, e.target.value)}
-                                  className="text-sm border border-gray-300 rounded px-2 py-1"
-                                >
-                                  <option value="organization_leader">Organization Leader</option>
-                                  <option value="project_leader">Project Leader</option>
-                                  <option value="team_member">Team Member</option>
-                                  <option value="administrator">Administrator</option>
-                                </select>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                      
-                      {/* Password Generation Section */}
-                      <div className="p-4 bg-blue-50 rounded-lg">
-                        <h5 className="font-medium text-blue-900 mb-2">Authentication Setup</h5>
-                        <p className="text-sm text-blue-700 mb-3">
-                          Generate secure passwords for all employees. Each employee will receive login credentials with their email alias as username.
-                        </p>
-                        <Button
-                          onClick={generateEmployeePasswords}
-                          disabled={passwordsGenerated || isGeneratingPasswords}
-                          className="bg-blue-600 hover:bg-blue-700 text-white"
-                        >
-                          {isGeneratingPasswords ? (
-                            <div className="flex items-center">
-                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                              Generating Passwords...
-                            </div>
-                          ) : passwordsGenerated ? 
-                            'Passwords Generated ✓' : 
-                            'Generate Employee Passwords'
-                          }
-                        </Button>
-                      </div>
+                  <div className="grid grid-cols-1 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Company Name</label>
+                      <Input
+                        value={companyForm.name}
+                        onChange={(e) => setCompanyForm({...companyForm, name: e.target.value})}
+                        placeholder="Enter your company name"
+                        className="mt-1"
+                      />
                     </div>
-                  )}
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Business Areas</label>
+                      <Input
+                        value={companyForm.businessAreas}
+                        onChange={(e) => setCompanyForm({...companyForm, businessAreas: e.target.value})}
+                        placeholder="Technology, Marketing, Sales (comma-separated)"
+                        className="mt-1"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Employee Count</label>
+                      <Input
+                        value={companyForm.employeeCount}
+                        onChange={(e) => setCompanyForm({...companyForm, employeeCount: e.target.value})}
+                        placeholder="Number of employees"
+                        className="mt-1"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Office Locations</label>
+                      <Input
+                        value={companyForm.locations}
+                        onChange={(e) => setCompanyForm({...companyForm, locations: e.target.value})}
+                        placeholder="New York, London, Tokyo (comma-separated)"
+                        className="mt-1"
+                      />
+                    </div>
+                  </div>
                 </div>
                 
                 <div className="flex justify-between">
@@ -854,8 +796,165 @@ export default function PerMeaTeEnhanced() {
                     Back
                   </Button>
                   <Button 
-                    onClick={() => setOnboardingStep(3)}
-                    disabled={employeeData.length === 0 || !passwordsGenerated || isAnalyzingCSV || isGeneratingPasswords}
+                    onClick={handleCompanySubmit}
+                    disabled={!companyForm.name}
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    Continue to Employee Selection
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Step 3: Employee Selection & Role Assignment */}
+            {onboardingStep === 3 && (
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Select Employees for PerMeaTe Access</h3>
+                  <p className="text-gray-600 mb-4">
+                    Choose which employees should have access to PerMeaTe and assign their roles. Include yourself as an Administrator.
+                  </p>
+                  
+                  {/* Employee Search and Selection */}
+                  {employeeData.length > 0 && (
+                    <div className="space-y-4">
+                      <div className="flex gap-4 items-center">
+                        <div className="flex-1">
+                          <Input
+                            placeholder="Search employees by name, role, or department..."
+                            value={employeeSearchTerm}
+                            onChange={(e) => setEmployeeSearchTerm(e.target.value)}
+                            className="w-full"
+                          />
+                        </div>
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            const allIds = new Set(employeeData.map(emp => emp.id));
+                            setSelectedEmployees(selectedEmployees.size === employeeData.length ? new Set() : allIds);
+                          }}
+                        >
+                          {selectedEmployees.size === employeeData.length ? 'Deselect All' : 'Select All'}
+                        </Button>
+                      </div>
+                      
+                      <div className="text-sm text-gray-600">
+                        {selectedEmployees.size} of {employeeData.length} employees selected for PerMeaTe access
+                      </div>
+                      
+                      {/* Employee List with Selection */}
+                      <div className="max-h-96 overflow-y-auto border border-gray-200 rounded-md">
+                        {employeeData
+                          .filter(emp => 
+                            employeeSearchTerm === '' || 
+                            emp.name.toLowerCase().includes(employeeSearchTerm.toLowerCase()) ||
+                            emp.role.toLowerCase().includes(employeeSearchTerm.toLowerCase()) ||
+                            (emp.department && emp.department.toLowerCase().includes(employeeSearchTerm.toLowerCase()))
+                          )
+                          .map((employee, index) => {
+                            const isSelected = selectedEmployees.has(employee.id);
+                            return (
+                              <div key={employee.id} className={`p-4 border-b border-gray-100 last:border-b-0 ${isSelected ? 'bg-blue-50' : 'bg-white'}`}>
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center space-x-3">
+                                    <input
+                                      type="checkbox"
+                                      checked={isSelected}
+                                      onChange={(e) => {
+                                        const newSelected = new Set(selectedEmployees);
+                                        if (e.target.checked) {
+                                          newSelected.add(employee.id);
+                                        } else {
+                                          newSelected.delete(employee.id);
+                                        }
+                                        setSelectedEmployees(newSelected);
+                                      }}
+                                      className="h-4 w-4 text-blue-600 rounded border-gray-300"
+                                    />
+                                    <div>
+                                      <p className="font-medium text-gray-900">{employee.name}</p>
+                                      <p className="text-sm text-gray-600">{employee.alias} • {employee.role}</p>
+                                      {employee.department && (
+                                        <p className="text-xs text-gray-500">{employee.department}</p>
+                                      )}
+                                    </div>
+                                  </div>
+                                  
+                                  {isSelected && (
+                                    <select
+                                      value={employee.userType}
+                                      onChange={(e) => updateEmployeeRole(index, e.target.value)}
+                                      className="text-sm border border-gray-300 rounded px-2 py-1"
+                                    >
+                                      <option value="organization_leader">Organization Leader</option>
+                                      <option value="project_leader">Project Leader</option>
+                                      <option value="team_member">Team Member</option>
+                                      <option value="administrator">Administrator</option>
+                                    </select>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })}
+                      </div>
+                      
+                      {/* Role Summary for Selected Employees */}
+                      {selectedEmployees.size > 0 && (
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-gray-50 rounded-lg mt-4">
+                          {Object.entries(
+                            employeeData
+                              .filter(emp => selectedEmployees.has(emp.id))
+                              .reduce((acc, emp) => {
+                                acc[emp.userType] = (acc[emp.userType] || 0) + 1;
+                                return acc;
+                              }, {} as Record<string, number>)
+                          ).map(([role, count]) => (
+                            <div key={role} className="text-center">
+                              <div className="text-lg font-bold text-blue-600">{count}</div>
+                              <div className="text-xs text-gray-600 capitalize">{role.replace('_', ' ')}</div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      
+                      {/* Password Generation Section */}
+                      {selectedEmployees.size > 0 && (
+                        <div className="p-4 bg-blue-50 rounded-lg">
+                          <h5 className="font-medium text-blue-900 mb-2">Authentication Setup</h5>
+                          <p className="text-sm text-blue-700 mb-3">
+                            Generate secure passwords for {selectedEmployees.size} selected employees. Each employee will receive login credentials with their email alias as username.
+                          </p>
+                          <Button
+                            onClick={generateEmployeePasswords}
+                            disabled={passwordsGenerated || isGeneratingPasswords || selectedEmployees.size === 0}
+                            className="bg-blue-600 hover:bg-blue-700 text-white"
+                          >
+                            {isGeneratingPasswords ? (
+                              <div className="flex items-center">
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                                Generating Passwords...
+                              </div>
+                            ) : passwordsGenerated ? 
+                              'Passwords Generated ✓' : 
+                              `Generate Passwords for ${selectedEmployees.size} Employees`
+                            }
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+                
+                <div className="flex justify-between">
+                  <Button 
+                    variant="outline"
+                    onClick={() => setOnboardingStep(2)}
+                  >
+                    Back
+                  </Button>
+                  <Button 
+                    onClick={() => setOnboardingStep(4)}
+                    disabled={selectedEmployees.size === 0 || !passwordsGenerated || isAnalyzingCSV || isGeneratingPasswords}
                     className="bg-blue-600 hover:bg-blue-700 text-white"
                   >
                     Continue to Review
@@ -864,8 +963,8 @@ export default function PerMeaTeEnhanced() {
               </div>
             )}
 
-            {/* Step 3: Review and Complete */}
-            {onboardingStep === 3 && (
+            {/* Step 4: Review and Complete */}
+            {onboardingStep === 4 && (
               <div className="space-y-6">
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">Review & Complete Setup</h3>
