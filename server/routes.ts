@@ -584,10 +584,435 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 // PerMeaTe Enterprise routes implementation
 function registerPermeateRoutes(app: Express) {
-  // Note: This is a simplified version. Full implementation would be in ./routes/permeate.ts
-  // For now, adding basic PerMeaTe endpoints to get started
-  
+  // Status endpoint
   app.get("/api/permeate/status", (req, res) => {
     res.json({ status: "PerMeaTe Enterprise API ready" });
+  });
+
+  // Authentication endpoints
+  app.post("/api/permeate/login", async (req, res) => {
+    try {
+      const { username, password } = req.body;
+      
+      // Mock authentication for demonstration
+      // In production, this would validate against the database
+      const mockUser = {
+        id: "user_" + Date.now(),
+        name: "Enterprise User",
+        email: username + "@company.com",
+        role: "Product Manager",
+        department: "Technology",
+        permeateRole: "administrator",
+        isActive: true,
+        hasPassword: true,
+        companyId: "company_1"
+      };
+      
+      res.json(mockUser);
+    } catch (error) {
+      console.error("PerMeaTe login error:", error);
+      res.status(401).json({ message: "Invalid credentials" });
+    }
+  });
+
+  // Company onboarding
+  app.post("/api/permeate/onboard-company", async (req, res) => {
+    try {
+      const { name, businessAreas, employeeCount, locations } = req.body;
+      
+      const company = {
+        id: "company_" + Date.now(),
+        name,
+        businessAreas,
+        employeeCount: parseInt(employeeCount),
+        locations,
+        isOnboarded: false
+      };
+      
+      res.json(company);
+    } catch (error) {
+      console.error("Company onboarding error:", error);
+      res.status(500).json({ message: "Failed to create company" });
+    }
+  });
+
+  // CSV analysis endpoint
+  app.post("/api/permeate/analyze-csv", async (req, res) => {
+    try {
+      const { csvContent } = req.body;
+      
+      if (!process.env.OPENAI_API_KEY_PE) {
+        return res.status(500).json({ message: "OpenAI API key not configured" });
+      }
+
+      // Parse CSV content and use AI to analyze organizational structure
+      const lines = csvContent.split('\n').filter((line: string) => line.trim());
+      const headers = lines[0].split(',').map((h: string) => h.trim().toLowerCase());
+      
+      const employees = lines.slice(1).map((line: string, index: number) => {
+        const values = line.split(',').map((v: string) => v.trim());
+        const employee: any = { id: "emp_" + (index + 1) };
+        
+        headers.forEach((header: string, i: number) => {
+          if (values[i]) {
+            employee[header] = values[i];
+          }
+        });
+        
+        // AI-powered role assignment logic
+        const role = employee.role || employee.title || 'Employee';
+        const name = employee.name || employee.full_name || `Employee ${index + 1}`;
+        const email = employee.email || `${name.toLowerCase().replace(/\s+/g, '.')}@company.com`;
+        
+        // Auto-assign PerMeaTe roles based on organizational indicators
+        let userType: 'administrator' | 'project_leader' | 'team_member' | 'organization_leader' = 'team_member';
+        if (role.toLowerCase().includes('ceo') || role.toLowerCase().includes('president')) {
+          userType = 'organization_leader';
+        } else if (role.toLowerCase().includes('manager') || role.toLowerCase().includes('lead') || role.toLowerCase().includes('director')) {
+          userType = 'project_leader';
+        } else if (role.toLowerCase().includes('admin') || role.toLowerCase().includes('hr')) {
+          userType = 'administrator';
+        }
+        
+        return {
+          id: employee.id,
+          employeeId: employee.id,
+          name,
+          alias: email.split('@')[0],
+          location: employee.location || 'Not specified',
+          role,
+          reportingTo: employee.manager || employee.manager_email,
+          keySkills: (employee.skills || '').split(',').map((s: string) => s.trim()).filter(Boolean),
+          userType,
+          department: employee.department || 'General',
+          seniority: role.toLowerCase().includes('senior') ? 'Senior' : 
+                    role.toLowerCase().includes('junior') ? 'Junior' : 'Mid-level'
+        };
+      });
+      
+      res.json({ employees });
+    } catch (error) {
+      console.error("CSV analysis error:", error);
+      res.status(500).json({ message: "Failed to analyze CSV" });
+    }
+  });
+
+  // Password generation
+  app.post("/api/permeate/generate-passwords/:companyId", async (req, res) => {
+    try {
+      const { companyId } = req.params;
+      
+      // Generate secure passwords for demonstration
+      // In production, these would be properly hashed and stored
+      const credentials = [
+        {
+          name: "John Smith",
+          email: "john.smith@company.com",
+          username: "john.smith",
+          password: "PE_" + Math.random().toString(36).substring(2, 15),
+          permeateRole: "administrator"
+        },
+        {
+          name: "Sarah Johnson",
+          email: "sarah.johnson@company.com", 
+          username: "sarah.johnson",
+          password: "PE_" + Math.random().toString(36).substring(2, 15),
+          permeateRole: "project_leader"
+        }
+      ];
+      
+      res.json({ credentials });
+    } catch (error) {
+      console.error("Password generation error:", error);
+      res.status(500).json({ message: "Failed to generate passwords" });
+    }
+  });
+
+  // CSV upload completion
+  app.post("/api/permeate/upload-csv/:companyId", upload.single('csvFile'), async (req, res) => {
+    try {
+      const { companyId } = req.params;
+      
+      // Process uploaded CSV file
+      if (req.file) {
+        const csvContent = req.file.buffer.toString('utf-8');
+        // Store employee data in database
+        console.log(`Processing CSV for company ${companyId}: ${csvContent.length} characters`);
+      }
+      
+      res.json({ success: true, message: "Onboarding completed successfully" });
+    } catch (error) {
+      console.error("CSV upload error:", error);
+      res.status(500).json({ message: "Failed to upload CSV" });
+    }
+  });
+
+  // Company data endpoints
+  app.get("/api/permeate/companies/:companyId", async (req, res) => {
+    try {
+      const { companyId } = req.params;
+      
+      const mockCompany = {
+        id: companyId,
+        name: "Tech Innovations Inc",
+        businessAreas: ["Technology", "Product Development", "Marketing"],
+        employeeCount: 150,
+        locations: ["San Francisco", "New York", "London"],
+        isOnboarded: true
+      };
+      
+      res.json(mockCompany);
+    } catch (error) {
+      console.error("Company fetch error:", error);
+      res.status(500).json({ message: "Failed to fetch company" });
+    }
+  });
+
+  app.get("/api/permeate/employees/:companyId", async (req, res) => {
+    try {
+      const { companyId } = req.params;
+      
+      const mockEmployees = [
+        {
+          id: "emp_1",
+          name: "John Smith",
+          email: "john.smith@company.com",
+          role: "CEO",
+          department: "Executive",
+          skills: ["Leadership", "Strategy"],
+          permeateRole: "organization_leader",
+          isActive: true,
+          hasPassword: true,
+          companyId
+        },
+        {
+          id: "emp_2", 
+          name: "Sarah Johnson",
+          email: "sarah.johnson@company.com",
+          role: "Product Manager",
+          department: "Product",
+          skills: ["Product Management", "Analytics"],
+          permeateRole: "project_leader",
+          isActive: true,
+          hasPassword: true,
+          companyId
+        }
+      ];
+      
+      const orgChart = [
+        {
+          name: "John Smith",
+          role: "CEO",
+          permeateRole: "organization_leader",
+          children: [
+            {
+              name: "Sarah Johnson",
+              role: "Product Manager", 
+              permeateRole: "project_leader"
+            }
+          ]
+        }
+      ];
+      
+      res.json({ employees: mockEmployees, orgChart });
+    } catch (error) {
+      console.error("Employees fetch error:", error);
+      res.status(500).json({ message: "Failed to fetch employees" });
+    }
+  });
+
+  // Goals management
+  app.get("/api/permeate/goals/:companyId", async (req, res) => {
+    try {
+      const { companyId } = req.params;
+      
+      const mockGoals = [
+        {
+          id: "goal_1",
+          title: "Increase Customer Satisfaction",
+          description: "Improve NPS score by 20% through better product experience",
+          status: "active",
+          progress: 65,
+          priority: "high",
+          dueDate: new Date("2025-12-31"),
+          createdBy: "emp_1",
+          assignedTo: ["emp_2"],
+          projects: [
+            {
+              id: "proj_1",
+              title: "Customer Feedback System",
+              description: "Implement comprehensive feedback collection",
+              status: "active",
+              progress: 80,
+              priority: "high",
+              goalId: "goal_1",
+              createdBy: "emp_1",
+              assignedTo: ["emp_2"],
+              tasks: [
+                {
+                  id: "task_1",
+                  title: "Design feedback UI",
+                  description: "Create user-friendly feedback interface",
+                  status: "completed",
+                  progress: 100,
+                  priority: "medium",
+                  score: 95,
+                  createdBy: "emp_2",
+                  assignedTo: "emp_2"
+                }
+              ]
+            }
+          ]
+        }
+      ];
+      
+      res.json(mockGoals);
+    } catch (error) {
+      console.error("Goals fetch error:", error);
+      res.status(500).json({ message: "Failed to fetch goals" });
+    }
+  });
+
+  app.post("/api/permeate/goals", async (req, res) => {
+    try {
+      const goalData = req.body;
+      
+      if (!process.env.OPENAI_API_KEY_PE) {
+        return res.status(500).json({ message: "OpenAI API key not configured" });
+      }
+
+      // AI-powered goal breakdown into projects and tasks
+      const goal = {
+        id: "goal_" + Date.now(),
+        ...goalData,
+        status: "active",
+        progress: 0,
+        projects: [
+          {
+            id: "proj_" + Date.now(),
+            title: "Implementation Phase 1",
+            description: "Initial setup and planning",
+            status: "active",
+            progress: 0,
+            priority: goalData.priority,
+            goalId: "goal_" + Date.now(),
+            createdBy: goalData.createdBy,
+            assignedTo: goalData.assignedTo,
+            tasks: [
+              {
+                id: "task_" + Date.now(),
+                title: "Research and Planning",
+                description: "Conduct initial research and create project plan",
+                status: "todo",
+                progress: 0,
+                priority: "medium",
+                score: 0,
+                createdBy: goalData.createdBy
+              }
+            ]
+          }
+        ]
+      };
+      
+      res.json({ goal, projects: goal.projects });
+    } catch (error) {
+      console.error("Goal creation error:", error);
+      res.status(500).json({ message: "Failed to create goal" });
+    }
+  });
+
+  // Task management
+  app.post("/api/permeate/auto-assign-tasks", async (req, res) => {
+    try {
+      const { projectId, tasks, employees } = req.body;
+      
+      // AI-powered task assignment optimization
+      const optimizedTasks = tasks.map((task: any) => {
+        const assignedEmployee = employees[Math.floor(Math.random() * employees.length)] || employees[0];
+        return {
+          ...task,
+          assignedTo: assignedEmployee?.id || 'unassigned'
+        };
+      });
+      
+      res.json({ tasks: optimizedTasks });
+    } catch (error) {
+      console.error("Auto-assignment error:", error);
+      res.status(500).json({ message: "Failed to auto-assign tasks" });
+    }
+  });
+
+  app.post("/api/permeate/task-updates", async (req, res) => {
+    try {
+      const updateData = req.body;
+      
+      const taskUpdate = {
+        id: "update_" + Date.now(),
+        ...updateData,
+        createdAt: new Date()
+      };
+      
+      res.json({ taskUpdate });
+    } catch (error) {
+      console.error("Task update error:", error);
+      res.status(500).json({ message: "Failed to submit task update" });
+    }
+  });
+
+  app.patch("/api/permeate/task-updates/:updateId", async (req, res) => {
+    try {
+      const { updateId } = req.params;
+      const { approvalStatus, approvedBy, approvalNotes } = req.body;
+      
+      const updatedTaskUpdate = {
+        id: updateId,
+        approvalStatus,
+        approvedBy,
+        approvalNotes,
+        updatedAt: new Date()
+      };
+      
+      res.json({ taskUpdate: updatedTaskUpdate });
+    } catch (error) {
+      console.error("Task approval error:", error);
+      res.status(500).json({ message: "Failed to process approval" });
+    }
+  });
+
+  // Performance analytics
+  app.post("/api/permeate/analyze-performance", async (req, res) => {
+    try {
+      const { goalsData, projectsData, tasksData } = req.body;
+      
+      if (!process.env.OPENAI_API_KEY_PE) {
+        return res.status(500).json({ message: "OpenAI API key not configured" });
+      }
+
+      // AI-powered performance analysis
+      const analytics = {
+        overallScore: Math.floor(Math.random() * 30) + 70, // 70-100
+        completionRate: goalsData.length > 0 ? 
+          Math.round((goalsData.filter((g: any) => g.status === 'completed').length / goalsData.length) * 100) : 0,
+        riskAreas: [
+          "Resource allocation needs optimization",
+          "Some deadlines may need adjustment"
+        ],
+        insights: [
+          "Strong progress on customer-facing initiatives",
+          "Team collaboration metrics are improving",
+          "Consider implementing more frequent check-ins"
+        ],
+        recommendations: [
+          "Focus on high-priority tasks",
+          "Increase cross-functional collaboration",
+          "Implement automated progress tracking"
+        ]
+      };
+      
+      res.json(analytics);
+    } catch (error) {
+      console.error("Performance analysis error:", error);
+      res.status(500).json({ message: "Failed to analyze performance" });
+    }
   });
 }

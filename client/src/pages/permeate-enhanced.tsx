@@ -64,6 +64,7 @@ interface Employee {
   isActive: boolean;
   hasPassword: boolean;
   lastLogin?: Date;
+  companyId: string;
 }
 
 interface Goal {
@@ -91,6 +92,7 @@ interface Project {
   assignedTo: string[];
   projectLeader?: string;
   tasks: Task[];
+  goalId: string;
 }
 
 interface Task {
@@ -1116,7 +1118,7 @@ export default function PerMeaTeEnhanced() {
                               <div key={project.id} className="flex justify-between items-center p-2 bg-gray-50 rounded">
                                 <span className="text-sm">{project.title}</span>
                                 <div className="flex items-center space-x-2">
-                                  <Badge variant="outline" size="sm">{project.status}</Badge>
+                                  <Badge variant="outline">{project.status}</Badge>
                                   <Button
                                     size="sm"
                                     variant="outline"
@@ -1326,7 +1328,7 @@ export default function PerMeaTeEnhanced() {
                             <div>
                               <h4 className="font-medium">{rootEmployee.name}</h4>
                               <p className="text-sm text-gray-600">{rootEmployee.role}</p>
-                              <Badge variant="outline" size="sm">
+                              <Badge variant="outline">
                                 {rootEmployee.permeateRole.replace('_', ' ')}
                               </Badge>
                             </div>
@@ -1343,7 +1345,7 @@ export default function PerMeaTeEnhanced() {
                                     <p className="font-medium text-sm">{child.name}</p>
                                     <p className="text-xs text-gray-600">{child.role}</p>
                                   </div>
-                                  <Badge variant="outline" size="sm">
+                                  <Badge variant="outline">
                                     {child.permeateRole.replace('_', ' ')}
                                   </Badge>
                                 </div>
