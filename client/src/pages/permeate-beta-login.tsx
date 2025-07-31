@@ -22,10 +22,10 @@ export default function PerMeateBetaLogin() {
 
     // Define user credentials and types
     const validUsers = {
-      "AdminUser": {
+      "OnboardingExpertUser": {
         password: "7c2f5a1d8b4e9c6f3a0d2b5e8c1f4a7b",
         userType: "administrator",
-        name: "Administrator User",
+        name: "Onboarding Expert User",
         employeeId: "ADM001"
       },
       "ProjectLeader": {
@@ -101,7 +101,7 @@ export default function PerMeateBetaLogin() {
               <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                 <p className="text-xs text-blue-800 font-medium">Demo Users:</p>
                 <div className="text-xs text-blue-700 mt-1 space-y-1">
-                  <div>AdminUser (Administrator)</div>
+                  <div>OnboardingExpertUser (Administrator)</div>
                   <div>ProjectLeader (Project Leader)</div>
                   <div>TeamMember (Team Member)</div>
                   <div>OrgLeader (Organization Leader)</div>

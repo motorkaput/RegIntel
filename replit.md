@@ -148,7 +148,7 @@ The application follows a modern full-stack architecture with emphasis on type s
   * Employee CSV/Excel upload with AI-powered analysis using OPENAI_API_KEY_PE
   * Data review and completion confirmation
 - ✅ **Multi-User System Architecture**: Four user types implemented
-  * Administrator (AdminUser): Password 7c2f5a1d8b4e9c6f3a0d2b5e8c1f4a7b
+  * Administrator (OnboardingExpertUser): Password 7c2f5a1d8b4e9c6f3a0d2b5e8c1f4a7b
   * Project Leader (ProjectLeader): Password pl_a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6
   * Team Member (TeamMember): Password tm_x9y8z7w6v5u4t3s2r1q0p9o8n7m6l5k4
   * Organization Leader (OrgLeader): Password ol_z3x1c5v7b9n2m4k6j8h0g2f4d6s8a0q2
@@ -167,7 +167,7 @@ The application follows a modern full-stack architecture with emphasis on type s
 - ✅ **Separate URLs**: /z9m3k/pe-workspace (different from Fetch Patterns /z8f4x/fp-workspace)
 - ✅ **User Updates (July 29, 2025)**:
   * Login page text changed to "PerMeaTe Enterprise Beta Access"
-  * Username changed from "EnterpriseUser" to "AdminUser" 
+  * Username changed from "EnterpriseUser" to "OnboardingExpertUser" 
   * Added re-onboarding option for administrators with "Re-onboard" button
   * localStorage clearing functionality to restart onboarding wizard with fresh CSV/Excel data
   * Fixed Excel file processing using XLSX library for proper organizational data analysis
