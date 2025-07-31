@@ -575,6 +575,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Register PerMeaTe Enterprise routes
+  registerPermeateRoutes(app);
+
   const httpServer = createServer(app);
   return httpServer;
+}
+
+// PerMeaTe Enterprise routes implementation
+function registerPermeateRoutes(app: Express) {
+  // Note: This is a simplified version. Full implementation would be in ./routes/permeate.ts
+  // For now, adding basic PerMeaTe endpoints to get started
+  
+  app.get("/api/permeate/status", (req, res) => {
+    res.json({ status: "PerMeaTe Enterprise API ready" });
+  });
 }

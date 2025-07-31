@@ -224,3 +224,27 @@ Tasks: ${JSON.stringify(tasksData)}`
     throw new Error('Failed to analyze performance data');
   }
 }
+
+export async function generateAIInsights(prompt: string) {
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      messages: [
+        {
+          role: "system",
+          content: "You are PerMeaTe Enterprise AI assistant. Provide structured business insights. Always respond with valid JSON.",
+        },
+        {
+          role: "user",
+          content: prompt,
+        },
+      ],
+      response_format: { type: "json_object" },
+    });
+
+    return JSON.parse(response.choices[0].message.content || "{}");
+  } catch (error) {
+    console.error("PerMeaTe AI insight error:", error);
+    return { projects: [], error: "Failed to generate AI insights" };
+  }
+}

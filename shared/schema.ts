@@ -10,6 +10,7 @@ import {
   decimal,
   integer,
 } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -180,3 +181,226 @@ export type PerformanceMetric = typeof performanceMetrics.$inferSelect;
 export type InsertPerformanceMetric = typeof performanceMetrics.$inferInsert;
 export type DocumentAnalysis = typeof documentAnalyses.$inferSelect;
 export type InsertDocumentAnalysis = typeof documentAnalyses.$inferInsert;
+
+// PerMeaTe Enterprise Tables
+export const permeateCompanies = pgTable("permeate_companies", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name").notNull(),
+  businessAreas: varchar("business_areas").array(),
+  employeeCount: integer("employee_count"),
+  locations: varchar("locations").array(),
+  isOnboarded: boolean("is_onboarded").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const permeateEmployees = pgTable("permeate_employees", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  companyId: varchar("company_id").notNull().references(() => permeateCompanies.id),
+  name: varchar("name").notNull(),
+  email: varchar("email").notNull(),
+  role: varchar("role").notNull(),
+  department: varchar("department"),
+  skills: varchar("skills").array(),
+  location: varchar("location"),
+  managerEmail: varchar("manager_email"),
+  permeateRole: varchar("permeate_role").notNull().default("team_member"), // organization_leader, project_leader, team_member, administrator
+  isActive: boolean("is_active").default(true),
+  hasPassword: boolean("has_password").default(false),
+  passwordHash: varchar("password_hash"),
+  lastLogin: timestamp("last_login"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const permeateGoals = pgTable("permeate_goals", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  companyId: varchar("company_id").notNull().references(() => permeateCompanies.id),
+  title: varchar("title").notNull(),
+  description: text("description"),
+  status: varchar("status").default("active"), // active, completed, paused, cancelled
+  progress: integer("progress").default(0),
+  priority: varchar("priority").default("medium"), // low, medium, high, critical
+  dueDate: timestamp("due_date"),
+  createdBy: varchar("created_by").notNull().references(() => permeateEmployees.id),
+  assignedTo: varchar("assigned_to").array(), // employee IDs
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const permeateProjects = pgTable("permeate_projects", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  goalId: varchar("goal_id").notNull().references(() => permeateGoals.id),
+  companyId: varchar("company_id").notNull().references(() => permeateCompanies.id),
+  title: varchar("title").notNull(),
+  description: text("description"),
+  status: varchar("status").default("active"), // active, completed, paused, cancelled
+  progress: integer("progress").default(0),
+  priority: varchar("priority").default("medium"), // low, medium, high, critical
+  dueDate: timestamp("due_date"),
+  createdBy: varchar("created_by").notNull().references(() => permeateEmployees.id),
+  assignedTo: varchar("assigned_to").array(), // employee IDs
+  projectLeader: varchar("project_leader").references(() => permeateEmployees.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const permeateTasks = pgTable("permeate_tasks", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  projectId: varchar("project_id").notNull().references(() => permeateProjects.id),
+  goalId: varchar("goal_id").notNull().references(() => permeateGoals.id),
+  companyId: varchar("company_id").notNull().references(() => permeateCompanies.id),
+  title: varchar("title").notNull(),
+  description: text("description"),
+  status: varchar("status").default("todo"), // todo, in_progress, completed, rejected
+  progress: integer("progress").default(0),
+  priority: varchar("priority").default("medium"), // low, medium, high, critical
+  score: integer("score").default(0),
+  selfScore: integer("self_score"),
+  dueDate: timestamp("due_date"),
+  createdBy: varchar("created_by").notNull().references(() => permeateEmployees.id),
+  assignedTo: varchar("assigned_to").references(() => permeateEmployees.id),
+  approvedBy: varchar("approved_by").references(() => permeateEmployees.id),
+  statusNotes: text("status_notes"),
+  externalIntegration: jsonb("external_integration"), // data from Jira, Asana, Trello, etc.
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const permeateTaskUpdates = pgTable("permeate_task_updates", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  taskId: varchar("task_id").notNull().references(() => permeateTasks.id),
+  employeeId: varchar("employee_id").notNull().references(() => permeateEmployees.id),
+  status: varchar("status").notNull(),
+  score: integer("score"),
+  notes: text("notes"),
+  attachments: jsonb("attachments"), // file paths or external links
+  approvalStatus: varchar("approval_status").default("pending"), // pending, approved, rejected
+  approvedBy: varchar("approved_by").references(() => permeateEmployees.id),
+  approvalNotes: text("approval_notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// PerMeaTe Relations
+export const permeateCompaniesRelations = relations(permeateCompanies, ({ many }) => ({
+  employees: many(permeateEmployees),
+  goals: many(permeateGoals),
+  projects: many(permeateProjects),
+  tasks: many(permeateTasks),
+}));
+
+export const permeateEmployeesRelations = relations(permeateEmployees, ({ one, many }) => ({
+  company: one(permeateCompanies, {
+    fields: [permeateEmployees.companyId],
+    references: [permeateCompanies.id],
+  }),
+  createdGoals: many(permeateGoals, { relationName: "goalCreator" }),
+  createdProjects: many(permeateProjects, { relationName: "projectCreator" }),
+  createdTasks: many(permeateTasks, { relationName: "taskCreator" }),
+  assignedTasks: many(permeateTasks, { relationName: "taskAssignee" }),
+  ledProjects: many(permeateProjects, { relationName: "projectLeader" }),
+  taskUpdates: many(permeateTaskUpdates),
+}));
+
+export const permeateGoalsRelations = relations(permeateGoals, ({ one, many }) => ({
+  company: one(permeateCompanies, {
+    fields: [permeateGoals.companyId],
+    references: [permeateCompanies.id],
+  }),
+  creator: one(permeateEmployees, {
+    fields: [permeateGoals.createdBy],
+    references: [permeateEmployees.id],
+    relationName: "goalCreator",
+  }),
+  projects: many(permeateProjects),
+  tasks: many(permeateTasks),
+}));
+
+export const permeateProjectsRelations = relations(permeateProjects, ({ one, many }) => ({
+  goal: one(permeateGoals, {
+    fields: [permeateProjects.goalId],
+    references: [permeateGoals.id],
+  }),
+  company: one(permeateCompanies, {
+    fields: [permeateProjects.companyId],
+    references: [permeateCompanies.id],
+  }),
+  creator: one(permeateEmployees, {
+    fields: [permeateProjects.createdBy],
+    references: [permeateEmployees.id],
+    relationName: "projectCreator",
+  }),
+  leader: one(permeateEmployees, {
+    fields: [permeateProjects.projectLeader],
+    references: [permeateEmployees.id],
+    relationName: "projectLeader",
+  }),
+  tasks: many(permeateTasks),
+}));
+
+export const permeateTasksRelations = relations(permeateTasks, ({ one, many }) => ({
+  project: one(permeateProjects, {
+    fields: [permeateTasks.projectId],
+    references: [permeateProjects.id],
+  }),
+  goal: one(permeateGoals, {
+    fields: [permeateTasks.goalId],
+    references: [permeateGoals.id],
+  }),
+  company: one(permeateCompanies, {
+    fields: [permeateTasks.companyId],
+    references: [permeateCompanies.id],
+  }),
+  creator: one(permeateEmployees, {
+    fields: [permeateTasks.createdBy],
+    references: [permeateEmployees.id],
+    relationName: "taskCreator",
+  }),
+  assignee: one(permeateEmployees, {
+    fields: [permeateTasks.assignedTo],
+    references: [permeateEmployees.id],
+    relationName: "taskAssignee",
+  }),
+  approver: one(permeateEmployees, {
+    fields: [permeateTasks.approvedBy],
+    references: [permeateEmployees.id],
+  }),
+  updates: many(permeateTaskUpdates),
+}));
+
+export const permeateTaskUpdatesRelations = relations(permeateTaskUpdates, ({ one }) => ({
+  task: one(permeateTasks, {
+    fields: [permeateTaskUpdates.taskId],
+    references: [permeateTasks.id],
+  }),
+  employee: one(permeateEmployees, {
+    fields: [permeateTaskUpdates.employeeId],
+    references: [permeateEmployees.id],
+  }),
+  approver: one(permeateEmployees, {
+    fields: [permeateTaskUpdates.approvedBy],
+    references: [permeateEmployees.id],
+  }),
+}));
+
+// PerMeaTe Zod schemas
+export const insertPermeateCompanySchema = createInsertSchema(permeateCompanies);
+export const insertPermeateEmployeeSchema = createInsertSchema(permeateEmployees);
+export const insertPermeateGoalSchema = createInsertSchema(permeateGoals);
+export const insertPermeateProjectSchema = createInsertSchema(permeateProjects);
+export const insertPermeateTaskSchema = createInsertSchema(permeateTasks);
+export const insertPermeateTaskUpdateSchema = createInsertSchema(permeateTaskUpdates);
+
+// PerMeaTe Types
+export type PermeateCompany = typeof permeateCompanies.$inferSelect;
+export type InsertPermeateCompany = typeof permeateCompanies.$inferInsert;
+export type PermeateEmployee = typeof permeateEmployees.$inferSelect;
+export type InsertPermeateEmployee = typeof permeateEmployees.$inferInsert;
+export type PermeateGoal = typeof permeateGoals.$inferSelect;
+export type InsertPermeateGoal = typeof permeateGoals.$inferInsert;
+export type PermeateProject = typeof permeateProjects.$inferSelect;
+export type InsertPermeateProject = typeof permeateProjects.$inferInsert;
+export type PermeateTask = typeof permeateTasks.$inferSelect;
+export type InsertPermeateTask = typeof permeateTasks.$inferInsert;
+export type PermeateTaskUpdate = typeof permeateTaskUpdates.$inferSelect;
+export type InsertPermeateTaskUpdate = typeof permeateTaskUpdates.$inferInsert;
