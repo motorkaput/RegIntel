@@ -165,6 +165,9 @@ export default function PerMeaTeEnhanced() {
   const [showRoleEditor, setShowRoleEditor] = useState(false);
   const [passwordsGenerated, setPasswordsGenerated] = useState(false);
   const [generatedCredentials, setGeneratedCredentials] = useState<any[]>([]);
+  const [isAnalyzingCSV, setIsAnalyzingCSV] = useState(false);
+  const [analysisProgress, setAnalysisProgress] = useState("");
+  const [isGeneratingPasswords, setIsGeneratingPasswords] = useState(false);
 
   // App state
   const [activeTab, setActiveTab] = useState('overview');
@@ -307,6 +310,8 @@ export default function PerMeaTeEnhanced() {
     if (!file) return;
 
     setUploadedFile(file);
+    setIsAnalyzingCSV(true);
+    setAnalysisProgress("Reading CSV file...");
     
     // Read and analyze CSV file
     const reader = new FileReader();
@@ -314,6 +319,8 @@ export default function PerMeaTeEnhanced() {
       const csvContent = event.target?.result as string;
       
       try {
+        setAnalysisProgress("Analyzing organizational structure with AI...");
+        
         const response = await fetch('/api/permeate/analyze-csv', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -321,15 +328,27 @@ export default function PerMeaTeEnhanced() {
         });
 
         if (response.ok) {
+          setAnalysisProgress("Processing employee roles and assignments...");
           const data = await response.json();
           setEmployeeData(data.employees);
+          setAnalysisProgress("Analysis complete!");
+          
+          setTimeout(() => {
+            setIsAnalyzingCSV(false);
+            setAnalysisProgress("");
+          }, 1000);
+          
           toast({
             title: "CSV Analysis Complete",
             description: `Analyzed ${data.employees.length} employees with auto-assigned roles`
           });
+        } else {
+          throw new Error('Analysis failed');
         }
       } catch (error) {
         console.error('CSV analysis error:', error);
+        setIsAnalyzingCSV(false);
+        setAnalysisProgress("");
         toast({
           title: "Analysis Failed",
           description: "Unable to process CSV file",
@@ -348,6 +367,7 @@ export default function PerMeaTeEnhanced() {
   };
 
   const generateEmployeePasswords = async () => {
+    setIsGeneratingPasswords(true);
     try {
       const response = await fetch(`/api/permeate/generate-passwords/${companyId}`, {
         method: 'POST'
@@ -369,6 +389,8 @@ export default function PerMeaTeEnhanced() {
         description: "Unable to generate employee passwords",
         variant: "destructive"
       });
+    } finally {
+      setIsGeneratingPasswords(false);
     }
   };
 
@@ -722,12 +744,29 @@ export default function PerMeaTeEnhanced() {
                       type="file"
                       accept=".csv"
                       onChange={handleFileUpload}
-                      className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                      disabled={isAnalyzingCSV}
+                      className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 disabled:opacity-50"
                     />
-                    {uploadedFile && (
+                    {uploadedFile && !isAnalyzingCSV && (
                       <p className="mt-2 text-sm text-green-600">
                         File uploaded: {uploadedFile.name}
                       </p>
+                    )}
+                    
+                    {/* Analysis Progress Indicator */}
+                    {isAnalyzingCSV && (
+                      <div className="mt-4 space-y-3">
+                        <div className="flex items-center space-x-3">
+                          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+                          <span className="text-sm font-medium text-blue-600">{analysisProgress}</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div className="bg-blue-600 h-2 rounded-full animate-pulse" style={{ width: '60%' }}></div>
+                        </div>
+                        <p className="text-xs text-gray-500">
+                          AI is analyzing your organizational structure and auto-assigning employee roles. This may take 1-2 minutes.
+                        </p>
+                      </div>
                     )}
                   </div>
                   
@@ -789,10 +828,18 @@ export default function PerMeaTeEnhanced() {
                         </p>
                         <Button
                           onClick={generateEmployeePasswords}
-                          disabled={passwordsGenerated}
+                          disabled={passwordsGenerated || isGeneratingPasswords}
                           className="bg-blue-600 hover:bg-blue-700 text-white"
                         >
-                          {passwordsGenerated ? 'Passwords Generated ✓' : 'Generate Employee Passwords'}
+                          {isGeneratingPasswords ? (
+                            <div className="flex items-center">
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                              Generating Passwords...
+                            </div>
+                          ) : passwordsGenerated ? 
+                            'Passwords Generated ✓' : 
+                            'Generate Employee Passwords'
+                          }
                         </Button>
                       </div>
                     </div>
@@ -808,7 +855,7 @@ export default function PerMeaTeEnhanced() {
                   </Button>
                   <Button 
                     onClick={() => setOnboardingStep(3)}
-                    disabled={employeeData.length === 0 || !passwordsGenerated}
+                    disabled={employeeData.length === 0 || !passwordsGenerated || isAnalyzingCSV || isGeneratingPasswords}
                     className="bg-blue-600 hover:bg-blue-700 text-white"
                   >
                     Continue to Review
