@@ -214,8 +214,8 @@ export default function PerMeaTeEnhanced() {
           description: `Logged in as ${userData.name}`
         });
         
-        // Fetch company data if user is authenticated
-        fetchCompanyData(userData.companyId);
+        // Check if company needs onboarding
+        setCompanyId(userData.companyId);
       } else {
         toast({
           title: "Login Failed",
@@ -270,6 +270,38 @@ export default function PerMeaTeEnhanced() {
   };
 
   // Onboarding functions
+  const handleCompanySubmit = async () => {
+    try {
+      const response = await fetch('/api/permeate/onboard-company', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: companyForm.name,
+          businessAreas: companyForm.businessAreas.split(',').map(s => s.trim()),
+          employeeCount: companyForm.employeeCount,
+          locations: companyForm.locations.split(',').map(s => s.trim())
+        })
+      });
+
+      if (response.ok) {
+        const company = await response.json();
+        setCompanyId(company.id);
+        setOnboardingStep(2);
+        toast({
+          title: "Company Created",
+          description: "Now let's set up your employees"
+        });
+      }
+    } catch (error) {
+      console.error('Company creation error:', error);
+      toast({
+        title: "Company Creation Failed",
+        description: "Unable to create company profile",
+        variant: "destructive"
+      });
+    }
+  };
+
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -359,8 +391,15 @@ export default function PerMeaTeEnhanced() {
           description: "PerMeaTe Enterprise is now ready for your organization"
         });
         
-        // Set up initial admin user and redirect to main app
-        setIsAuthenticated(true);
+        // Mark company as onboarded and fetch data
+        setCompany({
+          id: companyId,
+          name: companyForm.name,
+          businessAreas: companyForm.businessAreas.split(',').map(s => s.trim()),
+          employeeCount: parseInt(companyForm.employeeCount),
+          locations: companyForm.locations.split(',').map(s => s.trim()),
+          isOnboarded: true
+        });
         fetchCompanyData(companyId);
       }
     } catch (error) {
@@ -659,28 +698,7 @@ export default function PerMeaTeEnhanced() {
                 
                 <div className="flex justify-end">
                   <Button 
-                    onClick={async () => {
-                      // Create company
-                      try {
-                        const response = await fetch('/api/permeate/onboard-company', {
-                          method: 'POST',
-                          headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify({
-                            ...companyForm,
-                            businessAreas: companyForm.businessAreas.split(',').map(s => s.trim()),
-                            locations: companyForm.locations.split(',').map(s => s.trim())
-                          })
-                        });
-                        
-                        if (response.ok) {
-                          const data = await response.json();
-                          setCompanyId(data.id);
-                          setOnboardingStep(2);
-                        }
-                      } catch (error) {
-                        console.error('Company creation error:', error);
-                      }
-                    }}
+                    onClick={handleCompanySubmit}
                     disabled={!companyForm.name}
                     className="bg-blue-600 hover:bg-blue-700 text-white"
                   >
@@ -905,9 +923,14 @@ export default function PerMeaTeEnhanced() {
     </div>
   );
 
-  // Main app render
+  // Main app render logic
   if (!isAuthenticated) {
-    return company ? renderOnboarding() : renderLogin();
+    return renderLogin();
+  }
+
+  // If authenticated but no company data or company is not onboarded, show onboarding
+  if (!company || !company.isOnboarded) {
+    return renderOnboarding();
   }
 
   return (
@@ -917,16 +940,15 @@ export default function PerMeaTeEnhanced() {
       
       {/* PerMeaTe Enterprise header - positioned at exactly 64px */}
       <div 
-        className="sticky bg-white border-b border-gray-200 shadow-sm z-40"
-        style={{ top: '64px' }}
+        className="sticky top-16 bg-white border-b border-gray-200 shadow-sm z-40"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between py-3">
             <div className="flex items-center space-x-4">
-              <img src={permeateIcon} alt="PerMeaTe Enterprise" className="h-6 w-6" />
+              <img src={permeateIcon} alt="PerMeaTe Enterprise" className="h-10 w-10" />
               <div>
                 <h1 className="text-lg font-semibold text-gray-900">PerMeaTe Enterprise</h1>
-                <p className="text-sm text-gray-600">{company?.name}</p>
+                <p className="text-sm text-gray-600">Turn goals into real, measurable work.</p>
               </div>
             </div>
             
@@ -935,6 +957,21 @@ export default function PerMeaTeEnhanced() {
                 <User className="h-4 w-4 inline mr-1" />
                 {currentUser?.name} ({currentUser?.permeateRole.replace('_', ' ')})
               </div>
+              {currentUser?.permeateRole === 'administrator' && (
+                <Button variant="outline" size="sm" onClick={() => {
+                  setCompany(null);
+                  setOnboardingStep(1);
+                  setEmployeeData([]);
+                  setPasswordsGenerated(false);
+                  toast({
+                    title: "Re-onboarding Started",
+                    description: "Starting fresh onboarding process"
+                  });
+                }}>
+                  <RefreshCcw className="h-4 w-4 mr-1" />
+                  Re-onboard
+                </Button>
+              )}
               <Button variant="outline" size="sm" onClick={handleLogout}>
                 <LogOut className="h-4 w-4 mr-1" />
                 Logout
@@ -946,8 +983,7 @@ export default function PerMeaTeEnhanced() {
 
       {/* Function tabs - positioned at exactly 128px */}
       <div 
-        className="sticky bg-gray-50 border-b border-gray-200 z-30"
-        style={{ top: '128px' }}
+        className="sticky top-32 bg-gray-50 border-b border-gray-200 z-30"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">

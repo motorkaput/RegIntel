@@ -752,13 +752,14 @@ function registerPermeateRoutes(app: Express) {
     try {
       const { companyId } = req.params;
       
+      // For new companies, return unboarded status to trigger onboarding
       const mockCompany = {
         id: companyId,
-        name: "Tech Innovations Inc",
-        businessAreas: ["Technology", "Product Development", "Marketing"],
-        employeeCount: 150,
-        locations: ["San Francisco", "New York", "London"],
-        isOnboarded: true
+        name: "Your Company",
+        businessAreas: [],
+        employeeCount: 0,
+        locations: [],
+        isOnboarded: false // This will trigger onboarding wizard
       };
       
       res.json(mockCompany);
@@ -772,47 +773,9 @@ function registerPermeateRoutes(app: Express) {
     try {
       const { companyId } = req.params;
       
-      const mockEmployees = [
-        {
-          id: "emp_1",
-          name: "John Smith",
-          email: "john.smith@company.com",
-          role: "CEO",
-          department: "Executive",
-          skills: ["Leadership", "Strategy"],
-          permeateRole: "organization_leader",
-          isActive: true,
-          hasPassword: true,
-          companyId
-        },
-        {
-          id: "emp_2", 
-          name: "Sarah Johnson",
-          email: "sarah.johnson@company.com",
-          role: "Product Manager",
-          department: "Product",
-          skills: ["Product Management", "Analytics"],
-          permeateRole: "project_leader",
-          isActive: true,
-          hasPassword: true,
-          companyId
-        }
-      ];
-      
-      const orgChart = [
-        {
-          name: "John Smith",
-          role: "CEO",
-          permeateRole: "organization_leader",
-          children: [
-            {
-              name: "Sarah Johnson",
-              role: "Product Manager", 
-              permeateRole: "project_leader"
-            }
-          ]
-        }
-      ];
+      // For new companies, return empty employees list to trigger onboarding
+      const mockEmployees: any[] = [];
+      const orgChart: any[] = [];
       
       res.json({ employees: mockEmployees, orgChart });
     } catch (error) {
@@ -826,45 +789,8 @@ function registerPermeateRoutes(app: Express) {
     try {
       const { companyId } = req.params;
       
-      const mockGoals = [
-        {
-          id: "goal_1",
-          title: "Increase Customer Satisfaction",
-          description: "Improve NPS score by 20% through better product experience",
-          status: "active",
-          progress: 65,
-          priority: "high",
-          dueDate: new Date("2025-12-31"),
-          createdBy: "emp_1",
-          assignedTo: ["emp_2"],
-          projects: [
-            {
-              id: "proj_1",
-              title: "Customer Feedback System",
-              description: "Implement comprehensive feedback collection",
-              status: "active",
-              progress: 80,
-              priority: "high",
-              goalId: "goal_1",
-              createdBy: "emp_1",
-              assignedTo: ["emp_2"],
-              tasks: [
-                {
-                  id: "task_1",
-                  title: "Design feedback UI",
-                  description: "Create user-friendly feedback interface",
-                  status: "completed",
-                  progress: 100,
-                  priority: "medium",
-                  score: 95,
-                  createdBy: "emp_2",
-                  assignedTo: "emp_2"
-                }
-              ]
-            }
-          ]
-        }
-      ];
+      // For new companies, return empty goals list to trigger onboarding
+      const mockGoals: any[] = [];
       
       res.json(mockGoals);
     } catch (error) {
