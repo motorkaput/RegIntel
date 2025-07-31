@@ -98,15 +98,6 @@ export default function PerMeateBetaLogin() {
               <p className="text-gray-600 text-sm mt-2">
                 Enter your credentials to access PerMeaTe Enterprise
               </p>
-              <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                <p className="text-xs text-blue-800 font-medium">Demo Users:</p>
-                <div className="text-xs text-blue-700 mt-1 space-y-1">
-                  <div>OnboardingExpertUser (Administrator)</div>
-                  <div>ProjectLeader (Project Leader)</div>
-                  <div>TeamMember (Team Member)</div>
-                  <div>OrgLeader (Organization Leader)</div>
-                </div>
-              </div>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleLogin} className="space-y-4">
