@@ -51,7 +51,7 @@ function Router() {
       <Route path="/beta-login" component={BetaLogin} />
       <Route path="/x7k9p/fp-analyzer" component={FetchPatternsApp} />
       <Route path="/permeate-beta-login" component={PerMeateBetaLogin} />
-      <Route path="/z9m3k/pe-workspace" component={PerMeaTeEnterpriseApp} />
+      <Route path="/z9m3k/pe-workspace" component={PerMeaTeEnhanced} />
       <Route path="/enhanced-pe" component={PerMeaTeEnhanced} />
       
       {/* Legal and info pages */}
