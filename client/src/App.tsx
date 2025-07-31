@@ -50,7 +50,7 @@ function Router() {
       {/* SaaS Application routes - beta protected */}
       <Route path="/beta-login" component={BetaLogin} />
       <Route path="/x7k9p/fp-analyzer" component={FetchPatternsApp} />
-      <Route path="/permeate-beta-login" component={PerMeateBetaLogin} />
+      <Route path="/z9m3k/pe-beta-login" component={PerMeateBetaLogin} />
       <Route path="/z9m3k/pe-workspace" component={PerMeaTeEnhanced} />
       <Route path="/enhanced-pe" component={PerMeaTeEnhanced} />
       

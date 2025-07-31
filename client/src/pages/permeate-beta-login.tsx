@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import permeateIcon from "@assets/PerMeaTeEnterprise_Icon_1752664675820.png";
+import PerMeaTeHeader from "@/components/permeate-header";
+import Footer from "@/components/footer";
 
 export default function PerMeateBetaLogin() {
   const [, setLocation] = useLocation();
@@ -70,32 +71,20 @@ export default function PerMeateBetaLogin() {
     setIsLoading(false);
   };
 
-  // Custom PerMeaTe Navbar Component
-  const PerMeaTeNavbar = () => (
-    <nav className="nav-minimal fixed top-0 left-0 right-0 z-50 backdrop-blur-sm section-divider">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-24">
-          <div className="flex items-center space-x-3">
-            <img src={permeateIcon} alt="PerMeaTe Enterprise" className="h-10 w-10" />
-            <span className="text-xl font-bold text-gray-900">PerMeaTe Enterprise</span>
-          </div>
-        </div>
-      </div>
-    </nav>
-  );
-
   return (
-    <div className="min-h-screen bg-surface-white">
-      <PerMeaTeNavbar />
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Two-Tier Header */}
+      <PerMeaTeHeader showSessionControls={true} />
       
-      <main className="pt-24 pb-12">
-        <div className="max-w-md mx-auto px-4">
-          <Card className="bg-white border border-gray-200 shadow-lg">
+      {/* Main Content */}
+      <main className="pt-12 pb-12">
+        <div className="max-w-md mx-auto px-4 sm:px-6 lg:px-8">
+          <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg">
             <CardHeader className="text-center pb-6">
-              <CardTitle className="text-2xl font-bold text-gray-900">
+              <CardTitle className="text-2xl font-bold text-gray-900 dark:text-white">
                 PerMeaTe Enterprise Beta Access
               </CardTitle>
-              <p className="text-gray-600 text-sm mt-2">
+              <p className="text-gray-600 dark:text-gray-400 text-sm mt-2">
                 Enter your credentials to access PerMeaTe Enterprise
               </p>
             </CardHeader>

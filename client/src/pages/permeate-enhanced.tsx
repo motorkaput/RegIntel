@@ -40,6 +40,7 @@ import { apiRequest } from "@/lib/queryClient";
 import permeateIcon from "@assets/PerMeaTeEnterprise_Icon_1752664675820.png";
 import Footer from "@/components/footer";
 import Navbar from "@/components/navbar";
+import PerMeaTeHeader from "@/components/permeate-header";
 
 // Types
 interface Company {
@@ -700,9 +701,25 @@ export default function PerMeaTeEnhanced() {
 
   const renderOnboarding = () => (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="max-w-3xl mx-auto">
+      {/* Two-Tier Header for Onboarding */}
+      <PerMeaTeHeader 
+        currentUser={currentUser ? {
+          username: currentUser.name || '',
+          userType: currentUser.permeateRole || 'administrator',
+          name: currentUser.name || '',
+          employeeId: currentUser.id || ''
+        } : undefined}
+        showSessionControls={!currentUser}
+        onReOnboard={() => {
+          localStorage.removeItem('permeateOnboardingCompleted');
+          localStorage.removeItem('permeateCompanyData');
+          localStorage.removeItem('permeateEmployeeData');
+          window.location.reload();
+        }}
+      />
+      <div className="pt-12 pb-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-3xl mx-auto">
           <div className="text-center mb-8">
             <img src={permeateIcon} alt="PerMeaTe Enterprise" className="h-16 w-16 mx-auto mb-4" />
             <h1 className="text-3xl font-bold text-gray-900">PerMeaTe Enterprise Setup</h1>
@@ -1215,6 +1232,7 @@ export default function PerMeaTeEnhanced() {
               </div>
             )}
           </Card>
+          </div>
         </div>
       </div>
       <Footer />
@@ -1233,56 +1251,28 @@ export default function PerMeaTeEnhanced() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Two-tier header structure - Dark Street Tech navbar at top */}
-      <Navbar />
+      {/* Two-Tier Header */}
+      <PerMeaTeHeader 
+        currentUser={{
+          username: currentUser?.name || '',
+          userType: currentUser?.permeateRole || 'team_member',
+          name: currentUser?.name || '',
+          employeeId: currentUser?.id || ''
+        }}
+        showFunctionTabs={true}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        onLogout={handleLogout}
+        onReOnboard={() => {
+          localStorage.removeItem('permeateOnboardingCompleted');
+          localStorage.removeItem('permeateCompanyData');
+          localStorage.removeItem('permeateEmployeeData');
+          window.location.reload();
+        }}
+      />
       
-      {/* PerMeaTe Enterprise header - positioned at exactly 64px */}
-      <div 
-        className="sticky top-16 bg-white border-b border-gray-200 shadow-sm z-40"
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between py-3">
-            <div className="flex items-center space-x-4">
-              <img src={permeateIcon} alt="PerMeaTe Enterprise" className="h-10 w-10" />
-              <div>
-                <h1 className="text-lg font-semibold text-gray-900">PerMeaTe Enterprise</h1>
-                <p className="text-sm text-gray-600">Turn goals into real, measurable work.</p>
-              </div>
-            </div>
-            
-            <div className="flex items-center space-x-4">
-              <div className="text-sm text-gray-600">
-                <User className="h-4 w-4 inline mr-1" />
-                {currentUser?.name} ({currentUser?.permeateRole.replace('_', ' ')})
-              </div>
-              {currentUser?.permeateRole === 'administrator' && (
-                <Button variant="outline" size="sm" onClick={() => {
-                  setCompany(null);
-                  setOnboardingStep(1);
-                  setEmployeeData([]);
-                  setPasswordsGenerated(false);
-                  toast({
-                    title: "Re-onboarding Started",
-                    description: "Starting fresh onboarding process"
-                  });
-                }}>
-                  <RefreshCcw className="h-4 w-4 mr-1" />
-                  Re-onboard
-                </Button>
-              )}
-              <Button variant="outline" size="sm" onClick={handleLogout}>
-                <LogOut className="h-4 w-4 mr-1" />
-                Logout
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Function tabs - positioned at exactly 128px */}
-      <div 
-        className="sticky top-32 bg-gray-50 border-b border-gray-200 z-30"
-      >
+      {/* Main Content */}
+      <div className="pt-24 pb-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-5 py-2">
