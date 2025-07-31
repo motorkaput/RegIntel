@@ -593,7 +593,7 @@ export default function PerMeaTeEnterpriseApp() {
 
   // Sticky Navigation Tabs
   const NavigationTabs = () => (
-    <div className="sticky top-36 z-20 bg-white border-b border-gray-200">
+    <div className="sticky z-10 bg-white border-b border-gray-200" style={{top: '126px'}}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex space-x-8">
         {[
           { id: 'overview', label: 'Overview', icon: BarChart3 },
