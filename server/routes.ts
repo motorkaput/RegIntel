@@ -598,7 +598,7 @@ function registerPermeateRoutes(app: Express) {
       // In production, this would validate against the database
       const mockUser = {
         id: "user_" + Date.now(),
-        name: "Enterprise User",
+        name: username, // Use the actual username instead of generic "Enterprise User"
         email: username + "@company.com",
         role: "Product Manager",
         department: "Technology",
