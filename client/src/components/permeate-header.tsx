@@ -46,20 +46,16 @@ export default function PerMeaTeHeader({
 
   return (
     <>
-      {/* Tier 1: Main PerMeaTe Header */}
-      <div className="sticky top-0 z-50 bg-white dark:bg-black border-b border-gray-200 dark:border-gray-800 h-12">
+      {/* Tier 1: Main PerMeaTe Header - Matching Fetch Patterns styling */}
+      <div className="sticky z-20 bg-gray-50 border-b border-gray-200 py-3" style={{top: '64px'}}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-12">
-            {/* Logo and Branding */}
-            <div className="flex items-center space-x-3">
-              <img src={permeateIcon} alt="PerMeaTe Enterprise" className="h-10 w-10" />
-              <div className="flex flex-col">
-                <span className="text-sm font-semibold text-gray-900 dark:text-white">
-                  PerMeaTe Enterprise
-                </span>
-                <span className="text-xs text-gray-500 dark:text-gray-400 -mt-0.5">
-                  Turn goals into real, measurable work.
-                </span>
+          <div className="flex items-center justify-between">
+            {/* Logo and Branding - Match Fetch Patterns layout */}
+            <div className="flex items-center gap-3">
+              <img src={permeateIcon} alt="PerMeaTe Enterprise" className="h-10 w-auto" />
+              <div>
+                <h1 className="text-xl font-bold text-gray-900">PerMeaTe Enterprise</h1>
+                <p className="text-gray-600 text-xs">Turn goals into real, measurable work.</p>
               </div>
             </div>
 
@@ -70,14 +66,14 @@ export default function PerMeaTeHeader({
                   <div className="flex items-center space-x-2">
                     <User className="h-4 w-4 text-gray-500" />
                     <div className="flex flex-col">
-                      <span className="text-sm font-medium text-gray-900 dark:text-white">
+                      <span className="text-sm font-medium text-gray-900">
                         {currentUser.name}
                       </span>
                       <div className="flex items-center space-x-1 -mt-0.5">
                         <Badge variant="outline" className="text-xs py-0 px-1">
                           {currentUser.userType.replace('_', ' ')}
                         </Badge>
-                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                        <span className="text-xs text-gray-500">
                           {currentUser.employeeId}
                         </span>
                       </div>
@@ -120,7 +116,7 @@ export default function PerMeaTeHeader({
 
       {/* Tier 2: Function Tabs (if enabled) */}
       {showFunctionTabs && (
-        <div className="sticky top-12 z-40 bg-white dark:bg-black border-b border-gray-200 dark:border-gray-800 h-12">
+        <div className="sticky z-10 bg-white border-b border-gray-200 h-12" style={{top: '112px'}}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center h-12">
               <nav className="flex space-x-8">
@@ -137,7 +133,7 @@ export default function PerMeaTeHeader({
                     className={`flex items-center space-x-2 px-3 py-2 text-sm font-medium transition-colors ${
                       activeTab === tab.id
                         ? 'text-blue-600 border-b-2 border-blue-600'
-                        : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
+                        : 'text-gray-500 hover:text-gray-700'
                     }`}
                   >
                     <span className="text-base">{tab.icon}</span>

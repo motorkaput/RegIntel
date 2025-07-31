@@ -1272,7 +1272,7 @@ export default function PerMeaTeEnhanced() {
       />
       
       {/* Main Content */}
-      <div className="pt-24 pb-12">
+      <div className="pt-40 pb-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-5 py-2">
