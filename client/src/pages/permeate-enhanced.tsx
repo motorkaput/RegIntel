@@ -387,8 +387,16 @@ export default function PerMeaTeEnhanced() {
   const generateEmployeePasswords = async () => {
     setIsGeneratingPasswords(true);
     try {
+      const selectedEmployeeList = employeeData.filter(emp => selectedEmployees.has(emp.id));
+      
       const response = await fetch(`/api/permeate/generate-passwords/${companyId}`, {
-        method: 'POST'
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          selectedEmployees: selectedEmployeeList
+        })
       });
 
       if (response.ok) {
@@ -1177,13 +1185,13 @@ export default function PerMeaTeEnhanced() {
                       <Button
                         onClick={startNewOnboarding}
                         variant="outline"
-                        className="p-6 h-auto flex-col items-start text-left"
+                        className="p-6 h-auto flex flex-col items-start text-left"
                       >
                         <div className="flex items-center mb-2">
                           <RefreshCcw className="h-5 w-5 mr-2 text-blue-600" />
                           <span className="font-medium">Setup Another Organization</span>
                         </div>
-                        <span className="text-sm text-gray-600">
+                        <span className="text-sm text-gray-600 break-words">
                           Upload a new CSV file and configure PerMeaTe for a different client organization
                         </span>
                       </Button>
@@ -1191,13 +1199,13 @@ export default function PerMeaTeEnhanced() {
                       <Button
                         onClick={handleLogout}
                         variant="outline"
-                        className="p-6 h-auto flex-col items-start text-left"
+                        className="p-6 h-auto flex flex-col items-start text-left"
                       >
                         <div className="flex items-center mb-2">
                           <LogOut className="h-5 w-5 mr-2 text-gray-600" />
                           <span className="font-medium">Log Out & Access App</span>
                         </div>
-                        <span className="text-sm text-gray-600">
+                        <span className="text-sm text-gray-600 break-words">
                           Log out from OnboardingExpertUser account so employees can log in with their credentials
                         </span>
                       </Button>
@@ -1218,8 +1226,8 @@ export default function PerMeaTeEnhanced() {
     return renderLogin();
   }
 
-  // If authenticated but no company data or company is not onboarded, show onboarding
-  if (!company || !company.isOnboarded) {
+  // Only show onboarding for OnboardingExpertUser or genuinely unboarded companies
+  if (currentUser?.name === 'OnboardingExpertUser' && (!company || !company.isOnboarded)) {
     return renderOnboarding();
   }
 

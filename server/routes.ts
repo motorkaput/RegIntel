@@ -701,25 +701,20 @@ function registerPermeateRoutes(app: Express) {
   app.post("/api/permeate/generate-passwords/:companyId", async (req, res) => {
     try {
       const { companyId } = req.params;
+      const { selectedEmployees } = req.body;
       
-      // Generate secure passwords for demonstration
-      // In production, these would be properly hashed and stored
-      const credentials = [
-        {
-          name: "John Smith",
-          email: "john.smith@company.com",
-          username: "john.smith",
-          password: "PE_" + Math.random().toString(36).substring(2, 15),
-          permeateRole: "administrator"
-        },
-        {
-          name: "Sarah Johnson",
-          email: "sarah.johnson@company.com", 
-          username: "sarah.johnson",
-          password: "PE_" + Math.random().toString(36).substring(2, 15),
-          permeateRole: "project_leader"
-        }
-      ];
+      if (!selectedEmployees || selectedEmployees.length === 0) {
+        return res.status(400).json({ message: "No employees selected" });
+      }
+      
+      // Generate secure passwords for selected employees
+      const credentials = selectedEmployees.map((employee: any) => ({
+        name: employee.name,
+        email: `${employee.alias}@company.com`,
+        username: employee.alias,
+        password: "PE_" + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 8).toUpperCase(),
+        permeateRole: employee.userType
+      }));
       
       res.json({ credentials });
     } catch (error) {
@@ -752,14 +747,15 @@ function registerPermeateRoutes(app: Express) {
     try {
       const { companyId } = req.params;
       
-      // For new companies, return unboarded status to trigger onboarding
+      // Simulate a real company that has been onboarded (for employee users)
+      // Only OnboardingExpertUser should see unboarded status for new setups
       const mockCompany = {
         id: companyId,
-        name: "Your Company",
-        businessAreas: [],
-        employeeCount: 0,
-        locations: [],
-        isOnboarded: false // This will trigger onboarding wizard
+        name: "Acme Corporation",
+        businessAreas: ["Technology", "Marketing", "Sales"],
+        employeeCount: 50,
+        locations: ["New York", "San Francisco"],
+        isOnboarded: true // Regular employees see onboarded company
       };
       
       res.json(mockCompany);
@@ -773,9 +769,62 @@ function registerPermeateRoutes(app: Express) {
     try {
       const { companyId } = req.params;
       
-      // For new companies, return empty employees list to trigger onboarding
-      const mockEmployees: any[] = [];
-      const orgChart: any[] = [];
+      // Return realistic employee data for regular users
+      const mockEmployees = [
+        {
+          id: "emp_001",
+          name: "John Smith",
+          role: "Project Manager",
+          department: "Technology",
+          email: "john.smith@company.com",
+          permeateRole: "project_leader",
+          isActive: true
+        },
+        {
+          id: "emp_002", 
+          name: "Sarah Johnson",
+          role: "Software Engineer",
+          department: "Technology",
+          email: "sarah.johnson@company.com",
+          permeateRole: "team_member",
+          isActive: true
+        },
+        {
+          id: "emp_003",
+          name: "Michael Brown",
+          role: "CEO",
+          department: "Executive",
+          email: "michael.brown@company.com", 
+          permeateRole: "organization_leader",
+          isActive: true
+        }
+      ];
+      
+      const orgChart = [
+        {
+          id: "emp_003",
+          name: "Michael Brown",
+          role: "CEO",
+          department: "Executive",
+          children: [
+            {
+              id: "emp_001",
+              name: "John Smith", 
+              role: "Project Manager",
+              department: "Technology",
+              children: [
+                {
+                  id: "emp_002",
+                  name: "Sarah Johnson",
+                  role: "Software Engineer", 
+                  department: "Technology",
+                  children: []
+                }
+              ]
+            }
+          ]
+        }
+      ];
       
       res.json({ employees: mockEmployees, orgChart });
     } catch (error) {
@@ -789,8 +838,104 @@ function registerPermeateRoutes(app: Express) {
     try {
       const { companyId } = req.params;
       
-      // For new companies, return empty goals list to trigger onboarding
-      const mockGoals: any[] = [];
+      // Return realistic goals data for regular users
+      const mockGoals = [
+        {
+          id: "goal_001",
+          title: "Launch Q3 Product Feature",
+          description: "Develop and deploy the new analytics dashboard for customer insights",
+          status: "active",
+          priority: "high",
+          progress: 65,
+          assignedTo: "emp_001",
+          createdBy: "emp_003",
+          targetDate: "2025-09-30",
+          projects: [
+            {
+              id: "proj_001",
+              title: "UI/UX Design Phase",
+              description: "Complete user interface designs and user experience flows",
+              status: "completed",
+              progress: 100,
+              priority: "high",
+              goalId: "goal_001",
+              createdBy: "emp_001",
+              assignedTo: "emp_002",
+              tasks: [
+                {
+                  id: "task_001",
+                  title: "Wireframe Creation",
+                  description: "Create initial wireframes for dashboard layout",
+                  status: "completed",
+                  priority: "medium",
+                  projectId: "proj_001",
+                  assignedTo: "emp_002",
+                  createdBy: "emp_001"
+                }
+              ]
+            },
+            {
+              id: "proj_002", 
+              title: "Backend API Development",
+              description: "Build robust APIs for data analytics processing",
+              status: "active",
+              progress: 40,
+              priority: "high",
+              goalId: "goal_001",
+              createdBy: "emp_001",
+              assignedTo: "emp_002",
+              tasks: [
+                {
+                  id: "task_002",
+                  title: "Database Schema Design",
+                  description: "Design optimized database structure for analytics data",
+                  status: "active",
+                  priority: "high",
+                  projectId: "proj_002",
+                  assignedTo: "emp_002",
+                  createdBy: "emp_001"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          id: "goal_002",
+          title: "Improve Customer Satisfaction",
+          description: "Increase customer satisfaction scores by 20% through enhanced support processes",
+          status: "active",
+          priority: "medium",
+          progress: 30,
+          assignedTo: "emp_001",
+          createdBy: "emp_003",
+          targetDate: "2025-12-31",
+          projects: [
+            {
+              id: "proj_003",
+              title: "Support Process Optimization",
+              description: "Streamline customer support workflows and response times",
+              status: "active",
+              progress: 30,
+              priority: "medium",
+              goalId: "goal_002",
+              createdBy: "emp_001",
+              assignedTo: "emp_002",
+              tasks: [
+                {
+                  id: "task_003",
+                  title: "Current Process Analysis",
+                  description: "Analyze existing support processes and identify bottlenecks",
+                  status: "active",
+                  priority: "medium",
+                  projectId: "proj_003",
+                  assignedTo: "emp_002",
+                  createdBy: "emp_001"
+                }
+              ]
+            }
+          ]
+        }
+      ];
       
       res.json(mockGoals);
     } catch (error) {
