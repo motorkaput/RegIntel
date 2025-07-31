@@ -321,7 +321,7 @@ export default function PerMeaTeEnhanced() {
       const csvContent = event.target?.result as string;
       
       try {
-        setAnalysisProgress("Analyzing organizational structure with AI...");
+        setAnalysisProgress("Analyzing organizational structure...");
         
         const response = await fetch('/api/permeate/analyze-csv', {
           method: 'POST',
@@ -355,6 +355,11 @@ export default function PerMeaTeEnhanced() {
             title: "CSV Analysis Complete",
             description: `Analyzed ${data.employees.length} employees with auto-populated company details`
           });
+          
+          // Move to step 2 after successful analysis
+          setTimeout(() => {
+            setOnboardingStep(2);
+          }, 1500);
         } else {
           throw new Error('Analysis failed');
         }
@@ -471,8 +476,8 @@ export default function PerMeaTeEnhanced() {
         setShowCreateGoal(false);
         setGoalForm({ title: '', description: '', priority: 'medium', dueDate: '', assignedTo: [] });
         toast({
-          title: "Goal Created",
-          description: `${data.goal.title} created with ${data.projects?.length || 0} AI-generated projects`
+          title: "Goal Created", 
+          description: `${data.goal.title} created with ${data.projects?.length || 0} strategic projects`
         });
       }
     } catch (error) {
@@ -505,7 +510,7 @@ export default function PerMeaTeEnhanced() {
         const data = await response.json();
         toast({
           title: "Tasks Auto-Assigned",
-          description: `AI assigned ${data.tasks.length} tasks to optimal team members`
+          description: `System assigned ${data.tasks.length} tasks to optimal team members`
         });
         
         // Refresh data

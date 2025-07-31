@@ -31,6 +31,12 @@ export interface OrganizationInsights {
 export async function analyzeCSVData(csvContent: string): Promise<{
   employees: AnalyzedEmployee[];
   insights: OrganizationInsights;
+  companyDetails?: {
+    name: string;
+    businessAreas: string;
+    employeeCount: string;
+    locations: string;
+  };
 }> {
   try {
     const response = await openai.chat.completions.create({
@@ -51,6 +57,12 @@ For each employee, determine:
   * organization_leader: C-level, VPs, directors
 - Department categorization
 - Seniority level (junior/mid/senior/executive)
+
+Also extract company details from the data such as:
+- Company name (from email domains or organization names)
+- Business areas (inferred from roles and departments)
+- Employee count (total from CSV)
+- Office locations (from location data)
 
 Also provide organizational insights including department structure, skill distribution, reporting hierarchy, and recommendations.
 
@@ -79,6 +91,12 @@ Respond with JSON in this exact format:
     "reportingStructure": [{"manager": "name", "directReports": ["names"]}],
     "recommendations": ["recommendation_strings"],
     "potentialIssues": ["issue_strings"]
+  },
+  "companyDetails": {
+    "name": "extracted_company_name",
+    "businessAreas": "Technology, Marketing, Sales",
+    "employeeCount": "total_employee_count",
+    "locations": "New York, London, Tokyo"
   }
 }`
         },
