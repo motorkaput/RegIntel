@@ -52,7 +52,7 @@ export default function PerMeaTeHeader({
           <div className="flex items-center justify-between h-12">
             {/* Logo and Branding */}
             <div className="flex items-center space-x-3">
-              <img src={permeateIcon} alt="PerMeaTe Enterprise" className="h-6 w-6" />
+              <img src={permeateIcon} alt="PerMeaTe Enterprise" className="h-10 w-10" />
               <div className="flex flex-col">
                 <span className="text-sm font-semibold text-gray-900 dark:text-white">
                   PerMeaTe Enterprise

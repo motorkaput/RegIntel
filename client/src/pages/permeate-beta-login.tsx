@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import PerMeaTeHeader from "@/components/permeate-header";
 import Footer from "@/components/footer";
+import Navbar from "@/components/navbar";
 
 export default function PerMeateBetaLogin() {
   const [, setLocation] = useLocation();
@@ -73,11 +74,14 @@ export default function PerMeateBetaLogin() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Dark Street Tech Header */}
+      <Navbar />
+      
       {/* Two-Tier Header */}
       <PerMeaTeHeader showSessionControls={true} />
       
       {/* Main Content */}
-      <main className="pt-12 pb-12">
+      <main className="pt-36 pb-12">
         <div className="max-w-md mx-auto px-4 sm:px-6 lg:px-8">
           <Card className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg">
             <CardHeader className="text-center pb-6">
@@ -136,6 +140,9 @@ export default function PerMeateBetaLogin() {
           </Card>
         </div>
       </main>
+      
+      {/* Dark Street Tech Footer */}
+      <Footer />
     </div>
   );
 }
