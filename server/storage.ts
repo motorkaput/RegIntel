@@ -55,6 +55,16 @@ export interface IStorage {
   updateDocumentAnalysis(id: string, updates: Partial<DocumentAnalysis>): Promise<DocumentAnalysis>;
   deleteDocumentAnalysis(id: string): Promise<void>;
   getUserDocumentAnalysisCount(userId: string): Promise<number>;
+
+  // PerMeaTe Enterprise operations
+  getCompany(companyId: string): Promise<any>;
+  upsertCompany(company: any): Promise<any>;
+  getEmployees(companyId: string): Promise<any[]>;
+  upsertEmployees(companyId: string, employees: any[]): Promise<void>;
+  getOrgChart(companyId: string): Promise<any[]>;
+  getGoals(companyId: string): Promise<any[]>;
+  createGoal(goal: any): Promise<any>;
+  updateGoal(goalId: string, updates: any): Promise<any>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -274,6 +284,92 @@ export class DatabaseStorage implements IStorage {
       .from(documentAnalyses)
       .where(eq(documentAnalyses.userId, userId));
     return result.count;
+  }
+
+  // PerMeaTe Enterprise operations (using in-memory storage for now)
+  private permeateData: Map<string, any> = new Map();
+
+  async getCompany(companyId: string): Promise<any> {
+    return this.permeateData.get(`company_${companyId}`) || null;
+  }
+
+  async upsertCompany(company: any): Promise<any> {
+    this.permeateData.set(`company_${company.id}`, company);
+    return company;
+  }
+
+  async getEmployees(companyId: string): Promise<any[]> {
+    return this.permeateData.get(`employees_${companyId}`) || [];
+  }
+
+  async upsertEmployees(companyId: string, employees: any[]): Promise<void> {
+    this.permeateData.set(`employees_${companyId}`, employees);
+    
+    // Generate org chart from employee data
+    const orgChart = this.buildOrgChart(employees);
+    this.permeateData.set(`orgChart_${companyId}`, orgChart);
+  }
+
+  async getOrgChart(companyId: string): Promise<any[]> {
+    return this.permeateData.get(`orgChart_${companyId}`) || [];
+  }
+
+  async getGoals(companyId: string): Promise<any[]> {
+    return this.permeateData.get(`goals_${companyId}`) || [];
+  }
+
+  async createGoal(goal: any): Promise<any> {
+    const companyId = goal.companyId;
+    const goals = await this.getGoals(companyId);
+    goals.push(goal);
+    this.permeateData.set(`goals_${companyId}`, goals);
+    return goal;
+  }
+
+  async updateGoal(goalId: string, updates: any): Promise<any> {
+    // Find and update goal across all companies
+    for (const [key, value] of Array.from(this.permeateData.entries())) {
+      if (key.startsWith('goals_')) {
+        const goals = value as any[];
+        const goalIndex = goals.findIndex(g => g.id === goalId);
+        if (goalIndex !== -1) {
+          goals[goalIndex] = { ...goals[goalIndex], ...updates };
+          this.permeateData.set(key, goals);
+          return goals[goalIndex];
+        }
+      }
+    }
+    return null;
+  }
+
+  private buildOrgChart(employees: any[]): any[] {
+    // Build hierarchical org chart from flat employee list
+    const employeeMap = new Map();
+    const roots: any[] = [];
+
+    // First pass: create employee nodes
+    employees.forEach(emp => {
+      employeeMap.set(emp.id, {
+        id: emp.id,
+        name: emp.name,
+        role: emp.role,
+        department: emp.department,
+        children: []
+      });
+    });
+
+    // Second pass: build hierarchy
+    employees.forEach(emp => {
+      const node = employeeMap.get(emp.id);
+      if (emp.reportingTo && employeeMap.has(emp.reportingTo)) {
+        const manager = employeeMap.get(emp.reportingTo);
+        manager.children.push(node);
+      } else {
+        roots.push(node);
+      }
+    });
+
+    return roots;
   }
 }
 

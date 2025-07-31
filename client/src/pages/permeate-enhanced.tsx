@@ -1226,8 +1226,8 @@ export default function PerMeaTeEnhanced() {
     return renderLogin();
   }
 
-  // Only show onboarding for OnboardingExpertUser or genuinely unboarded companies
-  if (currentUser?.name === 'OnboardingExpertUser' && (!company || !company.isOnboarded)) {
+  // Show onboarding for OnboardingExpertUser OR if company genuinely needs onboarding
+  if ((currentUser?.name === 'OnboardingExpertUser') || (!company || !company.isOnboarded)) {
     return renderOnboarding();
   }
 

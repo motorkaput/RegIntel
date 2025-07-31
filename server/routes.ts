@@ -6,9 +6,92 @@ import { initializeRazorpay, createSubscription, verifyPayment } from "./service
 import { processDocument } from "./services/documentProcessor";
 import { generatePerformanceAnalytics } from "./services/performanceAnalytics";
 import { processDocumentWithAI, answerQuestion, analyzeContext } from "./services/fetchPatternsAI";
+import { permeateAI } from "./services/permeateAI";
 import multer from "multer";
 import { insertDocumentSchema, insertSubscriptionSchema } from "@shared/schema";
 import { nanoid } from "nanoid";
+import OpenAI from "openai";
+
+// Initialize OpenAI for PerMeaTe Enterprise
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY_PE });
+
+// AI-powered goal breakdown function
+async function generateGoalBreakdown(goalData: any, employees: any[]) {
+  try {
+    const prompt = `You are an expert business strategy consultant. Break down this organizational goal into actionable projects and tasks, then intelligently assign them to suitable employees.
+
+Goal: "${goalData.title}"
+Description: "${goalData.description}"
+Priority: ${goalData.priority}
+Target Date: ${goalData.targetDate}
+
+Available Employees:
+${employees.map(emp => `- ${emp.name} (${emp.role}, ${emp.department}, Skills: ${emp.keySkills.join(', ')}, Type: ${emp.userType})`).join('\n')}
+
+Please respond with JSON in this exact format:
+{
+  "projects": [
+    {
+      "title": "Project Name",
+      "description": "Project description",
+      "priority": "high/medium/low",
+      "status": "active", 
+      "progress": 0,
+      "assignedTo": "employee_id_from_list_above",
+      "tasks": [
+        {
+          "title": "Task Name",
+          "description": "Task description",
+          "priority": "high/medium/low",
+          "status": "pending",
+          "assignedTo": "employee_id_from_list_above"
+        }
+      ]
+    }
+  ]
+}
+
+Guidelines:
+- Create 2-4 logical projects that together achieve the goal
+- Each project should have 2-5 specific, actionable tasks
+- Assign project leaders (project_leader or organization_leader userTypes) to manage projects
+- Assign team members (team_member userType) to execute tasks
+- Match employee skills and roles to appropriate assignments
+- Ensure realistic task distribution across the team`;
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      messages: [{ role: "user", content: prompt }],
+      response_format: { type: "json_object" }
+    });
+
+    return JSON.parse(response.choices[0].message.content);
+  } catch (error) {
+    console.error('Goal breakdown error:', error);
+    // Fallback to basic structure if AI fails
+    return {
+      projects: [
+        {
+          title: `${goalData.title} - Phase 1`,
+          description: "Initial project phase",
+          priority: goalData.priority,
+          status: "active",
+          progress: 0,
+          assignedTo: employees.find(e => e.userType === 'project_leader')?.id || employees[0]?.id,
+          tasks: [
+            {
+              title: "Planning and Setup",
+              description: "Initial planning and resource allocation",
+              priority: "high",
+              status: "pending",
+              assignedTo: employees[0]?.id
+            }
+          ]
+        }
+      ]
+    };
+  }
+}
 
 const upload = multer({ 
   storage: multer.memoryStorage(),
@@ -626,8 +709,11 @@ function registerPermeateRoutes(app: Express) {
         businessAreas,
         employeeCount: parseInt(employeeCount),
         locations,
-        isOnboarded: false
+        isOnboarded: true // Mark as onboarded since this completes Step 2
       };
+      
+      // Store company information
+      await storage.upsertCompany(company);
       
       res.json(company);
     } catch (error) {
@@ -723,16 +809,66 @@ function registerPermeateRoutes(app: Express) {
     }
   });
 
-  // CSV upload completion
+  // CSV upload completion - store company and employee data
   app.post("/api/permeate/upload-csv/:companyId", upload.single('csvFile'), async (req, res) => {
     try {
       const { companyId } = req.params;
       
-      // Process uploaded CSV file
+      // Process uploaded CSV file and store employee data
       if (req.file) {
         const csvContent = req.file.buffer.toString('utf-8');
-        // Store employee data in database
         console.log(`Processing CSV for company ${companyId}: ${csvContent.length} characters`);
+        
+        // Parse CSV and extract employee data (this should match the CSV analysis logic)
+        const lines = csvContent.trim().split('\n');
+        const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+        
+        const employees = lines.slice(1).map((line, index) => {
+          const values = line.split(',').map(v => v.trim());
+          const employee: any = { id: `emp_${index + 1}` };
+          
+          headers.forEach((header: string, i: number) => {
+            if (values[i]) {
+              employee[header] = values[i];
+            }
+          });
+          
+          // Process into standardized format
+          const role = employee.role || employee.title || 'Employee';
+          const name = employee.name || employee.full_name || `Employee ${index + 1}`;
+          const email = employee.email || `${name.toLowerCase().replace(/\s+/g, '.')}@company.com`;
+          
+          // Auto-assign PerMeaTe roles
+          let userType: 'administrator' | 'project_leader' | 'team_member' | 'organization_leader' = 'team_member';
+          if (role.toLowerCase().includes('ceo') || role.toLowerCase().includes('president')) {
+            userType = 'organization_leader';
+          } else if (role.toLowerCase().includes('manager') || role.toLowerCase().includes('lead') || role.toLowerCase().includes('director')) {
+            userType = 'project_leader';
+          } else if (role.toLowerCase().includes('admin') || role.toLowerCase().includes('hr')) {
+            userType = 'administrator';
+          }
+          
+          return {
+            id: employee.id,
+            employeeId: employee.id,
+            name,
+            alias: email.split('@')[0],
+            location: employee.location || 'Not specified',
+            role,
+            reportingTo: employee.manager || employee.manager_email,
+            keySkills: (employee.skills || '').split(',').map((s: string) => s.trim()).filter(Boolean),
+            userType,
+            department: employee.department || 'General',
+            seniority: role.toLowerCase().includes('senior') ? 'Senior' : 
+                      role.toLowerCase().includes('junior') ? 'Junior' : 'Mid-level',
+            email,
+            permeateRole: userType,
+            isActive: true
+          };
+        });
+        
+        // Store employees in storage
+        await storage.upsertEmployees(companyId, employees);
       }
       
       res.json({ success: true, message: "Onboarding completed successfully" });
@@ -747,18 +883,22 @@ function registerPermeateRoutes(app: Express) {
     try {
       const { companyId } = req.params;
       
-      // Simulate a real company that has been onboarded (for employee users)
-      // Only OnboardingExpertUser should see unboarded status for new setups
-      const mockCompany = {
-        id: companyId,
-        name: "Acme Corporation",
-        businessAreas: ["Technology", "Marketing", "Sales"],
-        employeeCount: 50,
-        locations: ["New York", "San Francisco"],
-        isOnboarded: true // Regular employees see onboarded company
-      };
+      // Check if company exists in storage/database
+      const company = await storage.getCompany(companyId);
       
-      res.json(mockCompany);
+      if (company) {
+        res.json(company);
+      } else {
+        // New company needs onboarding
+        res.json({
+          id: companyId,
+          name: "",
+          businessAreas: [],
+          employeeCount: 0,
+          locations: [],
+          isOnboarded: false
+        });
+      }
     } catch (error) {
       console.error("Company fetch error:", error);
       res.status(500).json({ message: "Failed to fetch company" });
@@ -769,64 +909,11 @@ function registerPermeateRoutes(app: Express) {
     try {
       const { companyId } = req.params;
       
-      // Return realistic employee data for regular users
-      const mockEmployees = [
-        {
-          id: "emp_001",
-          name: "John Smith",
-          role: "Project Manager",
-          department: "Technology",
-          email: "john.smith@company.com",
-          permeateRole: "project_leader",
-          isActive: true
-        },
-        {
-          id: "emp_002", 
-          name: "Sarah Johnson",
-          role: "Software Engineer",
-          department: "Technology",
-          email: "sarah.johnson@company.com",
-          permeateRole: "team_member",
-          isActive: true
-        },
-        {
-          id: "emp_003",
-          name: "Michael Brown",
-          role: "CEO",
-          department: "Executive",
-          email: "michael.brown@company.com", 
-          permeateRole: "organization_leader",
-          isActive: true
-        }
-      ];
+      // Get employees from uploaded CSV data stored during onboarding
+      const employees = await storage.getEmployees(companyId);
+      const orgChart = await storage.getOrgChart(companyId);
       
-      const orgChart = [
-        {
-          id: "emp_003",
-          name: "Michael Brown",
-          role: "CEO",
-          department: "Executive",
-          children: [
-            {
-              id: "emp_001",
-              name: "John Smith", 
-              role: "Project Manager",
-              department: "Technology",
-              children: [
-                {
-                  id: "emp_002",
-                  name: "Sarah Johnson",
-                  role: "Software Engineer", 
-                  department: "Technology",
-                  children: []
-                }
-              ]
-            }
-          ]
-        }
-      ];
-      
-      res.json({ employees: mockEmployees, orgChart });
+      res.json({ employees, orgChart });
     } catch (error) {
       console.error("Employees fetch error:", error);
       res.status(500).json({ message: "Failed to fetch employees" });
@@ -838,106 +925,10 @@ function registerPermeateRoutes(app: Express) {
     try {
       const { companyId } = req.params;
       
-      // Return realistic goals data for regular users
-      const mockGoals = [
-        {
-          id: "goal_001",
-          title: "Launch Q3 Product Feature",
-          description: "Develop and deploy the new analytics dashboard for customer insights",
-          status: "active",
-          priority: "high",
-          progress: 65,
-          assignedTo: "emp_001",
-          createdBy: "emp_003",
-          targetDate: "2025-09-30",
-          projects: [
-            {
-              id: "proj_001",
-              title: "UI/UX Design Phase",
-              description: "Complete user interface designs and user experience flows",
-              status: "completed",
-              progress: 100,
-              priority: "high",
-              goalId: "goal_001",
-              createdBy: "emp_001",
-              assignedTo: "emp_002",
-              tasks: [
-                {
-                  id: "task_001",
-                  title: "Wireframe Creation",
-                  description: "Create initial wireframes for dashboard layout",
-                  status: "completed",
-                  priority: "medium",
-                  projectId: "proj_001",
-                  assignedTo: "emp_002",
-                  createdBy: "emp_001"
-                }
-              ]
-            },
-            {
-              id: "proj_002", 
-              title: "Backend API Development",
-              description: "Build robust APIs for data analytics processing",
-              status: "active",
-              progress: 40,
-              priority: "high",
-              goalId: "goal_001",
-              createdBy: "emp_001",
-              assignedTo: "emp_002",
-              tasks: [
-                {
-                  id: "task_002",
-                  title: "Database Schema Design",
-                  description: "Design optimized database structure for analytics data",
-                  status: "active",
-                  priority: "high",
-                  projectId: "proj_002",
-                  assignedTo: "emp_002",
-                  createdBy: "emp_001"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          id: "goal_002",
-          title: "Improve Customer Satisfaction",
-          description: "Increase customer satisfaction scores by 20% through enhanced support processes",
-          status: "active",
-          priority: "medium",
-          progress: 30,
-          assignedTo: "emp_001",
-          createdBy: "emp_003",
-          targetDate: "2025-12-31",
-          projects: [
-            {
-              id: "proj_003",
-              title: "Support Process Optimization",
-              description: "Streamline customer support workflows and response times",
-              status: "active",
-              progress: 30,
-              priority: "medium",
-              goalId: "goal_002",
-              createdBy: "emp_001",
-              assignedTo: "emp_002",
-              tasks: [
-                {
-                  id: "task_003",
-                  title: "Current Process Analysis",
-                  description: "Analyze existing support processes and identify bottlenecks",
-                  status: "active",
-                  priority: "medium",
-                  projectId: "proj_003",
-                  assignedTo: "emp_002",
-                  createdBy: "emp_001"
-                }
-              ]
-            }
-          ]
-        }
-      ];
+      // Get goals created by users for this company
+      const goals = await storage.getGoals(companyId);
       
-      res.json(mockGoals);
+      res.json(goals);
     } catch (error) {
       console.error("Goals fetch error:", error);
       res.status(500).json({ message: "Failed to fetch goals" });
@@ -952,40 +943,34 @@ function registerPermeateRoutes(app: Express) {
         return res.status(500).json({ message: "OpenAI API key not configured" });
       }
 
-      // AI-powered goal breakdown into projects and tasks
+      // Get employee data for intelligent assignment
+      const employees = await storage.getEmployees(goalData.companyId);
+      
+      // Use OpenAI to break down goal into projects and tasks with smart assignment
+      const breakdown = await generateGoalBreakdown(goalData, employees);
+      
       const goal = {
         id: "goal_" + Date.now(),
         ...goalData,
         status: "active",
         progress: 0,
-        projects: [
-          {
-            id: "proj_" + Date.now(),
-            title: "Implementation Phase 1",
-            description: "Initial setup and planning",
-            status: "active",
-            progress: 0,
-            priority: goalData.priority,
-            goalId: "goal_" + Date.now(),
-            createdBy: goalData.createdBy,
-            assignedTo: goalData.assignedTo,
-            tasks: [
-              {
-                id: "task_" + Date.now(),
-                title: "Research and Planning",
-                description: "Conduct initial research and create project plan",
-                status: "todo",
-                progress: 0,
-                priority: "medium",
-                score: 0,
-                createdBy: goalData.createdBy
-              }
-            ]
-          }
-        ]
+        companyId: goalData.companyId,
+        projects: breakdown.projects.map((proj: any) => ({
+          ...proj,
+          id: "proj_" + Date.now() + "_" + Math.random().toString(36).substr(2, 5),
+          goalId: "goal_" + Date.now(),
+          tasks: proj.tasks.map((task: any) => ({
+            ...task,
+            id: "task_" + Date.now() + "_" + Math.random().toString(36).substr(2, 5),
+            projectId: proj.id
+          }))
+        }))
       };
       
-      res.json({ goal, projects: goal.projects });
+      // Store goal in storage
+      await storage.createGoal(goal);
+      
+      res.json(goal);
     } catch (error) {
       console.error("Goal creation error:", error);
       res.status(500).json({ message: "Failed to create goal" });
