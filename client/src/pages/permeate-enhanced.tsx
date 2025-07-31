@@ -1213,7 +1213,7 @@ export default function PerMeaTeEnhanced() {
     </div>
   );
 
-  // Main app render logic
+  // Main app render logic - force rebuild
   if (!isAuthenticated) {
     return renderLogin();
   }
