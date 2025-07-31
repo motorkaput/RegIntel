@@ -431,16 +431,21 @@ export default function PerMeaTeEnhanced() {
           description: "PerMeaTe Enterprise is now ready for your organization"
         });
         
-        // Mark company as onboarded and fetch data
-        setCompany({
-          id: companyId,
-          name: companyForm.name,
-          businessAreas: companyForm.businessAreas.split(',').map(s => s.trim()),
-          employeeCount: parseInt(companyForm.employeeCount),
-          locations: companyForm.locations.split(',').map(s => s.trim()),
-          isOnboarded: true
-        });
-        fetchCompanyData(companyId);
+        // For OnboardingExpertUser, move to completion screen instead of main app
+        if (currentUser?.name === 'OnboardingExpertUser') {
+          setOnboardingStep(5); // New completion step
+        } else {
+          // Mark company as onboarded and fetch data for regular users
+          setCompany({
+            id: companyId,
+            name: companyForm.name,
+            businessAreas: companyForm.businessAreas.split(',').map(s => s.trim()),
+            employeeCount: parseInt(companyForm.employeeCount),
+            locations: companyForm.locations.split(',').map(s => s.trim()),
+            isOnboarded: true
+          });
+          fetchCompanyData(companyId);
+        }
       }
     } catch (error) {
       console.error('Onboarding completion error:', error);
@@ -450,6 +455,29 @@ export default function PerMeaTeEnhanced() {
         variant: "destructive"
       });
     }
+  };
+
+  const startNewOnboarding = () => {
+    // Reset all onboarding state
+    setOnboardingStep(1);
+    setCompanyForm({
+      name: '',
+      businessAreas: '',
+      employeeCount: '',
+      locations: ''
+    });
+    setUploadedFile(null);
+    setEmployeeData([]);
+    setPasswordsGenerated(false);
+    setGeneratedCredentials([]);
+    setSelectedEmployees(new Set());
+    setEmployeeSearchTerm("");
+    setCompanyId('');
+    
+    toast({
+      title: "New Onboarding Started",
+      description: "Ready to upload a new CSV file"
+    });
   };
 
   // Goal management functions
@@ -722,7 +750,7 @@ export default function PerMeaTeEnhanced() {
                           <div className="bg-blue-600 h-2 rounded-full animate-pulse" style={{ width: '60%' }}></div>
                         </div>
                         <p className="text-xs text-gray-500">
-                          AI is analyzing your organizational structure and extracting company details. This may take 1-2 minutes.
+                          Analyzing your organizational structure and extracting company details. This may take 1-2 minutes.
                         </p>
                       </div>
                     )}
@@ -1065,6 +1093,117 @@ export default function PerMeaTeEnhanced() {
                     Complete Setup & Launch PerMeaTe
                   </Button>
                 </div>
+              </div>
+            )}
+
+            {/* Step 5: Completion Screen for OnboardingExpertUser */}
+            {onboardingStep === 5 && currentUser?.name === 'OnboardingExpertUser' && (
+              <div className="space-y-6">
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2">Organization Setup Complete!</h3>
+                  <p className="text-gray-600 mb-8">
+                    PerMeaTe Enterprise has been successfully configured for {companyForm.name} with {selectedEmployees.size} employees.
+                  </p>
+                </div>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Setup Summary</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <dt className="font-medium text-gray-900">Company</dt>
+                        <dd className="text-gray-600">{companyForm.name}</dd>
+                      </div>
+                      <div>
+                        <dt className="font-medium text-gray-900">Employees</dt>
+                        <dd className="text-gray-600">{selectedEmployees.size} active users</dd>
+                      </div>
+                      <div>
+                        <dt className="font-medium text-gray-900">Business Areas</dt>
+                        <dd className="text-gray-600">{companyForm.businessAreas}</dd>
+                      </div>
+                      <div>
+                        <dt className="font-medium text-gray-900">Locations</dt>
+                        <dd className="text-gray-600">{companyForm.locations}</dd>
+                      </div>
+                    </div>
+
+                    {generatedCredentials.length > 0 && (
+                      <div className="mt-4 p-4 bg-yellow-50 rounded-lg">
+                        <h4 className="font-medium text-yellow-900 mb-2">Important: Employee Credentials</h4>
+                        <p className="text-sm text-yellow-800 mb-3">
+                          Make sure to download and securely distribute the employee credentials CSV file before proceeding.
+                        </p>
+                        <Button
+                          onClick={() => {
+                            const csvContent = "Name,Email,Username,Password,Role\n" +
+                              generatedCredentials.map(cred => 
+                                `${cred.name},${cred.email},${cred.username},${cred.password},${cred.permeateRole}`
+                              ).join('\n');
+                            
+                            const blob = new Blob([csvContent], { type: 'text/csv' });
+                            const url = window.URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.href = url;
+                            a.download = 'permeate-employee-credentials.csv';
+                            a.click();
+                          }}
+                          className="bg-yellow-600 hover:bg-yellow-700 text-white"
+                        >
+                          <Download className="h-4 w-4 mr-2" />
+                          Download Credentials CSV
+                        </Button>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">What's Next?</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-gray-600 mb-4">
+                      Choose your next action as the OnboardingExpertUser:
+                    </p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <Button
+                        onClick={startNewOnboarding}
+                        variant="outline"
+                        className="p-6 h-auto flex-col items-start text-left"
+                      >
+                        <div className="flex items-center mb-2">
+                          <RefreshCcw className="h-5 w-5 mr-2 text-blue-600" />
+                          <span className="font-medium">Setup Another Organization</span>
+                        </div>
+                        <span className="text-sm text-gray-600">
+                          Upload a new CSV file and configure PerMeaTe for a different client organization
+                        </span>
+                      </Button>
+                      
+                      <Button
+                        onClick={handleLogout}
+                        variant="outline"
+                        className="p-6 h-auto flex-col items-start text-left"
+                      >
+                        <div className="flex items-center mb-2">
+                          <LogOut className="h-5 w-5 mr-2 text-gray-600" />
+                          <span className="font-medium">Log Out & Access App</span>
+                        </div>
+                        <span className="text-sm text-gray-600">
+                          Log out from OnboardingExpertUser account so employees can log in with their credentials
+                        </span>
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
             )}
           </Card>
