@@ -1251,6 +1251,9 @@ export default function PerMeaTeEnhanced() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Dark Street Tech Header */}
+      <Navbar />
+      
       {/* Two-Tier Header */}
       <PerMeaTeHeader 
         currentUser={{
@@ -1271,25 +1274,11 @@ export default function PerMeaTeEnhanced() {
         }}
       />
       
-      {/* Main Content */}
+      {/* Main Content - positioned below both headers */}
       <div className="pt-40 pb-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-5 py-2">
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="goals">Goals</TabsTrigger>
-              <TabsTrigger value="projects">Projects</TabsTrigger>
-              <TabsTrigger value="analytics">Analytics</TabsTrigger>
-              <TabsTrigger value="users">Users</TabsTrigger>
-            </TabsList>
-          </Tabs>
-        </div>
-      </div>
-
-      {/* Main content area - positioned below sticky headers */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" style={{ paddingTop: '2rem' }}>
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsContent value="overview">
+            <TabsContent value="overview">
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <Card>
@@ -1723,7 +1712,8 @@ export default function PerMeaTeEnhanced() {
               </div>
             </div>
           </TabsContent>
-        </Tabs>
+          </Tabs>
+        </div>
       </div>
 
       {/* Modals */}
@@ -1792,7 +1782,7 @@ export default function PerMeaTeEnhanced() {
           </div>
         </DialogContent>
       </Dialog>
-
+      
       <Footer />
     </div>
   );
