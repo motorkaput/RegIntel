@@ -1,12 +1,12 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./replitAuth";
+// No external authentication - PerMeaTe Enterprise has its own authentication
 import { initializeRazorpay, createSubscription, verifyPayment } from "./services/razorpay";
 import { processDocument } from "./services/documentProcessor";
 import { generatePerformanceAnalytics } from "./services/performanceAnalytics";
 import { processDocumentWithAI, answerQuestion, analyzeContext } from "./services/fetchPatternsAI";
-import { permeateAI } from "./services/permeateAI";
+// PerMeaTe AI services are handled inline
 import multer from "multer";
 import { insertDocumentSchema, insertSubscriptionSchema } from "@shared/schema";
 import { nanoid } from "nanoid";
@@ -65,7 +65,7 @@ Guidelines:
       response_format: { type: "json_object" }
     });
 
-    return JSON.parse(response.choices[0].message.content);
+    return JSON.parse(response.choices[0].message.content || '{}');
   } catch (error) {
     console.error('Goal breakdown error:', error);
     // Fallback to basic structure if AI fails
@@ -104,26 +104,51 @@ const upload = multer({
 const freeVersionAnalyses = new Map<string, any>();
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  try {
-    // Auth middleware
-    await setupAuth(app);
-  } catch (error) {
-    console.error("Failed to setup auth:", error);
-    // Continue without auth for now to prevent complete server failure
-  }
-
   // Initialize Razorpay
   initializeRazorpay();
 
-  // Auth routes
-  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
+  // PerMeaTe Enterprise Authentication - separate from Dark Street Tech
+  app.post('/api/permeate/login', async (req, res) => {
     try {
-      const userId = req.user.id;
-      const user = await storage.getUser(userId);
-      res.json(user);
+      const { username, password } = req.body;
+      
+      // Handle OnboardingExpertUser special login
+      if (username === 'OnboardingExpertUser' && password === '7c2f5a1d8b4e9c6f3a0d2b5e8c1f4a7b') {
+        const onboardingUser = {
+          id: 'onboarding_expert',
+          name: 'OnboardingExpertUser',
+          email: 'onboarding@permeate.enterprise',
+          role: 'Onboarding Expert',
+          department: 'System Administration',
+          skills: ['System Setup', 'CSV Processing', 'User Management'],
+          permeateRole: 'onboarding_expert',
+          isActive: true,
+          hasPassword: true,
+          lastLogin: new Date(),
+          companyId: 'onboarding_company'
+        };
+        return res.json(onboardingUser);
+      }
+
+      // Check if user exists in employee database
+      const employee = await storage.getEmployeeByUsername(username);
+      if (!employee || !employee.hasPassword) {
+        return res.status(401).json({ message: 'Invalid credentials' });
+      }
+
+      // Verify password (in real app, use bcrypt)
+      const storedPassword = await storage.getEmployeePassword(employee.id);
+      if (storedPassword !== password) {
+        return res.status(401).json({ message: 'Invalid credentials' });
+      }
+
+      // Update last login
+      await storage.updateEmployeeLastLogin(employee.id);
+      
+      res.json(employee);
     } catch (error) {
-      console.error("Error fetching user:", error);
-      res.status(500).json({ message: "Failed to fetch user" });
+      console.error('Login error:', error);
+      res.status(500).json({ message: 'Login failed' });
     }
   });
 
@@ -138,7 +163,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/subscription', isAuthenticated, async (req: any, res) => {
+  app.get('/api/subscription', async (req: any, res) => {
     try {
       const userId = req.user.id;
       const subscription = await storage.getUserSubscription(userId);
@@ -149,7 +174,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/subscription/create', isAuthenticated, async (req: any, res) => {
+  app.post('/api/subscription/create', async (req: any, res) => {
     try {
       const userId = req.user.id;
       const { planId } = req.body;
@@ -178,7 +203,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/subscription/verify', isAuthenticated, async (req: any, res) => {
+  app.post('/api/subscription/verify', async (req: any, res) => {
     try {
       const { razorpay_payment_id, razorpay_subscription_id, razorpay_signature } = req.body;
       
@@ -201,7 +226,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Document routes
-  app.get('/api/documents', isAuthenticated, async (req: any, res) => {
+  app.get('/api/documents', async (req: any, res) => {
     try {
       const userId = req.user.id;
       const documents = await storage.getUserDocuments(userId);
@@ -212,7 +237,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/documents/upload', isAuthenticated, upload.single('file'), async (req: any, res) => {
+  app.post('/api/documents/upload', upload.single('file'), async (req: any, res) => {
     try {
       const userId = req.user.id;
       const file = req.file;
@@ -278,7 +303,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/documents/:id', isAuthenticated, async (req: any, res) => {
+  app.get('/api/documents/:id', async (req: any, res) => {
     try {
       const userId = req.user.id;
       const documentId = parseInt(req.params.id);
@@ -295,7 +320,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/documents/:id', isAuthenticated, async (req: any, res) => {
+  app.delete('/api/documents/:id', async (req: any, res) => {
     try {
       const userId = req.user.id;
       const documentId = parseInt(req.params.id);
@@ -487,7 +512,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Performance analytics routes
-  app.get('/api/analytics/dashboard', isAuthenticated, async (req: any, res) => {
+  app.get('/api/analytics/dashboard', async (req: any, res) => {
     try {
       const userId = req.user.id;
       const analytics = await generatePerformanceAnalytics(userId);
@@ -498,7 +523,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/analytics/metrics', isAuthenticated, async (req: any, res) => {
+  app.get('/api/analytics/metrics', async (req: any, res) => {
     try {
       const userId = req.user.id;
       const { type, startDate, endDate } = req.query;

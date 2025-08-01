@@ -65,6 +65,11 @@ export interface IStorage {
   getGoals(companyId: string): Promise<any[]>;
   createGoal(goal: any): Promise<any>;
   updateGoal(goalId: string, updates: any): Promise<any>;
+  
+  // PerMeaTe Authentication operations
+  getEmployeeByUsername(username: string): Promise<any | undefined>;
+  getEmployeePassword(employeeId: string): Promise<string | undefined>;
+  updateEmployeeLastLogin(employeeId: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -370,6 +375,41 @@ export class DatabaseStorage implements IStorage {
     });
 
     return roots;
+  }
+
+  // PerMeaTe Authentication implementations
+  async getEmployeeByUsername(username: string): Promise<any | undefined> {
+    // Search across all companies for employee with this username
+    for (const [key, value] of Array.from(this.permeateData.entries())) {
+      if (key.startsWith('employees_')) {
+        const employees = value as any[];
+        const employee = employees.find(emp => emp.email?.split('@')[0] === username || emp.username === username);
+        if (employee) {
+          return employee;
+        }
+      }
+    }
+    return undefined;
+  }
+
+  async getEmployeePassword(employeeId: string): Promise<string | undefined> {
+    // Get password from PerMeaTe password storage
+    return this.permeateData.get(`password_${employeeId}`);
+  }
+
+  async updateEmployeeLastLogin(employeeId: string): Promise<void> {
+    // Update last login time for employee
+    for (const [key, value] of Array.from(this.permeateData.entries())) {
+      if (key.startsWith('employees_')) {
+        const employees = value as any[];
+        const employeeIndex = employees.findIndex(emp => emp.id === employeeId);
+        if (employeeIndex !== -1) {
+          employees[employeeIndex].lastLogin = new Date();
+          this.permeateData.set(key, employees);
+          break;
+        }
+      }
+    }
   }
 }
 

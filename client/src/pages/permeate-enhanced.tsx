@@ -201,31 +201,50 @@ export default function PerMeaTeEnhanced() {
     return acc;
   }, {} as Record<string, number>);
 
-  // Initialize user data from Dark Street Tech authentication
-  useEffect(() => {
-    if (user && isAuthenticated) {
-      // Create PerMeaTe user from Dark Street Tech user
-      const permeateUser: Employee = {
-        id: (user as any).id || 'user_1',
-        name: ((user as any).firstName && (user as any).lastName) ? `${(user as any).firstName} ${(user as any).lastName}` : (user as any).email?.split('@')[0] || 'User',
-        email: (user as any).email || '',
-        role: 'Administrator',
-        department: 'Management',
-        skills: [],
-        permeateRole: 'administrator',
-        isActive: true,
-        hasPassword: true,
-        lastLogin: new Date(),
-        companyId: `company_${(user as any).id || 'user_1'}`
-      };
-      
-      setCurrentUser(permeateUser);
-      setCompanyId(`company_${(user as any).id || 'user_1'}`);
+  // PerMeaTe Enterprise authentication - separate from Dark Street Tech
+  const [isPermeateAuthenticated, setIsPermeateAuthenticated] = useState(false);
+  const [loginForm, setLoginForm] = useState({ username: '', password: '' });
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const response = await fetch('/api/permeate/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(loginForm)
+      });
+
+      if (response.ok) {
+        const userData = await response.json();
+        setCurrentUser(userData);
+        setIsPermeateAuthenticated(true);
+        toast({
+          title: "Welcome to PerMeaTe Enterprise",
+          description: `Logged in as ${userData.name}`
+        });
+        
+        setCompanyId(userData.companyId);
+      } else {
+        toast({
+          title: "Login Failed",
+          description: "Invalid credentials",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      toast({
+        title: "Login Error",
+        description: "Unable to connect to server",
+        variant: "destructive"
+      });
     }
-  }, [user, isAuthenticated]);
+  };
 
   const handleLogout = () => {
-    window.location.href = '/api/x9k2m/logout';
+    setCurrentUser(null);
+    setIsPermeateAuthenticated(false);
+    setLocation('/');
   };
 
   // Data fetching functions
@@ -1162,35 +1181,73 @@ export default function PerMeaTeEnhanced() {
     </div>
   );
 
-  // If loading, show loading state
-  if (isLoading) {
+  // PerMeaTe Enterprise Login Screen - separate authentication system
+  if (!isPermeateAuthenticated) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading PerMeaTe Enterprise...</p>
+      <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+        <div className="sm:mx-auto sm:w-full sm:max-w-md">
+          <div className="flex justify-center">
+            <img src={permeateIcon} alt="PerMeaTe Enterprise" className="h-16 w-16" />
+          </div>
+          <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">
+            PerMeaTe Enterprise Beta Access
+          </h2>
+          <p className="mt-2 text-center text-sm text-gray-600">
+            Sign in with your employee credentials
+          </p>
+        </div>
+
+        <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+          <Card className="py-8 px-4 shadow sm:rounded-lg sm:px-10">
+            <form className="space-y-6" onSubmit={handleLogin}>
+              <div>
+                <label htmlFor="username" className="block text-sm font-medium text-gray-700">
+                  Username (Email Alias)
+                </label>
+                <Input
+                  id="username"
+                  name="username"
+                  type="text"
+                  required
+                  value={loginForm.username}
+                  onChange={(e) => setLoginForm({...loginForm, username: e.target.value})}
+                  className="mt-1"
+                  placeholder="Enter your email alias"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                  Password
+                </label>
+                <Input
+                  id="password"
+                  name="password"
+                  type="password"
+                  required
+                  value={loginForm.password}
+                  onChange={(e) => setLoginForm({...loginForm, password: e.target.value})}
+                  className="mt-1"
+                  placeholder="Enter your secure password"
+                />
+              </div>
+
+              <Button
+                type="submit"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                Sign In
+              </Button>
+            </form>
+          </Card>
         </div>
       </div>
     );
   }
 
-  // If not authenticated, show login prompt (don't automatically redirect)
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center max-w-md mx-auto">
-          <img src={permeateIcon} alt="PerMeaTe Enterprise" className="h-16 w-16 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">PerMeaTe Enterprise</h2>
-          <p className="text-gray-600 mb-6">Please log in with your Dark Street Tech account to access PerMeaTe Enterprise.</p>
-          <Button 
-            onClick={() => window.location.href = '/api/x9k2m/auth'}
-            className="bg-blue-600 hover:bg-blue-700 text-white"
-          >
-            Log in with Dark Street Tech
-          </Button>
-        </div>
-      </div>
-    );
+  // Show onboarding for OnboardingExpertUser OR if company needs onboarding
+  if ((currentUser?.name === 'OnboardingExpertUser') || (!company || !company.isOnboarded)) {
+    return renderOnboarding();
   }
 
   return (
