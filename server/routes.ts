@@ -770,7 +770,7 @@ function registerPermeateRoutes(app: Express) {
               
               return res.json(updatedEmployee);
             }
-          } catch (err) {
+          } catch (err: any) {
             console.log(`Error searching for ${searchEmail}:`, err.message);
           }
         }
