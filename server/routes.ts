@@ -957,24 +957,27 @@ function registerPermeateRoutes(app: Express) {
             userType = 'administrator';
           }
           
+          // Generate password for each employee
+          const password = "PE_" + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 8).toUpperCase();
+          
           return {
-            id: employee.id,
+            id: `emp_${companyId}_${index + 1}`,
             companyId,
-            username: email,
-            employeeId: employee.id,
+            employeeId: `emp_${index + 1}`,
             name,
-            alias: email, // Use the full email as alias to avoid @company.com duplication
-            location: employee.location || 'Not specified',
+            email,
+            username: email,
+            passwordHash: password,
             role,
-            reportingTo: employee.manager || employee.manager_email,
+            department: employee.department || 'General',
+            location: employee.location || 'Not specified',
+            reportingTo: employee.manager || employee.manager_email || null,
             keySkills: (employee.skills || '').split(',').map((s: string) => s.trim()).filter(Boolean),
             userType,
-            department: employee.department || 'General',
             seniority: role.toLowerCase().includes('senior') ? 'Senior' : 
                       role.toLowerCase().includes('junior') ? 'Junior' : 'Mid-level',
-            email,
-            permeateRole: userType,
-            isActive: true
+            isActive: true,
+            lastLogin: null
           };
         });
         

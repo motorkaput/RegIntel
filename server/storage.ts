@@ -351,7 +351,15 @@ export class DatabaseStorage implements IStorage {
     const [employee] = await db
       .select()
       .from(permeateEmployees)
-      .where(eq(permeateEmployees.username, username));
+      .where(eq(permeateEmployees.email, username));
+    return employee;
+  }
+
+  async getPermeateEmployeeByEmail(email: string): Promise<PermeateEmployee | undefined> {
+    const [employee] = await db
+      .select()
+      .from(permeateEmployees)
+      .where(eq(permeateEmployees.email, email));
     return employee;
   }
 
