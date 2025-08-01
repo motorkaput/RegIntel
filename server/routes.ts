@@ -706,12 +706,13 @@ function registerPermeateRoutes(app: Express) {
       if (username === "OnboardingExpertUser" && password === "7c2f5a1d8b4e9c6f3a0d2b5e8c1f4a7b") {
         return res.json({
           id: "onboarding_expert",
-          name: "OnboardingExpertUser",
+          name: "Onboarding Expert",
           email: "onboarding@permeate.enterprise",
           role: "Onboarding Expert",
           department: "System Administration",
           skills: ["System Setup", "CSV Processing", "User Management"],
-          permeateRole: "onboarding_expert",
+          permeateRole: "permeate_expert",
+          userType: "permeate_expert",
           isActive: true,
           hasPassword: true,
           lastLogin: new Date().toISOString(),

@@ -67,15 +67,14 @@ export default function PerMeaTeHeader({
                     <User className="h-4 w-4 text-gray-500" />
                     <div className="flex flex-col">
                       <span className="text-sm font-medium text-gray-900">
-                        {currentUser.userType === 'onboarding_expert' ? 'Onboarding Expert' : currentUser.name}
+                        {currentUser.name}
                       </span>
-                      {currentUser.userType !== 'onboarding_expert' && (
-                        <div className="flex items-center space-x-1 -mt-0.5">
-                          <Badge variant="outline" className="text-xs py-0 px-1">
-                            {currentUser.userType.replace('_', ' ')}
-                          </Badge>
-                        </div>
-                      )}
+                      <div className="flex items-center space-x-1 -mt-0.5">
+                        <Badge variant="outline" className="text-xs py-0 px-1">
+                          {currentUser.userType === 'permeate_expert' ? 'PerMeaTe Expert' : 
+                           currentUser.userType.replace('_', ' ')}
+                        </Badge>
+                      </div>
                     </div>
                   </div>
                   
