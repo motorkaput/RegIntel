@@ -55,6 +55,8 @@ function Router() {
       {/* PerMeaTe Enterprise routes - accessible with or without authentication */}
       <Route path="/z9m3k/pe-workspace" component={PerMeaTeEnhanced} />
       <Route path="/enhanced-pe" component={PerMeaTeEnhanced} />
+      <Route path="/permeate-enhanced" component={PerMeaTeEnhanced} />
+      <Route path="/m8x3r/pe-system" component={PerMeaTeEnhanced} />
       
       {/* Legal and info pages */}
       <Route path="/privacy" component={Privacy} />
