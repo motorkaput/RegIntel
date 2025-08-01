@@ -1196,8 +1196,30 @@ function registerPermeateRoutes(app: Express) {
     }
   });
 
-  // Simple URL access route for PerMeaTe Enterprise
+  // Simple URL access route for PerMeaTe Enterprise - serve directly
   app.get("/m8x3r/pe-system", (req, res) => {
-    res.redirect("/permeate-enterprise");
+    // Serve the HTML directly with PerMeaTe route
+    res.send(`
+      <!DOCTYPE html>
+      <html lang="en">
+        <head>
+          <meta charset="UTF-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+          <title>PerMeaTe Enterprise</title>
+          <script>
+            // Redirect to PerMeaTe page after load
+            window.location.href = '/permeate-enterprise';
+          </script>
+        </head>
+        <body>
+          <div style="display: flex; justify-content: center; align-items: center; height: 100vh; background: #0f172a; color: #f1f5f9; font-family: system-ui;">
+            <div style="text-align: center;">
+              <h1>Loading PerMeaTe Enterprise...</h1>
+              <p>Redirecting to PerMeaTe Enterprise System...</p>
+            </div>
+          </div>
+        </body>
+      </html>
+    `);
   });
 }
