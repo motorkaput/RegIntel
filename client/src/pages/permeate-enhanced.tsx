@@ -225,7 +225,7 @@ export default function PerMeaTeEnhanced() {
   }, [user, isAuthenticated]);
 
   const handleLogout = () => {
-    window.location.href = '/api/logout';
+    window.location.href = '/api/x9k2m/logout';
   };
 
   // Data fetching functions
@@ -1183,7 +1183,7 @@ export default function PerMeaTeEnhanced() {
           <h2 className="text-2xl font-bold text-gray-900 mb-4">PerMeaTe Enterprise</h2>
           <p className="text-gray-600 mb-6">Please log in with your Dark Street Tech account to access PerMeaTe Enterprise.</p>
           <Button 
-            onClick={() => window.location.href = '/api/login'}
+            onClick={() => window.location.href = '/api/x9k2m/auth'}
             className="bg-blue-600 hover:bg-blue-700 text-white"
           >
             Log in with Dark Street Tech

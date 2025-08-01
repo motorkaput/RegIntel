@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./googleAuth";
+import { setupAuth, isAuthenticated } from "./replitAuth";
 import { initializeRazorpay, createSubscription, verifyPayment } from "./services/razorpay";
 import { processDocument } from "./services/documentProcessor";
 import { generatePerformanceAnalytics } from "./services/performanceAnalytics";
