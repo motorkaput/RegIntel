@@ -7,6 +7,14 @@ Dark Street Tech is a full-stack AI-powered SaaS platform providing document ana
 Preferred communication style: Simple, everyday language.
 Design preference: Mature, professional look inspired by Palantir.com instead of quirky/neon design.
 
+## Recent Changes (August 1, 2025)
+✓ Resolved critical PostgreSQL array handling for company onboarding
+✓ Fixed database schema inconsistencies and column mismatch issues  
+✓ Implemented comprehensive employee authentication system with CSV credential support
+✓ "Complete Setup & Launch PerMeaTe" button now fully functional
+✓ Employee login system working with proper database persistence
+✓ Both OnboardingExpertUser and employee workflows operational
+
 ## System Architecture
 
 ### Frontend

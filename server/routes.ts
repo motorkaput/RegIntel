@@ -749,23 +749,31 @@ function registerPermeateRoutes(app: Express) {
         });
       }
       
-      // Handle employee login - check if username exists and password matches PE_ format
+      // Handle employee login - search both with and without @company.com suffix
       if (password.startsWith("PE_")) {
-        // For demo: Allow any valid-looking employee username with PE_ password
-        const employeeUser = {
-          id: "emp_" + Date.now(),
-          name: username.split('@')[0].replace(/\./g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
-          email: username,
-          role: "Employee",
-          department: "General",
-          permeateRole: "team_member",
-          isActive: true,
-          hasPassword: true,
-          companyId: "company_employee",
-          lastLogin: new Date().toISOString()
-        };
+        const searchEmails = [
+          username,
+          username + "@company.com",
+          username.replace("@company.com", "")
+        ];
         
-        return res.json(employeeUser);
+        for (const searchEmail of searchEmails) {
+          try {
+            const employee = await storage.getPermeateEmployeeByEmail(searchEmail);
+            console.log(`Searching for: ${searchEmail}, Found:`, employee?.email);
+            
+            if (employee && employee.isActive) {
+              const updatedEmployee = {
+                ...employee,
+                lastLogin: new Date().toISOString()
+              };
+              
+              return res.json(updatedEmployee);
+            }
+          } catch (err) {
+            console.log(`Error searching for ${searchEmail}:`, err.message);
+          }
+        }
       }
       
       // Invalid credentials
