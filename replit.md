@@ -14,8 +14,9 @@ Design preference: Mature, professional look inspired by Palantir.com instead of
 ✓ "Complete Setup & Launch PerMeaTe" button now fully functional
 ✓ Employee login system working with proper database persistence
 ✓ Both OnboardingExpertUser and employee workflows operational
-✓ PerMeaTe Enterprise ready for deployment as standalone application (not linked to main Dark Street Tech site yet)
+✓ PerMeaTe Enterprise ready for deployment as standalone application
 ✓ Simple access URL created: `/m8x3r/pe-system` for clean PerMeaTe Enterprise access
+✓ "Launch PerMeaTe Enterprise" button added to Dark Street Tech website, opens app in new tab
 ✓ Replit webview display issue identified as platform infrastructure problem (app working correctly on server)
 
 ## System Architecture

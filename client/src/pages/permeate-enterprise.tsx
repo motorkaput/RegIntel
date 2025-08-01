@@ -90,10 +90,11 @@ export default function PerMeaTeEnterprise() {
               
               <div>
                 <Button 
-                  disabled 
-                  className="btn-primary px-8 py-4 text-lg opacity-50 cursor-not-allowed"
+                  onClick={() => window.open('/m8x3r/pe-system', '_blank')}
+                  className="btn-primary px-8 py-4 text-lg"
                 >
-                  Coming Soon
+                  Launch PerMeaTe Enterprise
+                  <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
               </div>
             </div>
