@@ -185,9 +185,9 @@ export type InsertDocumentAnalysis = typeof documentAnalyses.$inferInsert;
 export const permeateCompanies = pgTable("permeate_companies", {
   id: varchar("id").primaryKey(),
   name: varchar("name").notNull(),
-  businessAreas: jsonb("business_areas"),
+  businessAreas: varchar("business_areas").array(),
   employeeCount: integer("employee_count"),
-  locations: jsonb("locations"),
+  locations: varchar("locations").array(),
   isOnboarded: boolean("is_onboarded").default(false),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -379,16 +379,4 @@ export const insertPermeateProjectSchema = createInsertSchema(permeateProjects);
 export const insertPermeateTaskSchema = createInsertSchema(permeateTasks);
 export const insertPermeateTaskUpdateSchema = createInsertSchema(permeateTaskUpdates);
 
-// PerMeaTe Types
-export type PermeateCompany = typeof permeateCompanies.$inferSelect;
-export type InsertPermeateCompany = typeof permeateCompanies.$inferInsert;
-export type PermeateEmployee = typeof permeateEmployees.$inferSelect;
-export type InsertPermeateEmployee = typeof permeateEmployees.$inferInsert;
-export type PermeateGoal = typeof permeateGoals.$inferSelect;
-export type InsertPermeateGoal = typeof permeateGoals.$inferInsert;
-export type PermeateProject = typeof permeateProjects.$inferSelect;
-export type InsertPermeateProject = typeof permeateProjects.$inferInsert;
-export type PermeateTask = typeof permeateTasks.$inferSelect;
-export type InsertPermeateTask = typeof permeateTasks.$inferInsert;
-export type PermeateTaskUpdate = typeof permeateTaskUpdates.$inferSelect;
-export type InsertPermeateTaskUpdate = typeof permeateTaskUpdates.$inferInsert;
+

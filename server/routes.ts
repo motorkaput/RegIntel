@@ -781,14 +781,41 @@ function registerPermeateRoutes(app: Express) {
     try {
       const { name, businessAreas, employeeCount, locations } = req.body;
       
+      // Debug logging
+      console.log("Received data:", { name, businessAreas, employeeCount, locations });
+      console.log("BusinessAreas type:", typeof businessAreas, businessAreas);
+      console.log("Locations type:", typeof locations, locations);
+      
+      // Handle array conversion - sometimes the data comes as stringified arrays
+      let parsedBusinessAreas = businessAreas;
+      let parsedLocations = locations;
+      
+      if (typeof businessAreas === 'string') {
+        try {
+          parsedBusinessAreas = JSON.parse(businessAreas);
+        } catch {
+          parsedBusinessAreas = businessAreas.split(',').map(s => s.trim());
+        }
+      }
+      
+      if (typeof locations === 'string') {
+        try {
+          parsedLocations = JSON.parse(locations);
+        } catch {
+          parsedLocations = locations.split(',').map(s => s.trim());
+        }
+      }
+      
       const company = {
         id: "company_" + Date.now(),
         name,
-        businessAreas,
+        businessAreas: parsedBusinessAreas,
         employeeCount: parseInt(employeeCount),
-        locations,
+        locations: parsedLocations,
         isOnboarded: true // Mark as onboarded since this completes Step 2
       };
+      
+      console.log("Company object to insert:", company);
       
       // Store company information
       await storage.upsertPermeateCompany(company);
