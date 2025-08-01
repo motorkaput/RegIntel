@@ -103,7 +103,7 @@ export default function PerMeaTeHeader({
               
               {!currentUser && showSessionControls && (
                 <div className="text-sm text-gray-600 dark:text-gray-400">
-                  PerMeaTe Enterprise Beta Access
+                  Beta Access
                 </div>
               )}
             </div>

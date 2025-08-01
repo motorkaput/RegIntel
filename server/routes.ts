@@ -702,21 +702,44 @@ function registerPermeateRoutes(app: Express) {
     try {
       const { username, password } = req.body;
       
-      // Mock authentication for demonstration
-      // In production, this would validate against the database
-      const mockUser = {
-        id: "user_" + Date.now(),
-        name: username, // Use the actual username instead of generic "Enterprise User"
-        email: username + "@company.com",
-        role: "Product Manager",
-        department: "Technology",
-        permeateRole: "administrator",
-        isActive: true,
-        hasPassword: true,
-        companyId: "company_1"
-      };
+      // Handle OnboardingExpertUser login
+      if (username === "OnboardingExpertUser" && password === "7c2f5a1d8b4e9c6f3a0d2b5e8c1f4a7b") {
+        return res.json({
+          id: "onboarding_expert",
+          name: "OnboardingExpertUser",
+          email: "onboarding@permeate.enterprise",
+          role: "Onboarding Expert",
+          department: "System Administration",
+          skills: ["System Setup", "CSV Processing", "User Management"],
+          permeateRole: "onboarding_expert",
+          isActive: true,
+          hasPassword: true,
+          lastLogin: new Date().toISOString(),
+          companyId: "onboarding_company"
+        });
+      }
       
-      res.json(mockUser);
+      // Handle employee login - check if username exists and password matches PE_ format
+      if (password.startsWith("PE_")) {
+        // For demo: Allow any valid-looking employee username with PE_ password
+        const employeeUser = {
+          id: "emp_" + Date.now(),
+          name: username.split('@')[0].replace(/\./g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+          email: username,
+          role: "Employee",
+          department: "General",
+          permeateRole: "team_member",
+          isActive: true,
+          hasPassword: true,
+          companyId: "company_employee",
+          lastLogin: new Date().toISOString()
+        };
+        
+        return res.json(employeeUser);
+      }
+      
+      // Invalid credentials
+      return res.status(401).json({ message: "Invalid username or password" });
     } catch (error) {
       console.error("PerMeaTe login error:", error);
       res.status(401).json({ message: "Invalid credentials" });
@@ -821,7 +844,7 @@ function registerPermeateRoutes(app: Express) {
       // Generate secure passwords for selected employees
       const credentials = selectedEmployees.map((employee: any) => ({
         name: employee.name,
-        email: `${employee.alias}@company.com`,
+        email: employee.alias, // Use the original alias/email, don't append @company.com
         username: employee.alias,
         password: "PE_" + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 8).toUpperCase(),
         permeateRole: employee.userType

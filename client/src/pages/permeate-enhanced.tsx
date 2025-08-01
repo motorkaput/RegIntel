@@ -645,10 +645,9 @@ export default function PerMeaTeEnhanced() {
       <div className="pt-12 pb-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mx-auto">
-          <div className="text-center mb-8">
-            <img src={permeateIcon} alt="PerMeaTe Enterprise" className="h-16 w-16 mx-auto mb-4" />
-            <h1 className="text-3xl font-bold text-gray-900">PerMeaTe Enterprise Setup</h1>
-            <p className="text-gray-600 mt-2">
+          <div className="text-center mb-6">
+            <h1 className="text-2xl font-bold text-gray-900">PerMeaTe Enterprise Setup</h1>
+            <p className="text-gray-600 mt-1">
               Let's get your organization set up with intelligent workflow management
             </p>
           </div>
@@ -1133,8 +1132,8 @@ export default function PerMeaTeEnhanced() {
                           <RefreshCcw className="h-5 w-5 mr-2 text-blue-600" />
                           <span className="font-medium">Setup Another Organization</span>
                         </div>
-                        <span className="text-sm text-gray-600 break-words">
-                          Upload a new CSV file and configure PerMeaTe for a different client organization
+                        <span className="text-sm text-gray-600 break-words overflow-hidden">
+                          Upload a new CSV file and configure PerMeaTe for a different organization
                         </span>
                       </Button>
                       
@@ -1147,8 +1146,8 @@ export default function PerMeaTeEnhanced() {
                           <LogOut className="h-5 w-5 mr-2 text-gray-600" />
                           <span className="font-medium">Log Out & Access App</span>
                         </div>
-                        <span className="text-sm text-gray-600 break-words">
-                          Log out from OnboardingExpertUser account so employees can log in with their credentials
+                        <span className="text-sm text-gray-600 break-words overflow-hidden">
+                          Log out so employees can access with their credentials
                         </span>
                       </Button>
                     </div>
@@ -1179,10 +1178,7 @@ export default function PerMeaTeEnhanced() {
         {/* Login Content */}
         <div className="flex flex-col justify-center py-12 sm:px-6 lg:px-8">
           <div className="sm:mx-auto sm:w-full sm:max-w-md">
-            <div className="flex justify-center">
-              <img src={permeateIcon} alt="PerMeaTe Enterprise" className="h-16 w-16" />
-            </div>
-            <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">
+            <h2 className="text-center text-2xl font-bold text-gray-900">
               PerMeaTe Enterprise Beta Access
             </h2>
             <p className="mt-2 text-center text-sm text-gray-600">
