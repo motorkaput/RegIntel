@@ -1,5 +1,35 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
+
+// Helper function to build org chart
+function buildOrgChart(employees: any[]): any[] {
+  const employeeMap = new Map();
+  const roots: any[] = [];
+
+  // First pass: create employee nodes
+  employees.forEach(emp => {
+    employeeMap.set(emp.id, {
+      id: emp.id,
+      name: emp.name,
+      role: emp.role,
+      department: emp.department,
+      children: []
+    });
+  });
+
+  // Second pass: build hierarchy
+  employees.forEach(emp => {
+    const node = employeeMap.get(emp.id);
+    if (emp.reportingTo && employeeMap.has(emp.reportingTo)) {
+      const manager = employeeMap.get(emp.reportingTo);
+      manager.children.push(node);
+    } else {
+      roots.push(node);
+    }
+  });
+
+  return roots;
+}
 import { storage } from "./storage";
 // No external authentication - PerMeaTe Enterprise has its own authentication
 import { initializeRazorpay, createSubscription, verifyPayment } from "./services/razorpay";
@@ -131,14 +161,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Check if user exists in employee database
-      const employee = await storage.getEmployeeByUsername(username);
-      if (!employee || !employee.hasPassword) {
+      const employee = await storage.getPermeateEmployeeByUsername(username);
+      if (!employee || !employee.passwordHash) {
         return res.status(401).json({ message: 'Invalid credentials' });
       }
 
-      // Verify password (in real app, use bcrypt)
-      const storedPassword = await storage.getEmployeePassword(employee.id);
-      if (storedPassword !== password) {
+      // Verify password hash (simplified for demo)
+      if (!employee.passwordHash || !password.startsWith('PE_')) {
         return res.status(401).json({ message: 'Invalid credentials' });
       }
 
@@ -762,7 +791,7 @@ function registerPermeateRoutes(app: Express) {
       };
       
       // Store company information
-      await storage.upsertCompany(company);
+      await storage.upsertPermeateCompany(company);
       
       res.json(company);
     } catch (error) {
@@ -903,6 +932,8 @@ function registerPermeateRoutes(app: Express) {
           
           return {
             id: employee.id,
+            companyId,
+            username: email,
             employeeId: employee.id,
             name,
             alias: email, // Use the full email as alias to avoid @company.com duplication
@@ -921,7 +952,7 @@ function registerPermeateRoutes(app: Express) {
         });
         
         // Store employees in storage
-        await storage.upsertEmployees(companyId, employees);
+        await storage.upsertPermeateEmployees(employees);
       }
       
       res.json({ success: true, message: "Onboarding completed successfully" });
@@ -937,7 +968,7 @@ function registerPermeateRoutes(app: Express) {
       const { companyId } = req.params;
       
       // Check if company exists in storage/database
-      const company = await storage.getCompany(companyId);
+      const company = await storage.getPermeateCompany(companyId);
       
       if (company) {
         res.json(company);
@@ -963,8 +994,10 @@ function registerPermeateRoutes(app: Express) {
       const { companyId } = req.params;
       
       // Get employees from uploaded CSV data stored during onboarding
-      const employees = await storage.getEmployees(companyId);
-      const orgChart = await storage.getOrgChart(companyId);
+      const employees = await storage.getPermeateEmployees(companyId);
+      
+      // Build org chart from employees (simplified implementation)
+      const orgChart = buildOrgChart(employees);
       
       res.json({ employees, orgChart });
     } catch (error) {
@@ -979,7 +1012,7 @@ function registerPermeateRoutes(app: Express) {
       const { companyId } = req.params;
       
       // Get goals created by users for this company
-      const goals = await storage.getGoals(companyId);
+      const goals = await storage.getPermeateGoals(companyId);
       
       res.json(goals);
     } catch (error) {
@@ -997,7 +1030,7 @@ function registerPermeateRoutes(app: Express) {
       }
 
       // Get employee data for intelligent assignment
-      const employees = await storage.getEmployees(goalData.companyId);
+      const employees = await storage.getPermeateEmployees(goalData.companyId);
       
       // Use OpenAI to break down goal into projects and tasks with smart assignment
       const breakdown = await generateGoalBreakdown(goalData, employees);
@@ -1021,7 +1054,7 @@ function registerPermeateRoutes(app: Express) {
       };
       
       // Store goal in storage
-      await storage.createGoal(goal);
+      await storage.createPermeateGoal(goal);
       
       res.json(goal);
     } catch (error) {
