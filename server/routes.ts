@@ -724,7 +724,7 @@ function registerPermeateRoutes(app: Express) {
         // For demo: Allow any valid-looking employee username with PE_ password
         const employeeUser = {
           id: "emp_" + Date.now(),
-          name: username.split('@')[0].replace(/\./g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+          name: username.split('@')[0].replace(/\./g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
           email: username,
           role: "Employee",
           department: "General",
@@ -796,7 +796,9 @@ function registerPermeateRoutes(app: Express) {
         // AI-powered role assignment logic
         const role = employee.role || employee.title || 'Employee';
         const name = employee.name || employee.full_name || `Employee ${index + 1}`;
-        const email = employee.email || `${name.toLowerCase().replace(/\s+/g, '.')}@company.com`;
+        const originalEmail = employee.email || `${name.toLowerCase().replace(/\s+/g, '.')}@company.com`;
+        // Clean email - remove any existing @company.com suffix to avoid duplication
+        const email = originalEmail.replace(/@company\.com$/, '') + (originalEmail.includes('@') && !originalEmail.endsWith('@company.com') ? '' : '@company.com');
         
         // Auto-assign PerMeaTe roles based on organizational indicators
         let userType: 'administrator' | 'project_leader' | 'team_member' | 'organization_leader' = 'team_member';
@@ -812,7 +814,7 @@ function registerPermeateRoutes(app: Express) {
           id: employee.id,
           employeeId: employee.id,
           name,
-          alias: email.split('@')[0],
+          alias: email, // Use the full email as alias to avoid @company.com duplication
           location: employee.location || 'Not specified',
           role,
           reportingTo: employee.manager || employee.manager_email,
@@ -844,7 +846,7 @@ function registerPermeateRoutes(app: Express) {
       // Generate secure passwords for selected employees
       const credentials = selectedEmployees.map((employee: any) => ({
         name: employee.name,
-        email: employee.alias, // Use the original alias/email, don't append @company.com
+        email: employee.alias, // alias is now the full clean email 
         username: employee.alias,
         password: "PE_" + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 8).toUpperCase(),
         permeateRole: employee.userType
@@ -884,7 +886,9 @@ function registerPermeateRoutes(app: Express) {
           // Process into standardized format
           const role = employee.role || employee.title || 'Employee';
           const name = employee.name || employee.full_name || `Employee ${index + 1}`;
-          const email = employee.email || `${name.toLowerCase().replace(/\s+/g, '.')}@company.com`;
+          const originalEmail = employee.email || `${name.toLowerCase().replace(/\s+/g, '.')}@company.com`;
+          // Clean email - remove any existing @company.com suffix to avoid duplication
+          const email = originalEmail.replace(/@company\.com$/, '') + (originalEmail.includes('@') && !originalEmail.endsWith('@company.com') ? '' : '@company.com');
           
           // Auto-assign PerMeaTe roles
           let userType: 'administrator' | 'project_leader' | 'team_member' | 'organization_leader' = 'team_member';
@@ -900,7 +904,7 @@ function registerPermeateRoutes(app: Express) {
             id: employee.id,
             employeeId: employee.id,
             name,
-            alias: email.split('@')[0],
+            alias: email, // Use the full email as alias to avoid @company.com duplication
             location: employee.location || 'Not specified',
             role,
             reportingTo: employee.manager || employee.manager_email,
