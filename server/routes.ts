@@ -1195,4 +1195,9 @@ function registerPermeateRoutes(app: Express) {
       res.status(500).json({ message: "Failed to analyze performance" });
     }
   });
+
+  // Simple URL access route for PerMeaTe Enterprise
+  app.get("/m8x3r/pe-system", (req, res) => {
+    res.redirect("/permeate-enterprise");
+  });
 }
