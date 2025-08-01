@@ -642,23 +642,6 @@ export default function PerMeaTeEnhanced() {
 
 
   const renderOnboarding = () => (
-    <div className="min-h-screen bg-gray-50">
-      {/* Two-Tier Header for Onboarding */}
-      <PerMeaTeHeader 
-        currentUser={currentUser ? {
-          username: currentUser.name || '',
-          userType: currentUser.permeateRole || 'administrator',
-          name: currentUser.name || '',
-          employeeId: currentUser.id || ''
-        } : undefined}
-        showSessionControls={!currentUser}
-        onReOnboard={() => {
-          localStorage.removeItem('permeateOnboardingCompleted');
-          localStorage.removeItem('permeateCompanyData');
-          localStorage.removeItem('permeateEmployeeData');
-          window.location.reload();
-        }}
-      />
       <div className="pt-12 pb-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mx-auto">
@@ -1177,8 +1160,6 @@ export default function PerMeaTeEnhanced() {
           </div>
         </div>
       </div>
-      <Footer />
-    </div>
   );
 
   // PerMeaTe Enterprise Login Screen - separate authentication system with two-tier header
@@ -1260,7 +1241,34 @@ export default function PerMeaTeEnhanced() {
 
   // Show onboarding for OnboardingExpertUser OR if company needs onboarding
   if ((currentUser?.name === 'OnboardingExpertUser') || (!company || !company.isOnboarded)) {
-    return renderOnboarding();
+    return (
+      <div className="min-h-screen bg-gray-50">
+        {/* Dark Street Tech Header */}
+        <Navbar />
+        
+        {/* PerMeaTe Header */}
+        <PerMeaTeHeader 
+          currentUser={{
+            username: currentUser?.name || '',
+            userType: currentUser?.permeateRole || 'onboarding_expert',
+            name: currentUser?.name || '',
+            employeeId: currentUser?.id || ''
+          }}
+          showFunctionTabs={false}
+          showSessionControls={true}
+          onLogout={handleLogout}
+          onReOnboard={() => {
+            localStorage.removeItem('permeateOnboardingCompleted');
+            localStorage.removeItem('permeateCompanyData');
+            localStorage.removeItem('permeateEmployeeData');
+            window.location.reload();
+          }}
+        />
+        
+        {/* Onboarding Content */}
+        {renderOnboarding()}
+      </div>
+    );
   }
 
   return (
