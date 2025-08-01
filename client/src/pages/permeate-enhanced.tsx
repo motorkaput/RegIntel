@@ -1181,65 +1181,78 @@ export default function PerMeaTeEnhanced() {
     </div>
   );
 
-  // PerMeaTe Enterprise Login Screen - separate authentication system
+  // PerMeaTe Enterprise Login Screen - separate authentication system with two-tier header
   if (!isPermeateAuthenticated) {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-        <div className="sm:mx-auto sm:w-full sm:max-w-md">
-          <div className="flex justify-center">
-            <img src={permeateIcon} alt="PerMeaTe Enterprise" className="h-16 w-16" />
+      <div className="min-h-screen bg-gray-50">
+        {/* Dark Street Tech Header */}
+        <Navbar />
+        
+        {/* PerMeaTe Header */}
+        <PerMeaTeHeader 
+          currentUser={null}
+          showFunctionTabs={false}
+          showSessionControls={false}
+        />
+
+        {/* Login Content */}
+        <div className="flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+          <div className="sm:mx-auto sm:w-full sm:max-w-md">
+            <div className="flex justify-center">
+              <img src={permeateIcon} alt="PerMeaTe Enterprise" className="h-16 w-16" />
+            </div>
+            <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">
+              PerMeaTe Enterprise Beta Access
+            </h2>
+            <p className="mt-2 text-center text-sm text-gray-600">
+              Sign in with your employee credentials
+            </p>
           </div>
-          <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">
-            PerMeaTe Enterprise Beta Access
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Sign in with your employee credentials
-          </p>
-        </div>
 
-        <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-          <Card className="py-8 px-4 shadow sm:rounded-lg sm:px-10">
-            <form className="space-y-6" onSubmit={handleLogin}>
-              <div>
-                <label htmlFor="username" className="block text-sm font-medium text-gray-700">
-                  Username (Email Alias)
-                </label>
-                <Input
-                  id="username"
-                  name="username"
-                  type="text"
-                  required
-                  value={loginForm.username}
-                  onChange={(e) => setLoginForm({...loginForm, username: e.target.value})}
-                  className="mt-1"
-                  placeholder="Enter your email alias"
-                />
-              </div>
+          <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+            <Card className="py-8 px-4 shadow sm:rounded-lg sm:px-10">
+              <form className="space-y-6" onSubmit={handleLogin}>
+                <div>
+                  <label htmlFor="username" className="block text-sm font-medium text-gray-700">
+                    Username (Email Alias)
+                  </label>
+                  <Input
+                    id="username"
+                    name="username"
+                    type="text"
+                    required
+                    value={loginForm.username}
+                    onChange={(e) => setLoginForm({...loginForm, username: e.target.value})}
+                    className="mt-1"
+                    placeholder="Enter your email alias"
+                  />
+                </div>
 
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                  Password
-                </label>
-                <Input
-                  id="password"
-                  name="password"
-                  type="password"
-                  required
-                  value={loginForm.password}
-                  onChange={(e) => setLoginForm({...loginForm, password: e.target.value})}
-                  className="mt-1"
-                  placeholder="Enter your secure password"
-                />
-              </div>
+                <div>
+                  <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                    Password
+                  </label>
+                  <Input
+                    id="password"
+                    name="password"
+                    type="password"
+                    required
+                    value={loginForm.password}
+                    onChange={(e) => setLoginForm({...loginForm, password: e.target.value})}
+                    className="mt-1"
+                    placeholder="Enter your secure password"
+                  />
+                </div>
 
-              <Button
-                type="submit"
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                Sign In
-              </Button>
-            </form>
-          </Card>
+                <Button
+                  type="submit"
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  Sign In
+                </Button>
+              </form>
+            </Card>
+          </div>
         </div>
       </div>
     );
