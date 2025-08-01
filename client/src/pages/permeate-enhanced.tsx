@@ -1132,8 +1132,8 @@ export default function PerMeaTeEnhanced() {
                           <RefreshCcw className="h-5 w-5 mr-2 text-blue-600" />
                           <span className="font-medium">Setup Another Organization</span>
                         </div>
-                        <span className="text-sm text-gray-600 break-words overflow-hidden">
-                          Upload a new CSV file and configure PerMeaTe for a different organization
+                        <span className="text-sm text-gray-600">
+                          Setup new organization with CSV upload
                         </span>
                       </Button>
                       
@@ -1146,8 +1146,8 @@ export default function PerMeaTeEnhanced() {
                           <LogOut className="h-5 w-5 mr-2 text-gray-600" />
                           <span className="font-medium">Log Out & Access App</span>
                         </div>
-                        <span className="text-sm text-gray-600 break-words overflow-hidden">
-                          Log out so employees can access with their credentials
+                        <span className="text-sm text-gray-600">
+                          Enable employee access
                         </span>
                       </Button>
                     </div>
