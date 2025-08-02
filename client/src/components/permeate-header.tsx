@@ -29,6 +29,23 @@ export default function PerMeaTeHeader({
   showSessionControls = false
 }: PerMeaTeHeaderProps) {
   
+  // Name mapping function for display purposes
+  const getDisplayName = (user: any) => {
+    if (!user) return 'Unknown User';
+    
+    const nameMapping: Record<string, string> = {
+      'barsha@darkstreet.org': 'Barsha Panda',
+      'david@darkstreet.org': 'David Jairaj', 
+      'sashi@darkstreet.org': 'Sashi (Designer)',
+      'dj.darkbark@gmail.com': 'DJ DarkBark',
+      'shailendra.bhramhavanshi@techaroha.in': 'Shailendra Bhramhavanshi',
+      'sagar.salunkhe@techaroha.in': 'Sagar Salunkhe',
+      'john@darkstreet.org': 'John (Senior Programmer)'
+    };
+    
+    return nameMapping[user.username] || nameMapping[user.name] || user.name || user.username || 'Unknown User';
+  };
+  
   const handleLogout = () => {
     sessionStorage.removeItem("perMeateBetaAuth");
     sessionStorage.removeItem("perMeateCurrentUser");
@@ -67,7 +84,7 @@ export default function PerMeaTeHeader({
                     <User className="h-4 w-4 text-gray-500" />
                     <div className="flex flex-col">
                       <span className="text-sm font-medium text-gray-900">
-                        {currentUser.name}
+                        {getDisplayName(currentUser)}
                       </span>
                       <div className="flex items-center space-x-1 -mt-0.5">
                         <Badge variant="outline" className="text-xs py-0 px-1">
@@ -119,22 +136,21 @@ export default function PerMeaTeHeader({
             <div className="flex items-center h-12">
               <nav className="flex space-x-8">
                 {[
-                  { id: 'overview', label: 'Overview', icon: '📊' },
-                  { id: 'goals', label: 'Goals', icon: '🎯' },
-                  { id: 'projects', label: 'Projects', icon: '📋' },
-                  { id: 'analytics', label: 'Analytics', icon: '📈' },
-                  { id: 'users', label: 'Users', icon: '👥' }
+                  { id: 'overview', label: 'Overview' },
+                  { id: 'goals', label: 'Goals' },
+                  { id: 'projects', label: 'Projects' },
+                  { id: 'analytics', label: 'Analytics' },
+                  { id: 'users', label: 'Users' }
                 ].map((tab) => (
                   <button
                     key={tab.id}
                     onClick={() => onTabChange?.(tab.id)}
-                    className={`flex items-center space-x-2 px-3 py-2 text-sm font-medium transition-colors ${
+                    className={`px-3 py-2 text-sm font-medium transition-colors ${
                       activeTab === tab.id
                         ? 'text-blue-600 border-b-2 border-blue-600'
                         : 'text-gray-500 hover:text-gray-700'
                     }`}
                   >
-                    <span className="text-base">{tab.icon}</span>
                     <span>{tab.label}</span>
                   </button>
                 ))}

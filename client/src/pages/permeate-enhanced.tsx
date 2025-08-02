@@ -575,12 +575,19 @@ export default function PerMeaTeEnhanced() {
 
   // Goal management functions
   const createGoal = async () => {
-    if (!currentUser) return;
+    if (!currentUser || !companyId) {
+      toast({
+        title: "Error",
+        description: "Unable to create goal - missing company information",
+        variant: "destructive"
+      });
+      return;
+    }
 
     try {
       const goalData = {
         ...goalForm,
-        companyId: currentUser.companyId,
+        companyId: companyId,
         createdBy: currentUser.id,
         assignedTo: goalForm.assignedTo
       };
@@ -609,6 +616,24 @@ export default function PerMeaTeEnhanced() {
         variant: "destructive"
       });
     }
+  };
+
+  // Name mapping function for display purposes (until DB is properly updated)
+  const getDisplayName = (employee: any) => {
+    if (!employee) return 'Unknown Employee';
+    
+    // Mapping based on actual CSV data uploaded
+    const nameMapping: Record<string, string> = {
+      'barsha@darkstreet.org': 'Barsha Panda',
+      'david@darkstreet.org': 'David Jairaj', 
+      'sashi@darkstreet.org': 'Sashi (Designer)',
+      'dj.darkbark@gmail.com': 'DJ DarkBark',
+      'shailendra.bhramhavanshi@techaroha.in': 'Shailendra Bhramhavanshi',
+      'sagar.salunkhe@techaroha.in': 'Sagar Salunkhe',
+      'john@darkstreet.org': 'John (Senior Programmer)'
+    };
+    
+    return nameMapping[employee.email] || employee.name || employee.email || 'Unknown Employee';
   };
 
   // Auto-assignment functions
@@ -1328,10 +1353,10 @@ export default function PerMeaTeEnhanced() {
         {/* PerMeaTe Header */}
         <PerMeaTeHeader 
           currentUser={{
-            username: currentUser?.name || '',
+            username: currentUser?.email || currentUser?.name || '',
             userType: (currentUser as any)?.userType || 'onboarding_expert',
-            name: currentUser?.name || '',
-            employeeId: currentUser?.id || ''
+            name: currentUser?.name || currentUser?.email || '',
+            employeeId: currentUser?.employeeId || currentUser?.id || ''
           }}
           showFunctionTabs={false}
           showSessionControls={true}
@@ -1358,10 +1383,10 @@ export default function PerMeaTeEnhanced() {
       {/* Two-Tier Header */}
       <PerMeaTeHeader 
         currentUser={{
-          username: currentUser?.name || '',
+          username: currentUser?.email || currentUser?.name || '',
           userType: (currentUser as any)?.userType || 'team_member',
-          name: currentUser?.name || '',
-          employeeId: currentUser?.id || ''
+          name: currentUser?.name || currentUser?.email || '',
+          employeeId: currentUser?.employeeId || currentUser?.id || ''
         }}
         showFunctionTabs={true}
         activeTab={activeTab}
@@ -1375,8 +1400,8 @@ export default function PerMeaTeEnhanced() {
         }}
       />
       
-      {/* Main Content - positioned below both headers */}
-      <div className="pt-40 pb-12">
+      {/* Main Content - positioned below both headers with proper spacing for sticky headers */}
+      <div className="pb-12" style={{paddingTop: '160px'}}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsContent value="overview">
@@ -1462,7 +1487,7 @@ export default function PerMeaTeEnhanced() {
                         return (
                           <div key={employee.id} className="flex items-center space-x-4">
                             <div className="flex-1 space-y-1">
-                              <p className="text-sm font-medium leading-none">{employee.name || 'Unknown Employee'}</p>
+                              <p className="text-sm font-medium leading-none">{getDisplayName(employee)}</p>
                               <p className="text-sm text-muted-foreground">
                                 {employee.role || 'No role'} • {employee.department || 'No department'}
                               </p>
@@ -1749,7 +1774,7 @@ export default function PerMeaTeEnhanced() {
                               <User className="h-6 w-6 text-blue-600" />
                             </div>
                             <div>
-                              <h4 className="font-medium">{rootEmployee.name}</h4>
+                              <h4 className="font-medium">{getDisplayName(rootEmployee)}</h4>
                               <p className="text-sm text-gray-600">{rootEmployee.role}</p>
                               <Badge variant="outline">
                                 {((rootEmployee as any).userType || 'team_member').replace('_', ' ')}
@@ -1765,7 +1790,7 @@ export default function PerMeaTeEnhanced() {
                                     <User className="h-4 w-4 text-gray-600" />
                                   </div>
                                   <div>
-                                    <p className="font-medium text-sm">{child.name}</p>
+                                    <p className="font-medium text-sm">{getDisplayName(child)}</p>
                                     <p className="text-xs text-gray-600">{child.role}</p>
                                   </div>
                                   <Badge variant="outline">
@@ -1797,7 +1822,7 @@ export default function PerMeaTeEnhanced() {
                                 <User className="h-5 w-5 text-blue-600" />
                               </div>
                               <div>
-                                <p className="font-medium">{employee.name}</p>
+                                <p className="font-medium">{getDisplayName(employee)}</p>
                                 <p className="text-sm text-gray-600">{employee.email}</p>
                                 <p className="text-xs text-gray-500">
                                   {employee.role} • {employee.department}
