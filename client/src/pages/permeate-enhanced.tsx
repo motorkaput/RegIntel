@@ -44,6 +44,8 @@ import Navbar from "@/components/navbar";
 import PerMeaTeHeader from "@/components/permeate-header";
 
 // Types
+import { PermeateEmployee, PermeateCompany, PermeateGoal, PermeateProject } from "@shared/schema";
+
 interface Company {
   id: string;
   name: string;
@@ -53,21 +55,8 @@ interface Company {
   isOnboarded: boolean;
 }
 
-interface Employee {
-  id: string;
-  name: string;
-  email: string;
-  role: string;
-  department?: string;
-  skills: string[];
-  location?: string;
-  managerEmail?: string;
-  permeateRole: 'organization_leader' | 'project_leader' | 'team_member' | 'administrator';
-  isActive: boolean;
-  hasPassword: boolean;
-  lastLogin?: Date;
-  companyId: string;
-}
+// Use PermeateEmployee from schema instead of local interface
+type Employee = PermeateEmployee;
 
 interface Goal {
   id: string;
@@ -1328,7 +1317,7 @@ export default function PerMeaTeEnhanced() {
         <PerMeaTeHeader 
           currentUser={{
             username: currentUser?.name || '',
-            userType: currentUser?.permeateRole || 'onboarding_expert',
+            userType: (currentUser as any)?.userType || 'onboarding_expert',
             name: currentUser?.name || '',
             employeeId: currentUser?.id || ''
           }}
@@ -1358,7 +1347,7 @@ export default function PerMeaTeEnhanced() {
       <PerMeaTeHeader 
         currentUser={{
           username: currentUser?.name || '',
-          userType: currentUser?.permeateRole || 'team_member',
+          userType: (currentUser as any)?.userType || 'team_member',
           name: currentUser?.name || '',
           employeeId: currentUser?.id || ''
         }}
@@ -1465,7 +1454,7 @@ export default function PerMeaTeEnhanced() {
                             </p>
                           </div>
                           <Badge variant="outline">
-                            {(employee?.permeateRole || employee?.userType || 'team_member').replace('_', ' ')}
+                            {(employee?.userType || 'team_member').replace('_', ' ')}
                           </Badge>
                         </div>
                       ))}
@@ -1801,7 +1790,7 @@ export default function PerMeaTeEnhanced() {
                           
                           <div className="flex items-center space-x-2">
                             <Badge variant="outline">
-                              {employee.permeateRole.replace('_', ' ')}
+                              {(employee.userType || 'team_member').replace('_', ' ')}
                             </Badge>
                             <Badge variant={employee.isActive ? 'default' : 'secondary'}>
                               {employee.isActive ? 'Active' : 'Inactive'}
