@@ -64,7 +64,7 @@ export default function PerMeaTeHeader({
   return (
     <>
       {/* Tier 1: Main PerMeaTe Header - Matching Fetch Patterns styling */}
-      <div className="sticky z-20 bg-gray-50 border-b border-gray-200 py-3" style={{top: '64px'}}>
+      <div className="fixed z-20 w-full bg-gray-50 border-b border-gray-200 py-3" style={{top: '64px'}}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
             {/* Logo and Branding - Match Fetch Patterns layout */}
@@ -131,7 +131,7 @@ export default function PerMeaTeHeader({
 
       {/* Tier 2: Function Tabs (if enabled) */}
       {showFunctionTabs && (
-        <div className="sticky z-10 bg-white border-b border-gray-200 h-12" style={{top: '112px'}}>
+        <div className="fixed z-10 w-full bg-white border-b border-gray-200 h-12" style={{top: '112px'}}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center h-12">
               <nav className="flex space-x-8">

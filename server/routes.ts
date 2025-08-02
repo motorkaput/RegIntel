@@ -92,10 +92,12 @@ Guidelines:
     const response = await openai.chat.completions.create({
       model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
       messages: [{ role: "user", content: prompt }],
-      response_format: { type: "json_object" }
+      response_format: { type: "json_object" },
+      temperature: 0.7,
     });
 
-    return JSON.parse(response.choices[0].message.content || '{}');
+    const breakdown = JSON.parse(response.choices[0].message.content);
+    return breakdown;
   } catch (error) {
     console.error('Goal breakdown error:', error);
     // Fallback to basic structure if AI fails
@@ -1089,16 +1091,32 @@ function registerPermeateRoutes(app: Express) {
       // Use OpenAI to break down goal into projects and tasks with smart assignment
       const breakdown = await generateGoalBreakdown(goalData, employees);
       
-      const goal = {
-        id: "goal_" + Date.now(),
-        ...goalData,
+      const goalId = "goal_" + Date.now();
+      
+      // Prepare goal data for database insertion
+      const goalForDatabase = {
+        id: goalId,
+        title: goalData.title,
+        description: goalData.description,
+        priority: goalData.priority,
         status: "active",
         progress: 0,
         companyId: goalData.companyId,
+        assignedTo: goalData.assignedTo,
+        dueDate: goalData.dueDate ? new Date(goalData.dueDate) : null,
+        createdBy: goalData.createdBy
+      };
+      
+      // Store goal in storage  
+      const createdGoal = await storage.createPermeateGoal(goalForDatabase);
+      
+      // Return goal with breakdown information
+      const goalWithBreakdown = {
+        ...createdGoal,
         projects: breakdown.projects.map((proj: any) => ({
           ...proj,
           id: "proj_" + Date.now() + "_" + Math.random().toString(36).substr(2, 5),
-          goalId: "goal_" + Date.now(),
+          goalId: goalId,
           tasks: proj.tasks.map((task: any) => ({
             ...task,
             id: "task_" + Date.now() + "_" + Math.random().toString(36).substr(2, 5),
@@ -1107,10 +1125,7 @@ function registerPermeateRoutes(app: Express) {
         }))
       };
       
-      // Store goal in storage
-      await storage.createPermeateGoal(goal);
-      
-      res.json(goal);
+      res.json(goalWithBreakdown);
     } catch (error) {
       console.error("Goal creation error:", error);
       res.status(500).json({ message: "Failed to create goal" });

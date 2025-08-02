@@ -586,10 +586,14 @@ export default function PerMeaTeEnhanced() {
 
     try {
       const goalData = {
-        ...goalForm,
+        title: goalForm.title,
+        description: goalForm.description,
+        priority: goalForm.priority,
         companyId: companyId,
-        createdBy: currentUser.id,
-        assignedTo: goalForm.assignedTo
+        createdBy: currentUser.id || currentUser.employeeId,
+        assignedTo: goalForm.assignedTo[0] || null, // Take first employee or null
+        // Convert date string to proper Date object or send as string
+        dueDate: goalForm.dueDate || null
       };
 
       const response = await fetch('/api/permeate/goals', {
@@ -600,12 +604,19 @@ export default function PerMeaTeEnhanced() {
 
       if (response.ok) {
         const data = await response.json();
-        setGoals([...goals, data.goal]);
+        setGoals([...goals, data]);
         setShowCreateGoal(false);
         setGoalForm({ title: '', description: '', priority: 'medium', dueDate: '', assignedTo: [] });
         toast({
           title: "Goal Created", 
-          description: `${data.goal.title} created with ${data.projects?.length || 0} strategic projects`
+          description: `${data.title} created with ${data.projects?.length || 0} strategic projects`
+        });
+      } else {
+        const errorData = await response.json();
+        toast({
+          title: "Goal Creation Failed",
+          description: errorData.message || "Unable to create goal",
+          variant: "destructive"
         });
       }
     } catch (error) {
