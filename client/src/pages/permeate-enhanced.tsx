@@ -1387,9 +1387,9 @@ export default function PerMeaTeEnhanced() {
                     <Target className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">{goals.length}</div>
+                    <div className="text-2xl font-bold">{goals?.length || 0}</div>
                     <p className="text-xs text-muted-foreground">
-                      {goals.filter(g => g.status === 'completed').length} completed
+                      {goals?.filter(g => g?.status === 'completed')?.length || 0} completed
                     </p>
                   </CardContent>
                 </Card>
@@ -1401,10 +1401,10 @@ export default function PerMeaTeEnhanced() {
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold">
-                      {goals.flatMap(g => g.projects).filter(p => p.status === 'active').length}
+                      {goals?.flatMap(g => g?.projects || [])?.filter(p => p?.status === 'active')?.length || 0}
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      Across {goals.length} goals
+                      Across {goals?.length || 0} goals
                     </p>
                   </CardContent>
                 </Card>
@@ -1415,7 +1415,7 @@ export default function PerMeaTeEnhanced() {
                     <Users className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">{employees.length}</div>
+                    <div className="text-2xl font-bold">{employees?.length || 0}</div>
                     <p className="text-xs text-muted-foreground">
                       Active employees
                     </p>
@@ -1430,19 +1430,22 @@ export default function PerMeaTeEnhanced() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      {goals.slice(0, 3).map((goal) => (
-                        <div key={goal.id} className="flex items-center space-x-4">
+                      {(goals || []).slice(0, 3).map((goal) => (
+                        <div key={goal?.id} className="flex items-center space-x-4">
                           <div className="flex-1 space-y-1">
-                            <p className="text-sm font-medium leading-none">{goal.title}</p>
+                            <p className="text-sm font-medium leading-none">{goal?.title || 'Untitled Goal'}</p>
                             <p className="text-sm text-muted-foreground">
-                              {goal.projects.length} projects • {goal.priority} priority
+                              {goal?.projects?.length || 0} projects • {goal?.priority || 'medium'} priority
                             </p>
                           </div>
-                          <Badge variant={goal.status === 'completed' ? 'default' : 'secondary'}>
-                            {goal.status}
+                          <Badge variant={goal?.status === 'completed' ? 'default' : 'secondary'}>
+                            {goal?.status || 'active'}
                           </Badge>
                         </div>
                       ))}
+                      {(!goals || goals.length === 0) && (
+                        <p className="text-sm text-gray-500">No goals created yet</p>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -1453,19 +1456,22 @@ export default function PerMeaTeEnhanced() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      {employees.slice(0, 3).map((employee) => (
-                        <div key={employee.id} className="flex items-center space-x-4">
+                      {(employees || []).slice(0, 3).map((employee) => (
+                        <div key={employee?.id} className="flex items-center space-x-4">
                           <div className="flex-1 space-y-1">
-                            <p className="text-sm font-medium leading-none">{employee.name}</p>
+                            <p className="text-sm font-medium leading-none">{employee?.name || 'Unknown Employee'}</p>
                             <p className="text-sm text-muted-foreground">
-                              {employee.role} • {employee.department}
+                              {employee?.role || 'No role'} • {employee?.department || 'No department'}
                             </p>
                           </div>
                           <Badge variant="outline">
-                            {employee.permeateRole.replace('_', ' ')}
+                            {(employee?.permeateRole || employee?.userType || 'team_member').replace('_', ' ')}
                           </Badge>
                         </div>
                       ))}
+                      {(!employees || employees.length === 0) && (
+                        <p className="text-sm text-gray-500">No employees loaded</p>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -1484,7 +1490,7 @@ export default function PerMeaTeEnhanced() {
               </div>
 
               <div className="grid gap-6">
-                {goals.map((goal) => (
+                {(goals || []).map((goal) => (
                   <Card key={goal.id}>
                     <CardHeader>
                       <div className="flex justify-between items-start">
@@ -1517,17 +1523,17 @@ export default function PerMeaTeEnhanced() {
                         
                         <div className="grid grid-cols-2 gap-4 text-sm">
                           <div>
-                            <span className="font-medium">Projects:</span> {goal.projects.length}
+                            <span className="font-medium">Projects:</span> {goal?.projects?.length || 0}
                           </div>
                           <div>
-                            <span className="font-medium">Tasks:</span> {goal.projects.flatMap(p => p.tasks).length}
+                            <span className="font-medium">Tasks:</span> {goal?.projects?.flatMap(p => p?.tasks || [])?.length || 0}
                           </div>
                         </div>
 
-                        {goal.projects.length > 0 && (
+                        {(goal?.projects?.length || 0) > 0 && (
                           <div className="space-y-2">
                             <h4 className="font-medium">Projects:</h4>
-                            {goal.projects.map((project) => (
+                            {(goal?.projects || []).map((project) => (
                               <div key={project.id} className="flex justify-between items-center p-2 bg-gray-50 rounded">
                                 <span className="text-sm">{project.title}</span>
                                 <div className="flex items-center space-x-2">
@@ -1557,8 +1563,8 @@ export default function PerMeaTeEnhanced() {
               <h2 className="text-2xl font-bold text-gray-900">Projects & Tasks</h2>
               
               <div className="space-y-6">
-                {goals.flatMap(goal => 
-                  goal.projects.map(project => (
+                {(goals || []).flatMap(goal => 
+                  (goal?.projects || []).map(project => (
                     <Card key={project.id}>
                       <CardHeader>
                         <div className="flex justify-between items-start">
