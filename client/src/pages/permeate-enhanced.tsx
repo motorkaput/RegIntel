@@ -183,6 +183,8 @@ export default function PerMeaTeEnhanced() {
     dueDate: '',
     assignedTo: [] as string[]
   });
+  const [isCreatingGoal, setIsCreatingGoal] = useState(false);
+  const [goalCreationProgress, setGoalCreationProgress] = useState('');
 
   // Calculate role counts for display
   const roleCounts = (employeeData || []).reduce((acc, emp) => {
@@ -578,7 +580,8 @@ export default function PerMeaTeEnhanced() {
 
   // Goal management functions
   const createGoal = async () => {
-    if (!currentUser || !companyId) {
+    if (!currentUser || !companyId || isCreatingGoal) {
+      if (isCreatingGoal) return; // Prevent multiple clicks
       toast({
         title: "Error",
         description: "Unable to create goal - missing company information",
@@ -586,6 +589,9 @@ export default function PerMeaTeEnhanced() {
       });
       return;
     }
+
+    setIsCreatingGoal(true);
+    setGoalCreationProgress('Analyzing goal requirements...');
 
     try {
       const goalData = {
@@ -599,6 +605,8 @@ export default function PerMeaTeEnhanced() {
         dueDate: goalForm.dueDate || null
       };
 
+      setGoalCreationProgress('PerMeaTe is breaking down your goal into strategic projects...');
+
       const response = await fetch('/api/permeate/goals', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -606,6 +614,7 @@ export default function PerMeaTeEnhanced() {
       });
 
       if (response.ok) {
+        setGoalCreationProgress('Generating task assignments and timelines...');
         const data = await response.json();
         setGoals([...goals, data]);
         setShowCreateGoal(false);
@@ -614,6 +623,9 @@ export default function PerMeaTeEnhanced() {
           title: "Goal Created", 
           description: `${data.title} created with ${data.projects?.length || 0} strategic projects`
         });
+        
+        // Refresh company data to get updated goals
+        await fetchCompanyData(companyId);
       } else {
         const errorData = await response.json();
         toast({
@@ -629,6 +641,9 @@ export default function PerMeaTeEnhanced() {
         description: "Unable to create goal",
         variant: "destructive"
       });
+    } finally {
+      setIsCreatingGoal(false);
+      setGoalCreationProgress('');
     }
   };
 
@@ -653,15 +668,31 @@ export default function PerMeaTeEnhanced() {
   // Auto-assignment functions
   const autoAssignTasks = async (projectId: string) => {
     try {
-      const project = goals.flatMap(g => g.projects).find(p => p.id === projectId);
-      if (!project) return;
+      const project = goals.flatMap(g => g.projects || []).find(p => p.id === projectId);
+      if (!project) {
+        toast({
+          title: "Project Not Found",
+          description: "Unable to locate project for auto-assignment",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      if (!employees || employees.length === 0) {
+        toast({
+          title: "No Employees Available",
+          description: "No team members available for task assignment",
+          variant: "destructive"
+        });
+        return;
+      }
 
       const response = await fetch('/api/permeate/auto-assign-tasks', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           projectId,
-          tasks: project.tasks,
+          tasks: project.tasks || [],
           employees
         })
       });
@@ -670,19 +701,26 @@ export default function PerMeaTeEnhanced() {
         const data = await response.json();
         toast({
           title: "Tasks Auto-Assigned",
-          description: `System assigned ${data.tasks.length} tasks to optimal team members`
+          description: `System assigned ${data.tasks?.length || 0} tasks to optimal team members`
         });
         
         // Refresh data
-        if (currentUser) {
-          fetchCompanyData(currentUser.companyId);
+        if (currentUser && currentUser.companyId) {
+          await fetchCompanyData(currentUser.companyId);
         }
+      } else {
+        const errorData = await response.json();
+        toast({
+          title: "Auto-Assignment Failed",
+          description: errorData.message || "Unable to assign tasks automatically",
+          variant: "destructive"
+        });
       }
     } catch (error) {
       console.error('Auto-assignment error:', error);
       toast({
         title: "Auto-Assignment Failed",
-        description: "Unable to assign tasks automatically",
+        description: "Network error during task assignment",
         variant: "destructive"
       });
     }
@@ -1427,7 +1465,7 @@ export default function PerMeaTeEnhanced() {
       />
       
       {/* Main Content - positioned below both headers with proper spacing for sticky headers */}
-      <div className="pb-12" style={{paddingTop: '168px'}}>
+      <div className="pb-12" style={{paddingTop: '172px'}}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsContent value="overview">
@@ -1935,12 +1973,25 @@ export default function PerMeaTeEnhanced() {
               </div>
             </div>
             
+            {/* Loading Progress (if creating goal) */}
+            {isCreatingGoal && (
+              <div className="space-y-3 p-4 bg-blue-50 rounded-lg">
+                <div className="flex items-center space-x-3">
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+                  <span className="text-sm font-medium text-blue-700">{goalCreationProgress}</span>
+                </div>
+                <div className="w-full bg-blue-200 rounded-full h-2">
+                  <div className="bg-blue-600 h-2 rounded-full animate-pulse" style={{ width: '70%' }}></div>
+                </div>
+              </div>
+            )}
+            
             <div className="flex justify-end space-x-2">
-              <Button variant="outline" onClick={() => setShowCreateGoal(false)}>
+              <Button variant="outline" onClick={() => setShowCreateGoal(false)} disabled={isCreatingGoal}>
                 Cancel
               </Button>
-              <Button onClick={createGoal} disabled={!goalForm.title}>
-                Create Goal & Generate Projects
+              <Button onClick={createGoal} disabled={!goalForm.title || isCreatingGoal}>
+                {isCreatingGoal ? 'Creating Goal...' : 'Create Goal & Generate Projects'}
               </Button>
             </div>
           </div>
