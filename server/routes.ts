@@ -96,7 +96,11 @@ Guidelines:
       temperature: 0.7,
     });
 
-    const breakdown = JSON.parse(response.choices[0].message.content);
+    const content = response.choices[0].message.content;
+    if (!content) {
+      throw new Error('No content received from OpenAI');
+    }
+    const breakdown = JSON.parse(content);
     return breakdown;
   } catch (error) {
     console.error('Goal breakdown error:', error);
