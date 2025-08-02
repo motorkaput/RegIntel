@@ -328,11 +328,19 @@ export default function PerMeaTeEnhanced() {
 
       if (employeesRes.ok) {
         const employeesData = await employeesRes.json();
-        console.log('Employees data fetched:', employeesData?.employees?.length || 0, 'employees');
-        setEmployees(employeesData?.employees || []);
-        setOrgChart(employeesData?.orgChart || []);
+        console.log('Raw employees response:', employeesData);
+        
+        // Ensure employees is an array
+        const employeesList = Array.isArray(employeesData?.employees) ? employeesData.employees : [];
+        const orgChartData = Array.isArray(employeesData?.orgChart) ? employeesData.orgChart : [];
+        
+        console.log('Processing employees:', employeesList.length, 'employees');
+        setEmployees(employeesList);
+        setOrgChart(orgChartData);
       } else {
         console.log('Employees fetch failed:', employeesRes.status, await employeesRes.text());
+        setEmployees([]);
+        setOrgChart([]);
       }
 
       if (goalsRes.ok) {
@@ -343,7 +351,11 @@ export default function PerMeaTeEnhanced() {
         console.log('Goals fetch failed:', goalsRes.status, await goalsRes.text());
       }
     } catch (error) {
-      console.error('Error fetching company data:', error);
+      console.error('Company data fetch error:', error);
+      // Reset states on error
+      setEmployees([]);
+      setOrgChart([]);
+      setGoals([]);
     }
   };
 
@@ -1445,19 +1457,22 @@ export default function PerMeaTeEnhanced() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      {(employees || []).slice(0, 3).map((employee) => (
-                        <div key={employee?.id} className="flex items-center space-x-4">
-                          <div className="flex-1 space-y-1">
-                            <p className="text-sm font-medium leading-none">{employee?.name || 'Unknown Employee'}</p>
-                            <p className="text-sm text-muted-foreground">
-                              {employee?.role || 'No role'} • {employee?.department || 'No department'}
-                            </p>
+                      {(employees || []).slice(0, 3).map((employee) => {
+                        if (!employee || !employee.id) return null;
+                        return (
+                          <div key={employee.id} className="flex items-center space-x-4">
+                            <div className="flex-1 space-y-1">
+                              <p className="text-sm font-medium leading-none">{employee.name || 'Unknown Employee'}</p>
+                              <p className="text-sm text-muted-foreground">
+                                {employee.role || 'No role'} • {employee.department || 'No department'}
+                              </p>
+                            </div>
+                            <Badge variant="outline">
+                              {(employee.userType || 'team_member').replace('_', ' ')}
+                            </Badge>
                           </div>
-                          <Badge variant="outline">
-                            {(employee?.userType || 'team_member').replace('_', ' ')}
-                          </Badge>
-                        </div>
-                      ))}
+                        );
+                      }).filter(Boolean)}
                       {(!employees || employees.length === 0) && (
                         <p className="text-sm text-gray-500">No employees loaded</p>
                       )}
@@ -1737,7 +1752,7 @@ export default function PerMeaTeEnhanced() {
                               <h4 className="font-medium">{rootEmployee.name}</h4>
                               <p className="text-sm text-gray-600">{rootEmployee.role}</p>
                               <Badge variant="outline">
-                                {rootEmployee.permeateRole.replace('_', ' ')}
+                                {((rootEmployee as any).userType || 'team_member').replace('_', ' ')}
                               </Badge>
                             </div>
                           </div>
@@ -1754,7 +1769,7 @@ export default function PerMeaTeEnhanced() {
                                     <p className="text-xs text-gray-600">{child.role}</p>
                                   </div>
                                   <Badge variant="outline">
-                                    {child.permeateRole.replace('_', ' ')}
+                                    {((child as any).userType || 'team_member').replace('_', ' ')}
                                   </Badge>
                                 </div>
                               ))}
@@ -1773,34 +1788,37 @@ export default function PerMeaTeEnhanced() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-2">
-                      {employees.map((employee) => (
-                        <div key={employee.id} className="flex justify-between items-center p-3 border rounded">
-                          <div className="flex items-center space-x-3">
-                            <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                              <User className="h-5 w-5 text-blue-600" />
+                      {(employees || []).map((employee) => {
+                        if (!employee || !employee.id) return null;
+                        return (
+                          <div key={employee.id} className="flex justify-between items-center p-3 border rounded">
+                            <div className="flex items-center space-x-3">
+                              <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                                <User className="h-5 w-5 text-blue-600" />
+                              </div>
+                              <div>
+                                <p className="font-medium">{employee.name}</p>
+                                <p className="text-sm text-gray-600">{employee.email}</p>
+                                <p className="text-xs text-gray-500">
+                                  {employee.role} • {employee.department}
+                                </p>
+                              </div>
                             </div>
-                            <div>
-                              <p className="font-medium">{employee.name}</p>
-                              <p className="text-sm text-gray-600">{employee.email}</p>
-                              <p className="text-xs text-gray-500">
-                                {employee.role} • {employee.department}
-                              </p>
+                            
+                            <div className="flex items-center space-x-2">
+                              <Badge variant="outline">
+                                {(employee.userType || 'team_member').replace('_', ' ')}
+                              </Badge>
+                              <Badge variant={employee.isActive ? 'default' : 'secondary'}>
+                                {employee.isActive ? 'Active' : 'Inactive'}
+                              </Badge>
+                              <Button size="sm" variant="outline">
+                                <Edit className="h-4 w-4" />
+                              </Button>
                             </div>
                           </div>
-                          
-                          <div className="flex items-center space-x-2">
-                            <Badge variant="outline">
-                              {(employee.userType || 'team_member').replace('_', ' ')}
-                            </Badge>
-                            <Badge variant={employee.isActive ? 'default' : 'secondary'}>
-                              {employee.isActive ? 'Active' : 'Inactive'}
-                            </Badge>
-                            <Button size="sm" variant="outline">
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
+                        );
+                      }).filter(Boolean)}
                     </div>
                   </CardContent>
                 </Card>
