@@ -33,7 +33,7 @@ export default function PerMeaTeHeader({
     sessionStorage.removeItem("perMeateBetaAuth");
     sessionStorage.removeItem("perMeateCurrentUser");
     if (onLogout) onLogout();
-    window.location.href = "/z9m3k/pe-beta-login";
+    window.location.href = "/pe-workspace";
   };
 
   const handleReOnboard = () => {

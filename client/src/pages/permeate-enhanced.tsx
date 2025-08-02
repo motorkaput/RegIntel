@@ -301,7 +301,7 @@ export default function PerMeaTeEnhanced() {
     localStorage.removeItem('permeateCompanyData');
     localStorage.removeItem('permeateEmployeeData');
     
-    setLocation('/');
+    setLocation('/pe-workspace');
   };
 
   // Data fetching functions
