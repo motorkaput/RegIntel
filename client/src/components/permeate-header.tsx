@@ -131,7 +131,7 @@ export default function PerMeaTeHeader({
 
       {/* Tier 2: Function Tabs (if enabled) */}
       {showFunctionTabs && (
-        <div className="fixed z-10 w-full bg-white border-b border-gray-200 h-12" style={{top: '112px'}}>
+        <div className="fixed z-10 w-full bg-white border-b border-gray-200 h-12" style={{top: '116px'}}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center h-12">
               <nav className="flex space-x-8">

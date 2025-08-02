@@ -194,11 +194,13 @@ export default function PerMeaTeEnhanced() {
 
   // PerMeaTe Enterprise authentication - separate from Dark Street Tech
   const [isPermeateAuthenticated, setIsPermeateAuthenticated] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true); // Add loading state
   const [loginForm, setLoginForm] = useState({ username: '', password: '' });
 
   // Check for existing authentication on component mount
   useEffect(() => {
     const checkExistingAuth = async () => {
+      setIsCheckingAuth(true);
       const storedAuth = localStorage.getItem('permeateAuth');
       if (storedAuth) {
         try {
@@ -227,6 +229,7 @@ export default function PerMeaTeEnhanced() {
           localStorage.removeItem('permeateAuth');
         }
       }
+      setIsCheckingAuth(false);
     };
     
     checkExistingAuth();
@@ -1279,6 +1282,18 @@ export default function PerMeaTeEnhanced() {
       </div>
   );
 
+  // Show loading screen while checking authentication
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading PerMeaTe Enterprise...</p>
+        </div>
+      </div>
+    );
+  }
+
   // PerMeaTe Enterprise Login Screen - separate authentication system with two-tier header
   if (!isPermeateAuthenticated) {
     return (
@@ -1412,7 +1427,7 @@ export default function PerMeaTeEnhanced() {
       />
       
       {/* Main Content - positioned below both headers with proper spacing for sticky headers */}
-      <div className="pb-12" style={{paddingTop: '160px'}}>
+      <div className="pb-12" style={{paddingTop: '168px'}}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsContent value="overview">
