@@ -203,34 +203,13 @@ export default function PerMeaTeEnhanced() {
   useEffect(() => {
     const checkExistingAuth = async () => {
       setIsCheckingAuth(true);
-      const storedAuth = localStorage.getItem('permeateAuth');
-      if (storedAuth) {
-        try {
-          const authData = JSON.parse(storedAuth);
-          const userData = authData.user;
-          
-          // Check if auth is still valid (within 24 hours)
-          const isValid = (Date.now() - authData.timestamp) < (24 * 60 * 60 * 1000);
-          
-          if (isValid && userData) {
-            setCurrentUser(userData);
-            setIsPermeateAuthenticated(true);
-            setCompanyId(userData.companyId);
-            
-            // For employees (not OnboardingExpertUser), fetch company data
-            if (userData.name !== 'OnboardingExpertUser' && userData.companyId) {
-              console.log('Restoring employee session, fetching company data for:', userData.companyId);
-              await fetchCompanyData(userData.companyId);
-            }
-          } else {
-            // Clear expired auth
-            localStorage.removeItem('permeateAuth');
-          }
-        } catch (error) {
-          console.error('Error restoring authentication:', error);
-          localStorage.removeItem('permeateAuth');
-        }
-      }
+      
+      // Clear any existing auth data for fresh start
+      localStorage.removeItem('permeateAuth');
+      localStorage.removeItem('permeateOnboardingCompleted');
+      localStorage.removeItem('permeateCompanyData');
+      localStorage.removeItem('permeateEmployeeData');
+      
       setIsCheckingAuth(false);
     };
     
