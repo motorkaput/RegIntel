@@ -751,6 +751,8 @@ function registerPermeateRoutes(app: Express) {
       
       // Handle employee login - search both with and without @company.com suffix
       if (password.startsWith("PE_")) {
+        console.log('Employee login attempt:', { username, passwordPrefix: password.substring(0, 6) });
+        
         const searchEmails = [
           username,
           username + "@company.com",
@@ -760,7 +762,13 @@ function registerPermeateRoutes(app: Express) {
         for (const searchEmail of searchEmails) {
           try {
             const employee = await storage.getPermeateEmployeeByEmail(searchEmail);
-            console.log(`Searching for: ${searchEmail}, Found:`, employee?.email);
+            console.log(`Searching for: ${searchEmail}, Found:`, employee ? {
+              id: employee.id,
+              email: employee.email,
+              companyId: employee.companyId,
+              name: employee.name,
+              isActive: employee.isActive
+            } : null);
             
             if (employee && employee.isActive) {
               const updatedEmployee = {
@@ -768,12 +776,20 @@ function registerPermeateRoutes(app: Express) {
                 lastLogin: new Date().toISOString()
               };
               
+              console.log('Employee login successful:', {
+                id: updatedEmployee.id,
+                name: updatedEmployee.name,
+                companyId: updatedEmployee.companyId
+              });
+              
               return res.json(updatedEmployee);
             }
           } catch (err: any) {
             console.log(`Error searching for ${searchEmail}:`, err.message);
           }
         }
+        
+        console.log('No employee found with PE_ password for any search email:', searchEmails);
       }
       
       // Invalid credentials

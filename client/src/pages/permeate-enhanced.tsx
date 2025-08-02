@@ -196,8 +196,10 @@ export default function PerMeaTeEnhanced() {
   });
 
   // Calculate role counts for display
-  const roleCounts = employeeData.reduce((acc, emp) => {
-    acc[emp.userType] = (acc[emp.userType] || 0) + 1;
+  const roleCounts = (employeeData || []).reduce((acc, emp) => {
+    if (emp && emp.userType) {
+      acc[emp.userType] = (acc[emp.userType] || 0) + 1;
+    }
     return acc;
   }, {} as Record<string, number>);
 
@@ -224,6 +226,7 @@ export default function PerMeaTeEnhanced() {
             
             // For employees (not OnboardingExpertUser), fetch company data
             if (userData.name !== 'OnboardingExpertUser' && userData.companyId) {
+              console.log('Restoring employee session, fetching company data for:', userData.companyId);
               await fetchCompanyData(userData.companyId);
             }
           } else {
@@ -264,7 +267,11 @@ export default function PerMeaTeEnhanced() {
         
         // For employees (not OnboardingExpertUser), fetch company data immediately
         if (userData.name !== 'OnboardingExpertUser' && userData.companyId) {
+          console.log('Employee logged in, fetching company data for:', userData.companyId);
+          console.log('User data:', userData);
           await fetchCompanyData(userData.companyId);
+        } else {
+          console.log('Login handled for:', userData.name, 'CompanyId:', userData.companyId);
         }
         
         toast({
@@ -309,6 +316,12 @@ export default function PerMeaTeEnhanced() {
     try {
       console.log('Fetching company data for:', companyId);
       
+      // Add safety check for companyId
+      if (!companyId || companyId === 'undefined' || companyId === 'null') {
+        console.error('Invalid companyId provided:', companyId);
+        return;
+      }
+      
       // Fetch company details, employees, and goals
       const [companyRes, employeesRes, goalsRes] = await Promise.all([
         fetch(`/api/permeate/companies/${companyId}`),
@@ -321,16 +334,16 @@ export default function PerMeaTeEnhanced() {
         console.log('Company data fetched:', companyData);
         setCompany(companyData);
       } else {
-        console.log('Company fetch failed:', companyRes.status);
+        console.log('Company fetch failed:', companyRes.status, await companyRes.text());
       }
 
       if (employeesRes.ok) {
         const employeesData = await employeesRes.json();
-        console.log('Employees data fetched:', employeesData.employees?.length || 0, 'employees');
-        setEmployees(employeesData.employees || []);
-        setOrgChart(employeesData.orgChart || []);
+        console.log('Employees data fetched:', employeesData?.employees?.length || 0, 'employees');
+        setEmployees(employeesData?.employees || []);
+        setOrgChart(employeesData?.orgChart || []);
       } else {
-        console.log('Employees fetch failed:', employeesRes.status);
+        console.log('Employees fetch failed:', employeesRes.status, await employeesRes.text());
       }
 
       if (goalsRes.ok) {
@@ -338,7 +351,7 @@ export default function PerMeaTeEnhanced() {
         console.log('Goals data fetched:', goalsData?.length || 0, 'goals');
         setGoals(goalsData || []);
       } else {
-        console.log('Goals fetch failed:', goalsRes.status);
+        console.log('Goals fetch failed:', goalsRes.status, await goalsRes.text());
       }
     } catch (error) {
       console.error('Error fetching company data:', error);
