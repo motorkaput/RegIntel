@@ -205,6 +205,41 @@ export default function PerMeaTeEnhanced() {
   const [isPermeateAuthenticated, setIsPermeateAuthenticated] = useState(false);
   const [loginForm, setLoginForm] = useState({ username: '', password: '' });
 
+  // Check for existing authentication on component mount
+  useEffect(() => {
+    const checkExistingAuth = async () => {
+      const storedAuth = localStorage.getItem('permeateAuth');
+      if (storedAuth) {
+        try {
+          const authData = JSON.parse(storedAuth);
+          const userData = authData.user;
+          
+          // Check if auth is still valid (within 24 hours)
+          const isValid = (Date.now() - authData.timestamp) < (24 * 60 * 60 * 1000);
+          
+          if (isValid && userData) {
+            setCurrentUser(userData);
+            setIsPermeateAuthenticated(true);
+            setCompanyId(userData.companyId);
+            
+            // For employees (not OnboardingExpertUser), fetch company data
+            if (userData.name !== 'OnboardingExpertUser' && userData.companyId) {
+              await fetchCompanyData(userData.companyId);
+            }
+          } else {
+            // Clear expired auth
+            localStorage.removeItem('permeateAuth');
+          }
+        } catch (error) {
+          console.error('Error restoring authentication:', error);
+          localStorage.removeItem('permeateAuth');
+        }
+      }
+    };
+    
+    checkExistingAuth();
+  }, []);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -218,12 +253,24 @@ export default function PerMeaTeEnhanced() {
         const userData = await response.json();
         setCurrentUser(userData);
         setIsPermeateAuthenticated(true);
+        
+        // Store authentication in localStorage for persistence
+        localStorage.setItem('permeateAuth', JSON.stringify({
+          user: userData,
+          timestamp: Date.now()
+        }));
+        
+        setCompanyId(userData.companyId);
+        
+        // For employees (not OnboardingExpertUser), fetch company data immediately
+        if (userData.name !== 'OnboardingExpertUser' && userData.companyId) {
+          await fetchCompanyData(userData.companyId);
+        }
+        
         toast({
           title: "Welcome to PerMeaTe Enterprise",
           description: `Logged in as ${userData.name}`
         });
-        
-        setCompanyId(userData.companyId);
       } else {
         toast({
           title: "Login Failed",
@@ -244,12 +291,24 @@ export default function PerMeaTeEnhanced() {
   const handleLogout = () => {
     setCurrentUser(null);
     setIsPermeateAuthenticated(false);
+    setCompany(null);
+    setEmployees([]);
+    setGoals([]);
+    
+    // Clear authentication from localStorage
+    localStorage.removeItem('permeateAuth');
+    localStorage.removeItem('permeateOnboardingCompleted');
+    localStorage.removeItem('permeateCompanyData');
+    localStorage.removeItem('permeateEmployeeData');
+    
     setLocation('/');
   };
 
   // Data fetching functions
   const fetchCompanyData = async (companyId: string) => {
     try {
+      console.log('Fetching company data for:', companyId);
+      
       // Fetch company details, employees, and goals
       const [companyRes, employeesRes, goalsRes] = await Promise.all([
         fetch(`/api/permeate/companies/${companyId}`),
@@ -259,18 +318,27 @@ export default function PerMeaTeEnhanced() {
 
       if (companyRes.ok) {
         const companyData = await companyRes.json();
+        console.log('Company data fetched:', companyData);
         setCompany(companyData);
+      } else {
+        console.log('Company fetch failed:', companyRes.status);
       }
 
       if (employeesRes.ok) {
         const employeesData = await employeesRes.json();
-        setEmployees(employeesData.employees);
-        setOrgChart(employeesData.orgChart);
+        console.log('Employees data fetched:', employeesData.employees?.length || 0, 'employees');
+        setEmployees(employeesData.employees || []);
+        setOrgChart(employeesData.orgChart || []);
+      } else {
+        console.log('Employees fetch failed:', employeesRes.status);
       }
 
       if (goalsRes.ok) {
         const goalsData = await goalsRes.json();
-        setGoals(goalsData);
+        console.log('Goals data fetched:', goalsData?.length || 0, 'goals');
+        setGoals(goalsData || []);
+      } else {
+        console.log('Goals fetch failed:', goalsRes.status);
       }
     } catch (error) {
       console.error('Error fetching company data:', error);
@@ -1235,8 +1303,9 @@ export default function PerMeaTeEnhanced() {
     );
   }
 
-  // Show onboarding for OnboardingExpertUser OR if company needs onboarding
-  if ((currentUser?.name === 'OnboardingExpertUser') || (!company || !company.isOnboarded)) {
+  // Show onboarding only for OnboardingExpertUser OR if employee's company is not onboarded yet
+  if (currentUser?.name === 'OnboardingExpertUser' || 
+      (currentUser && currentUser.name !== 'OnboardingExpertUser' && (!company || !company.isOnboarded))) {
     return (
       <div className="min-h-screen bg-gray-50">
         {/* Dark Street Tech Header */}
