@@ -93,26 +93,14 @@ export default function FetchPatterns() {
         {/* CTA Section */}
         <section className="py-6 section-divider">
           <div className="container-section">
-            <div className="space-y-4">
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Button 
-                  className="btn-primary px-8 py-4 text-lg flex items-center gap-2"
-                  onClick={() => window.location.href = '/beta-login'}
-                >
-                  Launch Fetch Patterns (Closed Beta)
-                  <ArrowRight className="w-5 h-5" />
-                </Button>
-                <Button 
-                  className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 text-lg flex items-center gap-2"
-                  onClick={() => window.location.href = '/fetch-patterns-open-login'}
-                >
-                  Try Open Beta
-                  <ArrowRight className="w-5 h-5" />
-                </Button>
-              </div>
-              <p className="text-sm text-secondary">
-                Open Beta: Create your own account with email/password. Features include PDF export, enhanced UI, and comprehensive user guide.
-              </p>
+            <div>
+              <Button 
+                className="btn-primary px-8 py-4 text-lg flex items-center gap-2"
+                onClick={() => window.location.href = '/beta-login'}
+              >
+                Launch Fetch Patterns
+                <ArrowRight className="w-5 h-5" />
+              </Button>
             </div>
           </div>
         </section>
