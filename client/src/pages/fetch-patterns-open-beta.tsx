@@ -93,130 +93,54 @@ export default function FetchPatternsOpenBeta() {
   const [wordCloudGenerated, setWordCloudGenerated] = useState(false);
   const wordCloudRef = useRef<SVGSVGElement>(null);
 
-  // Get user from localStorage with better error handling
-  const [user, setUser] = useState(() => {
-    try {
-      const userData = localStorage.getItem('fetchPatternsUser');
-      console.log('Initial user data from localStorage:', userData);
-      
-      if (!userData) {
-        console.log('No user data in localStorage');
-        return null;
-      }
-      
-      const parsedUser = JSON.parse(userData);
-      console.log('Parsed user:', parsedUser);
-      
-      // Check if user data is complete (but allow existing sessions)
-      if (!parsedUser.displayName) {
-        console.log('User data incomplete - missing displayName');
-        // Don't clear localStorage immediately - just flag it
-      }
-      
-      return parsedUser;
-    } catch (error) {
-      console.error('Error parsing user data from localStorage:', error);
-      localStorage.removeItem('fetchPatternsUser');
-      return null;
+  // Session-based authentication
+  const [user, setUser] = useState(null);
+
+  // Check session on mount
+  const { data: sessionUser, isLoading: sessionLoading } = useQuery({
+    queryKey: ['/api/fetch-patterns-open/session'],
+    retry: false,
+    refetchOnWindowFocus: false,
+    onSuccess: (data) => {
+      console.log('Session loaded:', data);
+      setUser(data);
+    },
+    onError: (error) => {
+      console.log('No valid session:', error);
+      setUser(null);
     }
   });
 
-  // Listen for localStorage changes and also check periodically
+  // Redirect if not authenticated after session check
   useEffect(() => {
-    const handleStorageChange = () => {
-      try {
-        const userData = localStorage.getItem('fetchPatternsUser');
-        console.log('Storage change detected, raw data:', userData);
-        
-        if (userData) {
-          const parsedUser = JSON.parse(userData);
-          console.log('Setting user from storage change:', parsedUser);
-          setUser(parsedUser);
-        } else {
-          console.log('No user data in storage, clearing user state');
-          setUser(null);
-        }
-      } catch (error) {
-        console.error('Error handling storage change:', error);
-        setUser(null);
-      }
-    };
-    
-    // Force initial check on mount
-    handleStorageChange();
-    
-    window.addEventListener('storage', handleStorageChange);
-    
-    // Check localStorage periodically in case of cross-tab updates
-    const interval = setInterval(handleStorageChange, 1000);
-    
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      clearInterval(interval);
-    };
-  }, []);
-
-  // Check user state and handle authentication
-  useEffect(() => {
-    const userData = localStorage.getItem('fetchPatternsUser');
-    console.log('Effect check - localStorage:', userData);
-    console.log('Effect check - user state:', user);
-    
-    if (!userData) {
-      console.log('No user data in localStorage, redirecting to login');
+    if (!sessionLoading && !sessionUser) {
+      console.log('No valid session, redirecting to login');
       setLocation('/fetch-patterns-open-login');
-    } else if (!user) {
-      console.log('localStorage has data but user state is null, setting user');
-      try {
-        const parsedUser = JSON.parse(userData);
-        setUser(parsedUser);
-      } catch (e) {
-        console.error('Failed to parse user data:', e);
-        setLocation('/fetch-patterns-open-login');
-      }
-    } else {
-      console.log('User is logged in:', user);
     }
-  }, [user, setLocation]);
+  }, [sessionUser, sessionLoading, setLocation]);
 
   // Fetch user's document analyses
   const { data: analyses = [], isLoading } = useQuery({
-    queryKey: ['/api/fetch-patterns-open/analyses', user?.id],
-    enabled: !!user?.id,
+    queryKey: ['/api/fetch-patterns-open/analyses', sessionUser?.id],
+    enabled: !!sessionUser?.id,
     refetchInterval: 3000, // Poll every 3 seconds for updates
     queryFn: async () => {
-      const response = await apiRequest(`/api/fetch-patterns-open/analyses?userId=${user.id}`, 'GET');
+      const response = await apiRequest(`/api/fetch-patterns-open/analyses?userId=${sessionUser.id}`, 'GET');
       return response as unknown as any[];
     }
   });
 
-  // Upload mutation
+  // Upload mutation with session-based auth
   const uploadMutation = useMutation({
     mutationFn: async (files: File[]) => {
-      // Get fresh user data from localStorage
-      const userDataString = localStorage.getItem('fetchPatternsUser');
-      console.log('Raw localStorage data:', userDataString);
+      console.log('Upload attempt with session user:', sessionUser);
       
-      let currentUser;
-      try {
-        currentUser = userDataString ? JSON.parse(userDataString) : null;
-      } catch (e) {
-        console.error('Failed to parse user data:', e);
-        throw new Error('Session corrupted. Please log in again.');
+      if (!sessionUser?.id) {
+        throw new Error('Please log in to upload documents.');
       }
-      
-      console.log('Parsed current user:', currentUser);
-      
-      if (!currentUser?.id) {
-        console.error('No valid user found. User state:', user);
-        throw new Error('User not authenticated. Please refresh and try again.');
-      }
-      
-      console.log('Upload attempt with user ID:', currentUser.id);
       
       const formData = new FormData();
       files.forEach(file => formData.append('files', file));
-      formData.append('userId', currentUser.id);
       
       const response = await fetch('/api/fetch-patterns-open/upload', {
         method: 'POST',
@@ -407,10 +331,17 @@ export default function FetchPatternsOpenBeta() {
     });
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('fetchPatternsUser');
-    setUser(null);
-    setLocation('/fetch-patterns-open-login');
+  const handleLogout = async () => {
+    try {
+      await apiRequest('/api/fetch-patterns-open/logout', 'POST');
+      setUser(null);
+      setLocation('/fetch-patterns-open-login');
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Force logout anyway
+      setUser(null);
+      setLocation('/fetch-patterns-open-login');
+    }
   };
 
   const downloadPDF = () => {
@@ -487,7 +418,11 @@ export default function FetchPatternsOpenBeta() {
     });
   };
 
-  if (!user) {
+  if (sessionLoading) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
+
+  if (!sessionUser) {
     return null; // Will redirect
   }
 
@@ -520,38 +455,12 @@ export default function FetchPatternsOpenBeta() {
               Fetch Patterns Open Beta
             </h1>
             <p className="text-lg mt-2 text-black">
-              Welcome back, <span className="font-medium">{user?.displayName || 'User'}</span>!
+              Welcome back, <span className="font-medium">{sessionUser?.displayName || 'User'}</span>!
             </p>
-            <div className="text-xs text-gray-500 mt-1">
-              Debug: User ID: {user?.id}, Email: {user?.email}, DisplayName: {user?.displayName}
-            </div>
-            {/* Only show message if user exists but displayName is missing */}
-            {user && !user.displayName && user.email && (
-              <div className="text-xs text-red-600 mt-1">
-                Your session is incomplete. Please <button 
-                  onClick={() => {
-                    localStorage.removeItem('fetchPatternsUser');
-                    setLocation('/fetch-patterns-open-login');
-                  }}
-                  className="underline hover:no-underline"
-                >
-                  sign in again
-                </button> for full functionality.
-              </div>
-            )}
+
           </div>
           <div className="flex space-x-3">
-            <Button
-              onClick={() => {
-                localStorage.removeItem('fetchPatternsUser');
-                setLocation('/fetch-patterns-open-login');
-              }}
-              variant="outline"
-              className="border-orange-300 text-orange-700 hover:bg-orange-50"
-            >
-              <RefreshCw className="w-4 h-4 mr-2" />
-              Refresh Login
-            </Button>
+
             <Button
               onClick={() => setLocation('/fetch-patterns-guide')}
               variant="outline"

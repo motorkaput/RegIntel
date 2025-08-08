@@ -64,18 +64,12 @@ export default function FetchPatternsOpenLogin() {
       return response as unknown as { id: string; email: string; displayName: string };
     },
     onSuccess: (userData) => {
-      console.log('Login successful, storing user data:', userData);
-      localStorage.setItem("fetchPatternsUser", JSON.stringify(userData));
+      console.log('Login successful, session created:', userData);
       toast({
         title: "Welcome back!",
         description: `Hello ${userData.displayName}, you're now logged in.`,
       });
-      
-      // Small delay to ensure localStorage is set before navigation
-      setTimeout(() => {
-        console.log('Navigating to fetch-patterns-open');
-        setLocation('/fetch-patterns-open');
-      }, 100);
+      setLocation('/fetch-patterns-open');
     },
     onError: (error) => {
       toast({
@@ -100,7 +94,7 @@ export default function FetchPatternsOpenLogin() {
       return response as unknown as { id: string; email: string; displayName: string };
     },
     onSuccess: (userData) => {
-      localStorage.setItem("fetchPatternsUser", JSON.stringify(userData));
+      console.log('Registration successful, session created:', userData);
       toast({
         title: "Account created!",
         description: `Welcome ${userData.displayName}, your account has been created successfully.`,

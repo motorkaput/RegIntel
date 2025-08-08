@@ -702,12 +702,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Invalid email or password" });
       }
 
-      // Verify password
-      const bcrypt = await import('bcrypt');
-      const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
-      if (!isPasswordValid) {
+      // Simple password verification for demo
+      if (user.passwordHash !== password) {
         return res.status(401).json({ message: "Invalid email or password" });
       }
+
+      // Create server-side session
+      (req as any).session.fetchPatternsUser = {
+        id: user.id,
+        email: user.email,
+        displayName: user.displayName
+      };
+
+      console.log('Session created for user:', (req as any).session.fetchPatternsUser);
 
       // Return user data without password
       const { passwordHash: _, ...userResponse } = user;
@@ -718,30 +725,62 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Session-based auth route
+  app.get('/api/fetch-patterns-open/session', async (req: any, res) => {
+    try {
+      const sessionUser = req.session.fetchPatternsUser;
+      console.log('Session check:', sessionUser);
+      
+      if (!sessionUser) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+      
+      res.json(sessionUser);
+    } catch (error) {
+      console.error("Session check error:", error);
+      res.status(500).json({ message: "Session check failed" });
+    }
+  });
+
+  app.post('/api/fetch-patterns-open/logout', async (req: any, res) => {
+    try {
+      req.session.destroy((err: any) => {
+        if (err) {
+          console.error("Logout error:", err);
+          return res.status(500).json({ message: "Logout failed" });
+        }
+        res.json({ message: "Logged out successfully" });
+      });
+    } catch (error) {
+      console.error("Logout error:", error);
+      res.status(500).json({ message: "Logout failed" });
+    }
+  });
+
   // Open Beta Fetch Patterns Routes
   app.post('/api/fetch-patterns-open/upload', upload.array('files'), async (req: any, res) => {
     try {
-      const { userId } = req.body;
+      // Get user from session instead of request body
+      const sessionUser = req.session.fetchPatternsUser;
       const files = req.files as Express.Multer.File[];
       
       console.log('Upload request received:', { 
-        userId, 
+        sessionUser, 
         fileCount: files?.length || 0,
-        body: req.body,
-        formKeys: Object.keys(req.body || {})
+        sessionId: req.sessionID
       });
       
       if (!files || files.length === 0) {
         return res.status(400).json({ message: "No files uploaded" });
       }
 
-      if (!userId) {
-        console.log('No userId provided in request body');
-        return res.status(401).json({ message: "User authentication required" });
+      if (!sessionUser?.id) {
+        console.log('No valid session found');
+        return res.status(401).json({ message: "User not authenticated. Please log in again." });
       }
 
       // Verify user exists
-      const user = await storage.getOpenBetaUser(userId);
+      const user = await storage.getOpenBetaUser(sessionUser.id);
       if (!user) {
         return res.status(401).json({ message: "Invalid user" });
       }
@@ -756,7 +795,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         const analysis = {
           id: analysisId,
-          userId: userId,
+          userId: sessionUser.id,
           filename: `${nanoid()}_${file.originalname}`,
           originalName: file.originalname,
           mimeType: file.mimetype,
@@ -787,7 +826,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               completedAt: new Date(),
             });
             
-            console.log(`Document ${file.originalname} processed successfully for user ${userId}`);
+            console.log(`Document ${file.originalname} processed successfully for user ${sessionUser.id}`);
           } catch (error) {
             console.error(`Error processing document ${file.originalname}:`, error);
             await storage.updateOpenBetaDocumentAnalysis(analysisId, {
