@@ -126,12 +126,14 @@ export default function FetchPatternsOpenBeta() {
     const handleStorageChange = () => {
       try {
         const userData = localStorage.getItem('fetchPatternsUser');
-        console.log('Storage change detected, user data:', userData);
+        console.log('Storage change detected, raw data:', userData);
         
         if (userData) {
           const parsedUser = JSON.parse(userData);
+          console.log('Setting user from storage change:', parsedUser);
           setUser(parsedUser);
         } else {
+          console.log('No user data in storage, clearing user state');
           setUser(null);
         }
       } catch (error) {
@@ -139,6 +141,9 @@ export default function FetchPatternsOpenBeta() {
         setUser(null);
       }
     };
+    
+    // Force initial check on mount
+    handleStorageChange();
     
     window.addEventListener('storage', handleStorageChange);
     
@@ -175,16 +180,26 @@ export default function FetchPatternsOpenBeta() {
   // Upload mutation
   const uploadMutation = useMutation({
     mutationFn: async (files: File[]) => {
-      // Check both user object and localStorage for user data
-      const currentUser = user || JSON.parse(localStorage.getItem('fetchPatternsUser') || 'null');
+      // Get fresh user data from localStorage
+      const userDataString = localStorage.getItem('fetchPatternsUser');
+      console.log('Raw localStorage data:', userDataString);
+      
+      let currentUser;
+      try {
+        currentUser = userDataString ? JSON.parse(userDataString) : null;
+      } catch (e) {
+        console.error('Failed to parse user data:', e);
+        throw new Error('Session corrupted. Please log in again.');
+      }
+      
+      console.log('Parsed current user:', currentUser);
       
       if (!currentUser?.id) {
-        console.error('No user found:', { user, localStorage: localStorage.getItem('fetchPatternsUser') });
+        console.error('No valid user found. User state:', user);
         throw new Error('User not authenticated. Please refresh and try again.');
       }
       
-      console.log('Upload attempt with user:', currentUser);
-      console.log('User ID being sent:', currentUser.id);
+      console.log('Upload attempt with user ID:', currentUser.id);
       
       const formData = new FormData();
       files.forEach(file => formData.append('files', file));
