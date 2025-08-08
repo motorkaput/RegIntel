@@ -46,7 +46,7 @@ export default function FetchPatternsOpenLogin() {
     primary: '#6366f1', // Soft indigo
     secondary: '#ec4899', // Soft pink
     accent: '#10b981', // Soft emerald
-    background: '#fef7ff', // Very soft lavender
+    background: '#f1f5f9', // Light grey background
     surface: '#ffffff',
     muted: '#f8fafc', // Soft gray
     border: '#e2e8f0',

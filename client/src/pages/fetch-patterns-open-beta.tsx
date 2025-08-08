@@ -77,7 +77,7 @@ export default function FetchPatternsOpenBeta() {
     primary: '#8B5FBF', // Soft purple
     secondary: '#FF8A80', // Soft coral
     accent: '#81C784', // Soft green
-    background: '#F3E5F5', // Very light purple
+    background: '#f1f5f9', // Light grey background
     surface: '#FFFFFF',
     text: '#4A4A4A',
     muted: '#A1A1A1'
@@ -88,6 +88,20 @@ export default function FetchPatternsOpenBeta() {
     const userData = localStorage.getItem('fetchPatternsUser');
     return userData ? JSON.parse(userData) : null;
   });
+
+  // Listen for localStorage changes (when user logs in from another tab or refreshes)
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const userData = localStorage.getItem('fetchPatternsUser');
+      setUser(userData ? JSON.parse(userData) : null);
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    // Check localStorage on component mount
+    handleStorageChange();
+    
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
 
   // Redirect if not logged in
   useEffect(() => {
@@ -101,8 +115,10 @@ export default function FetchPatternsOpenBeta() {
     queryKey: ['/api/fetch-patterns-open/analyses', user?.id],
     enabled: !!user?.id,
     refetchInterval: 3000, // Poll every 3 seconds for updates
-    queryFn: () => 
-      apiRequest(`/api/fetch-patterns-open/analyses?userId=${user.id}`, 'GET') as Promise<any[]>
+    queryFn: async () => {
+      const response = await apiRequest(`/api/fetch-patterns-open/analyses?userId=${user.id}`, 'GET');
+      return response as unknown as any[];
+    }
   });
 
   // Upload mutation
@@ -499,7 +515,7 @@ export default function FetchPatternsOpenBeta() {
                                       </Tooltip>
                                     </span>
                                     <div className="flex flex-wrap gap-1 mt-1">
-                                      {analysis.keywords.slice(0, 8).map((keyword, idx) => (
+                                      {analysis.keywords.slice(0, 8).map((keyword: string, idx: number) => (
                                         <Badge key={idx} variant="outline" className="text-xs">
                                           {keyword}
                                         </Badge>
