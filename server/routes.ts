@@ -647,6 +647,77 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Fetch Patterns Open Beta Authentication routes
+  app.post('/api/fetch-patterns-open/register', async (req, res) => {
+    try {
+      const { email, password, displayName } = req.body;
+      
+      if (!email || !password || !displayName) {
+        return res.status(400).json({ message: "Email, password, and display name are required" });
+      }
+
+      // Check if user already exists
+      const existingUser = await storage.getOpenBetaUserByEmail(email);
+      if (existingUser) {
+        return res.status(409).json({ message: "User with this email already exists" });
+      }
+
+      // Hash password
+      const bcrypt = await import('bcrypt');
+      const saltRounds = 10;
+      const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+      // Create user
+      const userData = {
+        id: nanoid(),
+        email,
+        displayName,
+        passwordHash: hashedPassword,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+
+      const user = await storage.createOpenBetaUser(userData);
+      
+      // Return user data without password
+      const { passwordHash: _, ...userResponse } = user;
+      res.status(201).json(userResponse);
+    } catch (error) {
+      console.error("Open beta registration error:", error);
+      res.status(500).json({ message: "Failed to create account" });
+    }
+  });
+
+  app.post('/api/fetch-patterns-open/login', async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      
+      if (!email || !password) {
+        return res.status(400).json({ message: "Email and password are required" });
+      }
+
+      // Find user
+      const user = await storage.getOpenBetaUserByEmail(email);
+      if (!user) {
+        return res.status(401).json({ message: "Invalid email or password" });
+      }
+
+      // Verify password
+      const bcrypt = await import('bcrypt');
+      const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
+      if (!isPasswordValid) {
+        return res.status(401).json({ message: "Invalid email or password" });
+      }
+
+      // Return user data without password
+      const { passwordHash: _, ...userResponse } = user;
+      res.json(userResponse);
+    } catch (error) {
+      console.error("Open beta login error:", error);
+      res.status(500).json({ message: "Login failed" });
+    }
+  });
+
   // Open Beta Fetch Patterns Routes
   app.post('/api/fetch-patterns-open/upload', upload.array('files'), async (req: any, res) => {
     try {
@@ -767,7 +838,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      const result = await answerQuestion(completedDocuments, question);
+      const documentsForAI = completedDocuments.map(doc => ({
+        text: doc.extractedText || '',
+        filename: doc.originalName
+      }));
+      const result = await answerQuestion(documentsForAI, question);
       res.json(result);
     } catch (error) {
       console.error("Question answering error:", error);
@@ -797,7 +872,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      const result = await analyzeContext(completedDocuments, context);
+      const documentsForAI = completedDocuments.map(doc => ({
+        text: doc.extractedText || '',
+        filename: doc.originalName
+      }));
+      const result = await analyzeContext(documentsForAI, context);
       res.json(result);
     } catch (error) {
       console.error("Context analysis error:", error);

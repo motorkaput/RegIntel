@@ -60,7 +60,7 @@ export default function FetchPatternsOpenLogin() {
   // Login mutation
   const loginMutation = useMutation({
     mutationFn: async (credentials: LoginForm) => {
-      const response = await apiRequest('/api/auth/login', 'POST', credentials);
+      const response = await apiRequest('/api/fetch-patterns-open/login', 'POST', credentials);
       return response as unknown as { id: string; email: string; displayName: string };
     },
     onSuccess: (userData) => {
@@ -86,7 +86,7 @@ export default function FetchPatternsOpenLogin() {
       if (userData.password !== userData.confirmPassword) {
         throw new Error("Passwords don't match");
       }
-      const response = await apiRequest('/api/auth/register', 'POST', {
+      const response = await apiRequest('/api/fetch-patterns-open/register', 'POST', {
         email: userData.email,
         password: userData.password,
         displayName: userData.displayName
