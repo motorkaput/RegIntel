@@ -17,15 +17,15 @@ import * as d3 from 'd3';
 import cloud from 'd3-cloud';
 import jsPDF from 'jspdf';
 
-// Animated fetch dog component
-const FetchDog = ({ isProcessing }: { isProcessing: boolean }) => {
+// Animated fetch companion component
+const FetchCompanion = ({ isProcessing }: { isProcessing: boolean }) => {
   const [position, setPosition] = useState(0);
   
   useEffect(() => {
     if (isProcessing) {
       const interval = setInterval(() => {
-        setPosition(prev => (prev + 5) % 100);
-      }, 100);
+        setPosition(prev => (prev + 3) % 100);
+      }, 80);
       return () => clearInterval(interval);
     } else {
       setPosition(0);
@@ -33,16 +33,16 @@ const FetchDog = ({ isProcessing }: { isProcessing: boolean }) => {
   }, [isProcessing]);
 
   return (
-    <div className="flex items-center space-x-2 mb-4 relative">
+    <div className="flex items-center space-x-2 mb-4 relative overflow-hidden">
       <div 
         className={`text-2xl transition-all duration-300 ${isProcessing ? 'animate-none' : ''}`}
         style={{ 
-          transform: isProcessing ? `translateX(${position * 2}px)` : 'translateX(0px)'
+          transform: isProcessing ? `translateX(${position * 3}px)` : 'translateX(0px)'
         }}
       >
-        🐕
+        🦮
       </div>
-      <span className="text-sm text-black ml-8">
+      <span className="text-sm ml-8" style={{ color: colors.text }}>
         {isProcessing ? 'Fetching insights from your documents...' : 'Your AI fetch companion is ready to analyze documents'}
       </span>
     </div>
@@ -89,13 +89,14 @@ export default function FetchPatternsOpenBeta() {
     accent: '#81C784', // Soft green
     background: '#f1f5f9', // Light grey background
     surface: '#FFFFFF',
-    text: '#4A4A4A',
-    muted: '#A1A1A1'
+    text: '#000000', // Black text for better readability
+    muted: '#4A4A4A'
   };
 
   // Get user from localStorage
   const [user, setUser] = useState(() => {
     const userData = localStorage.getItem('fetchPatternsUser');
+    console.log('Initial user data from localStorage:', userData);
     return userData ? JSON.parse(userData) : null;
   });
 
@@ -103,6 +104,7 @@ export default function FetchPatternsOpenBeta() {
   useEffect(() => {
     const handleStorageChange = () => {
       const userData = localStorage.getItem('fetchPatternsUser');
+      console.log('Storage change detected, user data:', userData);
       setUser(userData ? JSON.parse(userData) : null);
     };
     
@@ -116,7 +118,10 @@ export default function FetchPatternsOpenBeta() {
   // Redirect if not logged in
   useEffect(() => {
     if (!user) {
+      console.log('No user found, redirecting to login');
       setLocation('/fetch-patterns-open-login');
+    } else {
+      console.log('User is logged in:', user);
     }
   }, [user, setLocation]);
 
@@ -134,15 +139,19 @@ export default function FetchPatternsOpenBeta() {
   // Upload mutation
   const uploadMutation = useMutation({
     mutationFn: async (files: File[]) => {
-      if (!user?.id) {
+      // Check both user object and localStorage for user data
+      const currentUser = user || JSON.parse(localStorage.getItem('fetchPatternsUser') || 'null');
+      
+      if (!currentUser?.id) {
+        console.error('No user found:', { user, localStorage: localStorage.getItem('fetchPatternsUser') });
         throw new Error('User not authenticated. Please refresh and try again.');
       }
       
-      console.log('Upload attempt with user:', user);
+      console.log('Upload attempt with user:', currentUser);
       
       const formData = new FormData();
       files.forEach(file => formData.append('files', file));
-      formData.append('userId', user.id);
+      formData.append('userId', currentUser.id);
       
       const response = await fetch('/api/fetch-patterns-open/upload', {
         method: 'POST',
@@ -423,15 +432,15 @@ export default function FetchPatternsOpenBeta() {
   return (
     <div className="min-h-screen" style={{ backgroundColor: colors.background }}>
       {/* Dark Street Tech Header */}
-      <header className="bg-slate-900 text-white py-4 border-b border-slate-700">
+      <header className="bg-gray-900 text-white py-3 border-b border-gray-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between h-12">
             <div className="flex items-center space-x-4">
-              <h1 className="text-xl font-bold">Dark Street Tech</h1>
-              <span className="text-slate-400">|</span>
-              <span className="text-slate-300">Fetch Patterns Open Beta</span>
+              <h1 className="text-xl font-bold text-white">Dark Street Tech</h1>
+              <span className="text-gray-400">|</span>
+              <span className="text-gray-300">Fetch Patterns Open Beta</span>
             </div>
-            <div className="text-sm text-slate-400">
+            <div className="text-sm text-gray-400">
               Advanced AI Document Analysis
             </div>
           </div>
@@ -448,7 +457,12 @@ export default function FetchPatternsOpenBeta() {
             <p className="text-lg mt-2 text-black">
               Welcome back, <span className="font-medium">{user?.displayName || user?.email || 'User'}</span>!
             </p>
-
+            {/* Temporary debug - remove after fixing */}
+            {!user?.displayName && (
+              <div className="text-xs text-red-600 mt-1">
+                Debug: Missing displayName. Please sign out and log in again.
+              </div>
+            )}
           </div>
           <div className="flex space-x-3">
             <Button
@@ -479,24 +493,20 @@ export default function FetchPatternsOpenBeta() {
           </div>
         </div>
 
-        <FetchDog isProcessing={processingAnalyses.length > 0} />
+        <FetchCompanion isProcessing={processingAnalyses.length > 0} />
 
         <Tabs defaultValue="upload" className="space-y-6">
           <TabsList className="grid w-full grid-cols-4 bg-white border border-purple-200">
             <TabsTrigger value="upload" className="data-[state=active]:bg-purple-100 data-[state=active]:text-purple-700">
-              <Upload className="w-4 h-4 mr-2" />
               Upload
             </TabsTrigger>
             <TabsTrigger value="documents" className="data-[state=active]:bg-purple-100 data-[state=active]:text-purple-700">
-              <FileText className="w-4 h-4 mr-2" />
               Documents ({analyses.length})
             </TabsTrigger>
             <TabsTrigger value="chat" className="data-[state=active]:bg-purple-100 data-[state=active]:text-purple-700">
-              <MessageSquare className="w-4 h-4 mr-2" />
               Q&A
             </TabsTrigger>
             <TabsTrigger value="insights" className="data-[state=active]:bg-purple-100 data-[state=active]:text-purple-700">
-              <Sparkles className="w-4 h-4 mr-2" />
               Insights
             </TabsTrigger>
           </TabsList>
@@ -863,16 +873,16 @@ export default function FetchPatternsOpenBeta() {
       </div>
       
       {/* Dark Street Tech Footer */}
-      <footer className="bg-slate-900 text-white py-6 border-t border-slate-700 mt-16">
+      <footer className="bg-gray-900 text-white py-6 border-t border-gray-700 mt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-lg font-semibold mb-2">Dark Street Tech</h3>
-              <p className="text-slate-400 text-sm">Advanced AI-Powered Document Analysis Solutions</p>
+              <h3 className="text-lg font-semibold mb-2 text-white">Dark Street Tech</h3>
+              <p className="text-gray-400 text-sm">Advanced AI-Powered Document Analysis Solutions</p>
             </div>
             <div className="text-right">
-              <p className="text-slate-400 text-sm">© 2025 Dark Street Tech. All rights reserved.</p>
-              <p className="text-slate-500 text-xs mt-1">Fetch Patterns Open Beta v1.0</p>
+              <p className="text-gray-400 text-sm">© 2025 Dark Street Tech. All rights reserved.</p>
+              <p className="text-gray-500 text-xs mt-1">Fetch Patterns Open Beta v1.0</p>
             </div>
           </div>
         </div>
