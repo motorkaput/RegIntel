@@ -14,28 +14,36 @@ import { useLocation } from 'wouter';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import * as d3 from 'd3';
+import cloud from 'd3-cloud';
 import jsPDF from 'jspdf';
 
 // Animated fetch dog component
-const FetchDog = () => {
-  const [isAnimating, setIsAnimating] = useState(false);
+const FetchDog = ({ isProcessing }: { isProcessing: boolean }) => {
+  const [position, setPosition] = useState(0);
   
   useEffect(() => {
-    const interval = setInterval(() => {
-      setIsAnimating(true);
-      setTimeout(() => setIsAnimating(false), 2000);
-    }, 8000);
-    
-    return () => clearInterval(interval);
-  }, []);
+    if (isProcessing) {
+      const interval = setInterval(() => {
+        setPosition(prev => (prev + 5) % 100);
+      }, 100);
+      return () => clearInterval(interval);
+    } else {
+      setPosition(0);
+    }
+  }, [isProcessing]);
 
   return (
-    <div className="flex items-center space-x-2 mb-4">
-      <div className={`text-2xl transition-transform duration-500 ${isAnimating ? 'animate-bounce' : ''}`}>
+    <div className="flex items-center space-x-2 mb-4 relative">
+      <div 
+        className={`text-2xl transition-all duration-300 ${isProcessing ? 'animate-none' : ''}`}
+        style={{ 
+          transform: isProcessing ? `translateX(${position * 2}px)` : 'translateX(0px)'
+        }}
+      >
         🐕
       </div>
-      <span className="text-sm text-muted-foreground">
-        Your AI fetch companion is ready to analyze documents
+      <span className="text-sm text-black ml-8">
+        {isProcessing ? 'Fetching insights from your documents...' : 'Your AI fetch companion is ready to analyze documents'}
       </span>
     </div>
   );
@@ -71,6 +79,8 @@ export default function FetchPatternsOpenBeta() {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [question, setQuestion] = useState('');
   const [contextQuery, setContextQuery] = useState('');
+  const [wordCloudGenerated, setWordCloudGenerated] = useState(false);
+  const wordCloudRef = useRef<SVGSVGElement>(null);
   
   // Pastel colors theme
   const colors = {
@@ -124,6 +134,12 @@ export default function FetchPatternsOpenBeta() {
   // Upload mutation
   const uploadMutation = useMutation({
     mutationFn: async (files: File[]) => {
+      if (!user?.id) {
+        throw new Error('User not authenticated. Please refresh and try again.');
+      }
+      
+      console.log('Upload attempt with user:', user);
+      
       const formData = new FormData();
       files.forEach(file => formData.append('files', file));
       formData.append('userId', user.id);
@@ -135,6 +151,7 @@ export default function FetchPatternsOpenBeta() {
       
       if (!response.ok) {
         const error = await response.json();
+        console.error('Upload error:', error);
         throw new Error(error.message || 'Upload failed');
       }
       
@@ -238,6 +255,84 @@ export default function FetchPatternsOpenBeta() {
     contextMutation.mutate(contextQuery.trim());
   };
 
+  // Word Cloud generation function
+  const generateWordCloud = () => {
+    if (completedAnalyses.length === 0) {
+      toast({
+        title: "No documents available",
+        description: "Upload and process some documents first to generate a word cloud.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Extract all words from document analyses
+    const allWords: string[] = [];
+    completedAnalyses.forEach(analysis => {
+      if (analysis.keyPhrases) {
+        allWords.push(...analysis.keyPhrases);
+      }
+      if (analysis.extractedText) {
+        const words = analysis.extractedText
+          .toLowerCase()
+          .replace(/[^\w\s]/g, '')
+          .split(/\s+/)
+          .filter((word: string) => word.length > 3 && !['the', 'and', 'for', 'with', 'this', 'that', 'from', 'they', 'have', 'were', 'said', 'each', 'which', 'their', 'time', 'will', 'about', 'would', 'there', 'could', 'other', 'more', 'very', 'what', 'know', 'just', 'first', 'into', 'over', 'think', 'also', 'your', 'work', 'life', 'only'].includes(word));
+        allWords.push(...words);
+      }
+    });
+
+    // Count word frequencies
+    const wordCounts: { [key: string]: number } = {};
+    allWords.forEach(word => {
+      wordCounts[word] = (wordCounts[word] || 0) + 1;
+    });
+
+    // Convert to array and sort by frequency
+    const wordsArray = Object.entries(wordCounts)
+      .map(([text, count]) => ({ text, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 50); // Top 50 words
+
+    // Create word cloud
+    const svg = d3.select(wordCloudRef.current);
+    svg.selectAll("*").remove(); // Clear previous content
+
+    const width = 600;
+    const height = 400;
+    
+    svg.attr("width", width).attr("height", height);
+
+    const layout = cloud()
+      .size([width, height])
+      .words(wordsArray as any)
+      .padding(5)
+      .rotate(() => ~~(Math.random() * 2) * 90)
+      .font("Impact")
+      .fontSize((d: any) => Math.max(12, Math.min(40, d.count * 8)))
+      .on("end", (words: any) => {
+        svg.append("g")
+          .attr("transform", `translate(${width/2},${height/2})`)
+          .selectAll("text")
+          .data(words)
+          .enter().append("text")
+          .style("font-size", (d: any) => `${d.size}px`)
+          .style("font-family", "Impact")
+          .style("fill", (d: any, i: number) => d3.schemeCategory10[i % 10])
+          .attr("text-anchor", "middle")
+          .attr("transform", (d: any) => `translate(${d.x},${d.y})rotate(${d.rotate})`)
+          .text((d: any) => d.text || '');
+      });
+
+    layout.start();
+    setWordCloudGenerated(true);
+
+    toast({
+      title: "Word Cloud Generated",
+      description: "Your document word cloud has been created successfully.",
+    });
+  };
+
   const handleLogout = () => {
     localStorage.removeItem('fetchPatternsUser');
     setUser(null);
@@ -327,6 +422,22 @@ export default function FetchPatternsOpenBeta() {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: colors.background }}>
+      {/* Dark Street Tech Header */}
+      <header className="bg-slate-900 text-white py-4 border-b border-slate-700">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <h1 className="text-xl font-bold">Dark Street Tech</h1>
+              <span className="text-slate-400">|</span>
+              <span className="text-slate-300">Fetch Patterns Open Beta</span>
+            </div>
+            <div className="text-sm text-slate-400">
+              Advanced AI Document Analysis
+            </div>
+          </div>
+        </div>
+      </header>
+      
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
@@ -334,9 +445,10 @@ export default function FetchPatternsOpenBeta() {
             <h1 className="text-3xl font-bold" style={{ color: colors.primary }}>
               Fetch Patterns Open Beta
             </h1>
-            <p className="text-lg mt-2" style={{ color: colors.text }}>
-              Welcome back, <span className="font-medium">{user?.displayName || 'User'}</span>!
+            <p className="text-lg mt-2 text-black">
+              Welcome back, <span className="font-medium">{user?.displayName || user?.email || 'User'}</span>!
             </p>
+
           </div>
           <div className="flex space-x-3">
             <Button
@@ -367,7 +479,7 @@ export default function FetchPatternsOpenBeta() {
           </div>
         </div>
 
-        <FetchDog />
+        <FetchDog isProcessing={processingAnalyses.length > 0} />
 
         <Tabs defaultValue="upload" className="space-y-6">
           <TabsList className="grid w-full grid-cols-4 bg-white border border-purple-200">
@@ -394,7 +506,7 @@ export default function FetchPatternsOpenBeta() {
             <Card className="border border-purple-200">
               <CardHeader>
                 <CardTitle style={{ color: colors.primary }}>Upload Documents</CardTitle>
-                <CardDescription>
+                <CardDescription className="text-black">
                   Upload your documents for AI-powered analysis. Supports PDF, DOCX, XLSX, images, and PPTX files.
                 </CardDescription>
               </CardHeader>
@@ -641,13 +753,23 @@ export default function FetchPatternsOpenBeta() {
                     onChange={(e) => setContextQuery(e.target.value)}
                     className="border-purple-200 focus:border-purple-400"
                   />
-                  <Button
-                    onClick={handleContextAnalysis}
-                    disabled={contextMutation.isPending || !contextQuery.trim() || completedAnalyses.length === 0}
-                    style={{ backgroundColor: colors.primary }}
-                  >
-                    {contextMutation.isPending ? 'Analyzing...' : 'Analyze Context'}
-                  </Button>
+                  <div className="flex space-x-2">
+                    <Button
+                      onClick={handleContextAnalysis}
+                      disabled={contextMutation.isPending || !contextQuery.trim() || completedAnalyses.length === 0}
+                      style={{ backgroundColor: colors.primary }}
+                    >
+                      {contextMutation.isPending ? 'Analyzing...' : 'Analyze Context'}
+                    </Button>
+                    <Button
+                      onClick={generateWordCloud}
+                      disabled={completedAnalyses.length === 0}
+                      variant="outline"
+                      className="border-purple-300 text-purple-700 hover:bg-purple-50"
+                    >
+                      Generate Word Cloud
+                    </Button>
+                  </div>
                 </div>
 
                 {contextMutation.data && (
@@ -707,6 +829,26 @@ export default function FetchPatternsOpenBeta() {
                   </Card>
                 )}
 
+                {/* Word Cloud Display */}
+                {wordCloudGenerated && (
+                  <Card className="bg-green-50 border-green-200">
+                    <CardHeader>
+                      <CardTitle className="text-green-800">Word Cloud Visualization</CardTitle>
+                      <CardDescription>
+                        Visual representation of the most frequent words from your documents.
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex justify-center">
+                        <svg
+                          ref={wordCloudRef}
+                          className="border border-green-300 rounded-lg bg-white"
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
                 {completedAnalyses.length === 0 && (
                   <Alert className="border-blue-200 bg-blue-50">
                     <AlertDescription>
@@ -719,6 +861,22 @@ export default function FetchPatternsOpenBeta() {
           </TabsContent>
         </Tabs>
       </div>
+      
+      {/* Dark Street Tech Footer */}
+      <footer className="bg-slate-900 text-white py-6 border-t border-slate-700 mt-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-semibold mb-2">Dark Street Tech</h3>
+              <p className="text-slate-400 text-sm">Advanced AI-Powered Document Analysis Solutions</p>
+            </div>
+            <div className="text-right">
+              <p className="text-slate-400 text-sm">© 2025 Dark Street Tech. All rights reserved.</p>
+              <p className="text-slate-500 text-xs mt-1">Fetch Patterns Open Beta v1.0</p>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
