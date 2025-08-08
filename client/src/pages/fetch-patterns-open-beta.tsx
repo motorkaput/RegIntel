@@ -9,7 +9,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { FileText, Upload, MessageSquare, Download, LogOut, HelpCircle, Sparkles } from 'lucide-react';
+import { FileText, Upload, MessageSquare, Download, LogOut, HelpCircle, Sparkles, RefreshCw } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
@@ -156,11 +156,24 @@ export default function FetchPatternsOpenBeta() {
     };
   }, []);
 
-  // Redirect if not logged in
+  // Check user state and handle authentication
   useEffect(() => {
-    if (!user) {
-      console.log('No user found, redirecting to login');
+    const userData = localStorage.getItem('fetchPatternsUser');
+    console.log('Effect check - localStorage:', userData);
+    console.log('Effect check - user state:', user);
+    
+    if (!userData) {
+      console.log('No user data in localStorage, redirecting to login');
       setLocation('/fetch-patterns-open-login');
+    } else if (!user) {
+      console.log('localStorage has data but user state is null, setting user');
+      try {
+        const parsedUser = JSON.parse(userData);
+        setUser(parsedUser);
+      } catch (e) {
+        console.error('Failed to parse user data:', e);
+        setLocation('/fetch-patterns-open-login');
+      }
     } else {
       console.log('User is logged in:', user);
     }
@@ -507,8 +520,11 @@ export default function FetchPatternsOpenBeta() {
               Fetch Patterns Open Beta
             </h1>
             <p className="text-lg mt-2 text-black">
-              Welcome back, <span className="font-medium">{user?.displayName || user?.email || 'User'}</span>!
+              Welcome back, <span className="font-medium">{user?.displayName || 'User'}</span>!
             </p>
+            <div className="text-xs text-gray-500 mt-1">
+              Debug: User ID: {user?.id}, Email: {user?.email}, DisplayName: {user?.displayName}
+            </div>
             {/* Only show message if user exists but displayName is missing */}
             {user && !user.displayName && user.email && (
               <div className="text-xs text-red-600 mt-1">
@@ -525,6 +541,17 @@ export default function FetchPatternsOpenBeta() {
             )}
           </div>
           <div className="flex space-x-3">
+            <Button
+              onClick={() => {
+                localStorage.removeItem('fetchPatternsUser');
+                setLocation('/fetch-patterns-open-login');
+              }}
+              variant="outline"
+              className="border-orange-300 text-orange-700 hover:bg-orange-50"
+            >
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Refresh Login
+            </Button>
             <Button
               onClick={() => setLocation('/fetch-patterns-guide')}
               variant="outline"
