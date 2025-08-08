@@ -724,11 +724,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { userId } = req.body;
       const files = req.files as Express.Multer.File[];
       
+      console.log('Upload request received:', { 
+        userId, 
+        fileCount: files?.length || 0,
+        body: req.body,
+        formKeys: Object.keys(req.body || {})
+      });
+      
       if (!files || files.length === 0) {
         return res.status(400).json({ message: "No files uploaded" });
       }
 
       if (!userId) {
+        console.log('No userId provided in request body');
         return res.status(401).json({ message: "User authentication required" });
       }
 

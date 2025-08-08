@@ -184,6 +184,7 @@ export default function FetchPatternsOpenBeta() {
       }
       
       console.log('Upload attempt with user:', currentUser);
+      console.log('User ID being sent:', currentUser.id);
       
       const formData = new FormData();
       files.forEach(file => formData.append('files', file));
@@ -493,8 +494,8 @@ export default function FetchPatternsOpenBeta() {
             <p className="text-lg mt-2 text-black">
               Welcome back, <span className="font-medium">{user?.displayName || user?.email || 'User'}</span>!
             </p>
-            {/* Show message for users with incomplete data */}
-            {user && !user.displayName && (
+            {/* Only show message if user exists but displayName is missing */}
+            {user && !user.displayName && user.email && (
               <div className="text-xs text-red-600 mt-1">
                 Your session is incomplete. Please <button 
                   onClick={() => {
