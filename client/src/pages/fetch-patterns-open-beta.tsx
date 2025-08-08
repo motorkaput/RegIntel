@@ -93,11 +93,33 @@ export default function FetchPatternsOpenBeta() {
   const [wordCloudGenerated, setWordCloudGenerated] = useState(false);
   const wordCloudRef = useRef<SVGSVGElement>(null);
 
-  // Get user from localStorage
+  // Get user from localStorage with better error handling
   const [user, setUser] = useState(() => {
-    const userData = localStorage.getItem('fetchPatternsUser');
-    console.log('Initial user data from localStorage:', userData);
-    return userData ? JSON.parse(userData) : null;
+    try {
+      const userData = localStorage.getItem('fetchPatternsUser');
+      console.log('Initial user data from localStorage:', userData);
+      
+      if (!userData) {
+        console.log('No user data in localStorage');
+        return null;
+      }
+      
+      const parsedUser = JSON.parse(userData);
+      console.log('Parsed user:', parsedUser);
+      
+      // Check if user data is complete
+      if (!parsedUser.displayName) {
+        console.log('User data incomplete - missing displayName, clearing localStorage');
+        localStorage.removeItem('fetchPatternsUser');
+        return null;
+      }
+      
+      return parsedUser;
+    } catch (error) {
+      console.error('Error parsing user data from localStorage:', error);
+      localStorage.removeItem('fetchPatternsUser');
+      return null;
+    }
   });
 
   // Listen for localStorage changes (when user logs in from another tab or refreshes)
@@ -457,10 +479,18 @@ export default function FetchPatternsOpenBeta() {
             <p className="text-lg mt-2 text-black">
               Welcome back, <span className="font-medium">{user?.displayName || user?.email || 'User'}</span>!
             </p>
-            {/* Temporary debug - remove after fixing */}
-            {!user?.displayName && (
+            {/* Show message for users with incomplete data */}
+            {user && !user.displayName && (
               <div className="text-xs text-red-600 mt-1">
-                Debug: Missing displayName. Please sign out and log in again.
+                Your session is incomplete. Please <button 
+                  onClick={() => {
+                    localStorage.removeItem('fetchPatternsUser');
+                    setLocation('/fetch-patterns-open-login');
+                  }}
+                  className="underline hover:no-underline"
+                >
+                  sign in again
+                </button> for full functionality.
               </div>
             )}
           </div>
