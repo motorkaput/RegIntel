@@ -13,6 +13,9 @@ import Pricing from "@/pages/pricing";
 import Subscription from "@/pages/subscription";
 import FetchPatterns from "@/pages/fetch-patterns";
 import FetchPatternsApp from "@/pages/fetch-patterns-app";
+import FetchPatternsOpenLogin from "@/pages/fetch-patterns-open-login";
+import FetchPatternsOpenBeta from "@/pages/fetch-patterns-open-beta";
+import FetchPatternsGuide from "@/pages/fetch-patterns-guide";
 import BetaLogin from "@/pages/beta-login";
 import PerMeateBetaLogin from "@/pages/permeate-beta-login";
 import PerMeaTeEnterpriseApp from "@/pages/permeate-enterprise-app";
@@ -51,6 +54,11 @@ function Router() {
       <Route path="/beta-login" component={BetaLogin} />
       <Route path="/x7k9p/fp-analyzer" component={FetchPatternsApp} />
       <Route path="/z9m3k/pe-beta-login" component={PerMeateBetaLogin} />
+      
+      {/* Open Beta Fetch Patterns routes */}
+      <Route path="/fetch-patterns-open-login" component={FetchPatternsOpenLogin} />
+      <Route path="/fetch-patterns-open" component={FetchPatternsOpenBeta} />
+      <Route path="/fetch-patterns-guide" component={FetchPatternsGuide} />
       
       {/* PerMeaTe Enterprise routes - accessible with or without authentication */}
       <Route path="/pe-workspace" component={PerMeaTeEnhanced} />

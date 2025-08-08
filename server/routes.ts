@@ -581,6 +581,230 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Open Beta Authentication Routes
+  app.post('/api/auth/register', async (req, res) => {
+    try {
+      const { email, password, displayName } = req.body;
+      
+      if (!email || !password || !displayName) {
+        return res.status(400).json({ message: 'Email, password, and display name are required' });
+      }
+
+      // Check if user already exists
+      const existingUser = await storage.getOpenBetaUserByEmail(email);
+      if (existingUser) {
+        return res.status(409).json({ message: 'User already exists with this email' });
+      }
+
+      // Hash password
+      const bcrypt = await import('bcrypt');
+      const saltRounds = 12;
+      const passwordHash = await bcrypt.hash(password, saltRounds);
+
+      // Create user
+      const user = await storage.createOpenBetaUser({
+        email,
+        passwordHash,
+        displayName,
+      });
+
+      // Return user data without password hash
+      const { passwordHash: _, ...userResponse } = user;
+      res.status(201).json(userResponse);
+    } catch (error) {
+      console.error('Registration error:', error);
+      res.status(500).json({ message: 'Failed to create account' });
+    }
+  });
+
+  app.post('/api/auth/login', async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      
+      if (!email || !password) {
+        return res.status(400).json({ message: 'Email and password are required' });
+      }
+
+      // Find user
+      const user = await storage.getOpenBetaUserByEmail(email);
+      if (!user) {
+        return res.status(401).json({ message: 'Invalid email or password' });
+      }
+
+      // Verify password
+      const bcrypt = await import('bcrypt');
+      const isValid = await bcrypt.compare(password, user.passwordHash);
+      if (!isValid) {
+        return res.status(401).json({ message: 'Invalid email or password' });
+      }
+
+      // Return user data without password hash
+      const { passwordHash: _, ...userResponse } = user;
+      res.json(userResponse);
+    } catch (error) {
+      console.error('Login error:', error);
+      res.status(500).json({ message: 'Failed to sign in' });
+    }
+  });
+
+  // Open Beta Fetch Patterns Routes
+  app.post('/api/fetch-patterns-open/upload', upload.array('files'), async (req: any, res) => {
+    try {
+      const { userId } = req.body;
+      const files = req.files as Express.Multer.File[];
+      
+      if (!files || files.length === 0) {
+        return res.status(400).json({ message: "No files uploaded" });
+      }
+
+      if (!userId) {
+        return res.status(401).json({ message: "User authentication required" });
+      }
+
+      // Verify user exists
+      const user = await storage.getOpenBetaUser(userId);
+      if (!user) {
+        return res.status(401).json({ message: "Invalid user" });
+      }
+
+      const sessionLimit = 20;
+      if (files.length > sessionLimit) {
+        return res.status(429).json({ message: `Please upload no more than ${sessionLimit} documents at once` });
+      }
+
+      const analysisPromises = files.map(async (file) => {
+        const analysisId = nanoid();
+        
+        const analysis = {
+          id: analysisId,
+          userId: userId,
+          filename: `${nanoid()}_${file.originalname}`,
+          originalName: file.originalname,
+          mimeType: file.mimetype,
+          size: file.size,
+          status: 'processing' as const,
+          uploadDate: new Date(),
+        };
+
+        // Store initial analysis in database
+        await storage.createOpenBetaDocumentAnalysis(analysis);
+
+        // Process document asynchronously with AI analysis
+        setImmediate(async () => {
+          try {
+            const result = await processDocumentWithAI(file.buffer, file.mimetype);
+            
+            // Update analysis with completed results
+            await storage.updateOpenBetaDocumentAnalysis(analysisId, {
+              status: 'completed',
+              extractedText: result.extractedText,
+              classification: result.classification,
+              sentiment: result.sentiment,
+              keywords: result.keywords,
+              insights: result.insights,
+              riskFlags: result.riskFlags,
+              summary: result.summary,
+              wordCloud: result.wordCloud,
+              completedAt: new Date(),
+            });
+            
+            console.log(`Document ${file.originalname} processed successfully for user ${userId}`);
+          } catch (error) {
+            console.error(`Error processing document ${file.originalname}:`, error);
+            await storage.updateOpenBetaDocumentAnalysis(analysisId, {
+              status: 'error',
+              processingError: (error as Error).message,
+            });
+          }
+        });
+
+        return { id: analysisId };
+      });
+
+      const results = await Promise.all(analysisPromises);
+      res.json({ 
+        message: `Successfully uploaded ${files.length} document(s)`,
+        analyses: results 
+      });
+    } catch (error) {
+      console.error("Upload error:", error);
+      res.status(500).json({ message: "Failed to upload documents" });
+    }
+  });
+
+  app.get('/api/fetch-patterns-open/analyses', async (req, res) => {
+    try {
+      const { userId } = req.query;
+      
+      if (!userId) {
+        return res.status(401).json({ message: "User authentication required" });
+      }
+
+      const analyses = await storage.getOpenBetaUserDocumentAnalyses(userId as string);
+      res.json(analyses);
+    } catch (error) {
+      console.error("Error fetching analyses:", error);
+      res.status(500).json({ message: "Failed to fetch analyses" });
+    }
+  });
+
+  app.post('/api/fetch-patterns-open/ask', async (req, res) => {
+    try {
+      const { question, userId } = req.body;
+      
+      if (!question || !userId) {
+        return res.status(400).json({ message: "Question and user authentication required" });
+      }
+
+      const documents = await storage.getOpenBetaUserDocumentAnalyses(userId);
+      const completedDocuments = documents.filter(doc => doc.status === 'completed' && doc.extractedText);
+
+      if (!completedDocuments || completedDocuments.length === 0) {
+        return res.json({
+          answer: "No documents available to answer questions. Please upload some documents first.",
+          confidence: 0.0,
+          sources: []
+        });
+      }
+
+      const result = await answerQuestion(completedDocuments, question);
+      res.json(result);
+    } catch (error) {
+      console.error("Question answering error:", error);
+      res.status(500).json({ message: "Failed to answer question" });
+    }
+  });
+
+  app.post('/api/fetch-patterns-open/analyze-context', async (req, res) => {
+    try {
+      const { context, userId } = req.body;
+      
+      if (!context || !userId) {
+        return res.status(400).json({ message: "Context and user authentication required" });
+      }
+
+      const documents = await storage.getOpenBetaUserDocumentAnalyses(userId);
+      const completedDocuments = documents.filter(doc => doc.status === 'completed' && doc.extractedText);
+
+      if (!completedDocuments || completedDocuments.length === 0) {
+        return res.json({
+          context,
+          mentions: 0,
+          sentimentBreakdown: { positive: 0, negative: 0, neutral: 0 },
+          emotionalTone: [],
+          keyPhrases: [],
+          summary: "No documents available for context analysis."
+        });
+      }
+
+      const result = await analyzeContext(completedDocuments, context);
+      res.json(result);
+    } catch (error) {
+      console.error("Context analysis error:", error);
+      res.status(500).json({ message: "Failed to analyze context" });
+    }
+  });
+
   // PerMeaTe Enterprise routes
   app.post('/api/permeate/analyze-csv', async (req, res) => {
     try {
