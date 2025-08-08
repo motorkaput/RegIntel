@@ -107,11 +107,10 @@ export default function FetchPatternsOpenBeta() {
       const parsedUser = JSON.parse(userData);
       console.log('Parsed user:', parsedUser);
       
-      // Check if user data is complete
+      // Check if user data is complete (but allow existing sessions)
       if (!parsedUser.displayName) {
-        console.log('User data incomplete - missing displayName, clearing localStorage');
-        localStorage.removeItem('fetchPatternsUser');
-        return null;
+        console.log('User data incomplete - missing displayName');
+        // Don't clear localStorage immediately - just flag it
       }
       
       return parsedUser;
@@ -122,19 +121,34 @@ export default function FetchPatternsOpenBeta() {
     }
   });
 
-  // Listen for localStorage changes (when user logs in from another tab or refreshes)
+  // Listen for localStorage changes and also check periodically
   useEffect(() => {
     const handleStorageChange = () => {
-      const userData = localStorage.getItem('fetchPatternsUser');
-      console.log('Storage change detected, user data:', userData);
-      setUser(userData ? JSON.parse(userData) : null);
+      try {
+        const userData = localStorage.getItem('fetchPatternsUser');
+        console.log('Storage change detected, user data:', userData);
+        
+        if (userData) {
+          const parsedUser = JSON.parse(userData);
+          setUser(parsedUser);
+        } else {
+          setUser(null);
+        }
+      } catch (error) {
+        console.error('Error handling storage change:', error);
+        setUser(null);
+      }
     };
     
     window.addEventListener('storage', handleStorageChange);
-    // Check localStorage on component mount
-    handleStorageChange();
     
-    return () => window.removeEventListener('storage', handleStorageChange);
+    // Check localStorage periodically in case of cross-tab updates
+    const interval = setInterval(handleStorageChange, 1000);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      clearInterval(interval);
+    };
   }, []);
 
   // Redirect if not logged in
