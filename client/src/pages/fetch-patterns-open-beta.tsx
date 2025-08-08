@@ -335,7 +335,7 @@ export default function FetchPatternsOpenBeta() {
               Fetch Patterns Open Beta
             </h1>
             <p className="text-lg mt-2" style={{ color: colors.text }}>
-              Welcome back, <span className="font-medium">{user.displayName}</span>!
+              Welcome back, <span className="font-medium">{user?.displayName || 'User'}</span>!
             </p>
           </div>
           <div className="flex space-x-3">
