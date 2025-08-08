@@ -17,6 +17,17 @@ import * as d3 from 'd3';
 import cloud from 'd3-cloud';
 import jsPDF from 'jspdf';
 
+// Color constants
+const colors = {
+  primary: '#8B5FBF', // Soft purple
+  secondary: '#FF8A80', // Soft coral
+  accent: '#81C784', // Soft green
+  background: '#f1f5f9', // Light grey background
+  surface: '#FFFFFF',
+  text: '#000000', // Black text for better readability
+  muted: '#4A4A4A'
+};
+
 // Animated fetch companion component
 const FetchCompanion = ({ isProcessing }: { isProcessing: boolean }) => {
   const [position, setPosition] = useState(0);
@@ -81,17 +92,6 @@ export default function FetchPatternsOpenBeta() {
   const [contextQuery, setContextQuery] = useState('');
   const [wordCloudGenerated, setWordCloudGenerated] = useState(false);
   const wordCloudRef = useRef<SVGSVGElement>(null);
-  
-  // Pastel colors theme
-  const colors = {
-    primary: '#8B5FBF', // Soft purple
-    secondary: '#FF8A80', // Soft coral
-    accent: '#81C784', // Soft green
-    background: '#f1f5f9', // Light grey background
-    surface: '#FFFFFF',
-    text: '#000000', // Black text for better readability
-    muted: '#4A4A4A'
-  };
 
   // Get user from localStorage
   const [user, setUser] = useState(() => {
@@ -564,7 +564,7 @@ export default function FetchPatternsOpenBeta() {
             <Card className="border border-purple-200">
               <CardHeader>
                 <CardTitle style={{ color: colors.primary }}>Document Analysis Results</CardTitle>
-                <CardDescription>
+                <CardDescription className="text-black">
                   View the AI analysis results for your uploaded documents.
                 </CardDescription>
               </CardHeader>
@@ -573,7 +573,7 @@ export default function FetchPatternsOpenBeta() {
                   {isLoading ? (
                     <div className="text-center py-8">Loading documents...</div>
                   ) : analyses.length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground">
+                    <div className="text-center py-8 text-black">
                       No documents uploaded yet. Start by uploading some files!
                     </div>
                   ) : (
@@ -625,7 +625,7 @@ export default function FetchPatternsOpenBeta() {
                                         Summary:
                                       </Tooltip>
                                     </span>
-                                    <p className="mt-1 text-sm text-muted-foreground">{analysis.summary}</p>
+                                    <p className="mt-1 text-sm text-black">{analysis.summary}</p>
                                   </div>
                                 )}
 
@@ -651,7 +651,7 @@ export default function FetchPatternsOpenBeta() {
                             {analysis.status === 'processing' && (
                               <div className="space-y-2">
                                 <Progress value={33} className="w-full" />
-                                <p className="text-sm text-muted-foreground">
+                                <p className="text-sm text-black">
                                   AI is analyzing your document...
                                 </p>
                               </div>
@@ -679,7 +679,7 @@ export default function FetchPatternsOpenBeta() {
             <Card className="border border-purple-200">
               <CardHeader>
                 <CardTitle style={{ color: colors.primary }}>Ask Questions</CardTitle>
-                <CardDescription>
+                <CardDescription className="text-black">
                   Ask questions about your uploaded documents and get AI-powered answers.
                 </CardDescription>
               </CardHeader>
@@ -707,7 +707,7 @@ export default function FetchPatternsOpenBeta() {
                       <div className="space-y-3">
                         <div>
                           <span className="font-medium text-green-800">Answer:</span>
-                          <p className="mt-1">{askMutation.data.answer}</p>
+                          <p className="mt-1 text-black">{askMutation.data.answer}</p>
                         </div>
                         
                         {askMutation.data.confidence && (
@@ -751,7 +751,7 @@ export default function FetchPatternsOpenBeta() {
             <Card className="border border-purple-200">
               <CardHeader>
                 <CardTitle style={{ color: colors.primary }}>Document Insights</CardTitle>
-                <CardDescription>
+                <CardDescription className="text-black">
                   Get contextual analysis and insights from your document collection.
                 </CardDescription>
               </CardHeader>
@@ -818,7 +818,7 @@ export default function FetchPatternsOpenBeta() {
                         {contextMutation.data.summary && (
                           <div>
                             <span className="font-medium text-blue-800">Analysis Summary:</span>
-                            <p className="mt-1">{contextMutation.data.summary}</p>
+                            <p className="mt-1 text-black">{contextMutation.data.summary}</p>
                           </div>
                         )}
 
