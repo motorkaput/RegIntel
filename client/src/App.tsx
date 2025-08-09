@@ -13,7 +13,9 @@ import Pricing from "@/pages/pricing";
 import Subscription from "@/pages/subscription";
 import FetchPatterns from "@/pages/fetch-patterns";
 import FetchPatternsApp from "@/pages/fetch-patterns-app";
+import FetchPatternsBeta2 from "@/pages/fetch-patterns-beta2";
 import BetaLogin from "@/pages/beta-login";
+import Beta2Login from "@/pages/beta2-login";
 import PerMeateBetaLogin from "@/pages/permeate-beta-login";
 import PerMeaTeEnterpriseApp from "@/pages/permeate-enterprise-app";
 import PerMeaTeEnhanced from "@/pages/permeate-enhanced";
@@ -49,7 +51,9 @@ function Router() {
       
       {/* SaaS Application routes - beta protected */}
       <Route path="/beta-login" component={BetaLogin} />
+      <Route path="/beta2-login" component={Beta2Login} />
       <Route path="/x7k9p/fp-analyzer" component={FetchPatternsApp} />
+      <Route path="/h5p2m/fp-beta2" component={FetchPatternsBeta2} />
       <Route path="/z9m3k/pe-beta-login" component={PerMeateBetaLogin} />
       
 
