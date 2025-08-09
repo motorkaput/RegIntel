@@ -133,7 +133,7 @@ export default function FetchPatternsOpenBeta() {
     enabled: !!sessionUser?.id,
     refetchInterval: 3000, // Poll every 3 seconds for updates
     queryFn: async () => {
-      const response = await apiRequest(`/api/fetch-patterns-open/analyses?userId=${sessionUser.id}`, 'GET');
+      const response = await apiRequest(`/api/fetch-patterns-open/analyses?userId=${sessionUser?.id}`, 'GET');
       return response as unknown as any[];
     }
   });
@@ -188,7 +188,7 @@ export default function FetchPatternsOpenBeta() {
     mutationFn: async (questionText: string) => {
       return await apiRequest('/api/fetch-patterns-open/ask', 'POST', {
         question: questionText,
-        userId: user.id,
+        userId: user?.id || '',
       }) as any;
     },
     onError: (error: Error) => {
@@ -205,7 +205,7 @@ export default function FetchPatternsOpenBeta() {
     mutationFn: async (context: string) => {
       return await apiRequest('/api/fetch-patterns-open/analyze-context', 'POST', {
         context,
-        userId: user.id,
+        userId: user?.id || '',
       }) as any;
     },
     onError: (error: Error) => {
@@ -367,7 +367,7 @@ export default function FetchPatternsOpenBeta() {
     doc.setFontSize(12);
     doc.setTextColor(74, 74, 74);
     doc.text(`Generated on: ${new Date().toLocaleDateString()}`, margin, yPosition);
-    doc.text(`User: ${user.displayName}`, pageWidth - margin - 60, yPosition);
+    doc.text(`User: ${user?.displayName || 'User'}`, pageWidth - margin - 60, yPosition);
     yPosition += 20;
 
     // Summary
