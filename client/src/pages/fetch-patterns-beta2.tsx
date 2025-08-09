@@ -94,8 +94,16 @@ export default function FetchPatternsBeta2() {
         formData.append('files', file);
       });
 
-      const response = await apiRequest("POST", "/api/fetch-patterns/upload", formData);
-      return response;
+      const response = await fetch("/api/fetch-patterns/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error(`Upload failed: ${response.statusText}`);
+      }
+
+      return await response.json();
     },
     onSuccess: () => {
       setSelectedFiles([]);
@@ -125,9 +133,9 @@ export default function FetchPatternsBeta2() {
         question,
         documents: documentsForAnalysis
       });
-      return response;
+      return await response.json();
     },
-    onSuccess: (data) => {
+    onSuccess: (data: any) => {
       setQaHistory(prev => [...prev, {
         question,
         answer: data.answer,
@@ -154,9 +162,9 @@ export default function FetchPatternsBeta2() {
         context,
         documents: documentsForAnalysis
       });
-      return response;
+      return await response.json();
     },
-    onSuccess: (data) => {
+    onSuccess: (data: ContextAnalysis) => {
       setContextHistory(prev => [...prev, data]);
       setContextInput("");
     },
@@ -212,7 +220,7 @@ export default function FetchPatternsBeta2() {
   };
 
   const selectAllDocuments = () => {
-    if (!analyses) return;
+    if (!analyses || !Array.isArray(analyses)) return;
     const allIds = analyses.map((doc: DocumentAnalysis) => doc.id);
     setSelectedDocuments(allIds);
   };
@@ -269,15 +277,15 @@ export default function FetchPatternsBeta2() {
     }
   };
 
-  const completedAnalyses = analyses?.filter((doc: DocumentAnalysis) => doc.status === 'completed') || [];
-  const processingCount = analyses?.filter((doc: DocumentAnalysis) => doc.status === 'processing').length || 0;
+  const completedAnalyses = Array.isArray(analyses) ? analyses.filter((doc: DocumentAnalysis) => doc.status === 'completed') : [];
+  const processingCount = Array.isArray(analyses) ? analyses.filter((doc: DocumentAnalysis) => doc.status === 'processing').length : 0;
 
   return (
-    <div className="min-h-screen bg-[#1e1e1e]">
+    <div className="min-h-screen bg-surface-white">
       <Navbar />
       
       {/* Sticky Fetch Patterns Header */}
-      <div className="sticky top-16 z-40 bg-[#252526] border-b border-[#3e3e42] shadow-sm">
+      <div className="sticky top-16 z-40 bg-white border-b border-gray-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-12">
             <div className="flex items-center space-x-3">
@@ -286,7 +294,7 @@ export default function FetchPatternsBeta2() {
                 alt="Fetch Patterns" 
                 className="h-6 w-6"
               />
-              <h1 className="text-sm font-semibold text-[#cccccc]">
+              <h1 className="text-sm font-semibold text-gray-900">
                 Fetch Patterns Beta2
               </h1>
             </div>
@@ -296,13 +304,13 @@ export default function FetchPatternsBeta2() {
                 variant="ghost"
                 size="sm"
                 onClick={exportToPDF}
-                className="text-[#cccccc] hover:text-white hover:bg-[#2d2d30] h-8"
+                className="text-gray-600 hover:text-gray-900 hover:bg-gray-100 h-8"
               >
                 <Download className="h-4 w-4 mr-1" />
                 PDF Report
               </Button>
               
-              <div className="flex items-center space-x-2 text-sm text-[#cccccc]">
+              <div className="flex items-center space-x-2 text-sm text-gray-600">
                 <User className="h-4 w-4" />
                 <span>BetaUser2</span>
               </div>
@@ -311,7 +319,7 @@ export default function FetchPatternsBeta2() {
                 variant="ghost"
                 size="sm"
                 onClick={handleLogout}
-                className="text-[#cccccc] hover:text-white hover:bg-[#2d2d30] h-8"
+                className="text-gray-600 hover:text-gray-900 hover:bg-gray-100 h-8"
               >
                 <LogOut className="h-4 w-4 mr-1" />
                 Logout
@@ -324,26 +332,26 @@ export default function FetchPatternsBeta2() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" id="analysis-content">
         
         {/* Document Upload Section */}
-        <Card className="mb-8 bg-[#2d2d30] border-[#3e3e42]">
+        <Card className="mb-8 bg-white border border-gray-200 shadow-lg">
           <CardHeader className="pb-4">
             <div className="flex items-center space-x-2">
-              <Upload className="h-5 w-5 text-[#569cd6]" />
-              <CardTitle className="text-[#cccccc]">Document Upload</CardTitle>
+              <Upload className="h-5 w-5 text-blue-600" />
+              <CardTitle className="text-gray-900">Document Upload</CardTitle>
             </div>
-            <CardDescription className="text-[#9cdcfe]">
+            <CardDescription className="text-gray-600">
               Upload documents for AI-powered analysis and insights
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <div className="flex items-center justify-center w-full">
-                <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-[#3e3e42] border-dashed rounded-lg cursor-pointer bg-[#1e1e1e] hover:bg-[#2d2d30] transition-colors">
+                <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors">
                   <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                    <Upload className="w-8 h-8 mb-4 text-[#569cd6]" />
-                    <p className="mb-2 text-sm text-[#cccccc]">
+                    <Upload className="w-8 h-8 mb-4 text-blue-600" />
+                    <p className="mb-2 text-sm text-gray-700">
                       <span className="font-semibold">Click to upload documents</span>
                     </p>
-                    <p className="text-xs text-[#9cdcfe]">
+                    <p className="text-xs text-gray-500">
                       Supports PDF, DOCX, XLSX, PPTX, images, and more
                     </p>
                   </div>
@@ -359,11 +367,11 @@ export default function FetchPatternsBeta2() {
               
               {selectedFiles.length > 0 && (
                 <div className="space-y-2">
-                  <h4 className="font-medium text-[#cccccc]">Uploaded Files:</h4>
+                  <h4 className="font-medium text-gray-900">Uploaded Files:</h4>
                   {selectedFiles.map((file, index) => (
-                    <div key={index} className="flex items-center justify-between p-2 bg-[#1e1e1e] rounded-md">
-                      <span className="text-sm text-[#cccccc]">{file.name}</span>
-                      <span className="text-xs text-[#9cdcfe]">{(file.size / 1024).toFixed(1)} KB</span>
+                    <div key={index} className="flex items-center justify-between p-2 bg-gray-100 rounded-md">
+                      <span className="text-sm text-gray-700">{file.name}</span>
+                      <span className="text-xs text-gray-500">{(file.size / 1024).toFixed(1)} KB</span>
                     </div>
                   ))}
                 </div>
@@ -371,7 +379,7 @@ export default function FetchPatternsBeta2() {
               
               {uploadProgress > 0 && (
                 <div className="space-y-2">
-                  <div className="flex justify-between text-sm text-[#cccccc]">
+                  <div className="flex justify-between text-sm text-gray-700">
                     <span>Upload Progress</span>
                     <span>{uploadProgress}%</span>
                   </div>
@@ -382,7 +390,7 @@ export default function FetchPatternsBeta2() {
               <Button
                 onClick={handleUpload}
                 disabled={selectedFiles.length === 0 || uploadMutation.isPending}
-                className="w-full bg-[#0e639c] hover:bg-[#1177bb] text-white font-medium"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium"
               >
                 {uploadMutation.isPending ? "Uploading..." : "Upload Files"}
               </Button>
@@ -392,19 +400,19 @@ export default function FetchPatternsBeta2() {
 
         {/* Document Selection and Analysis */}
         {completedAnalyses.length > 0 && (
-          <Card className="mb-8 bg-[#2d2d30] border-[#3e3e42]">
+          <Card className="mb-8 bg-white border border-gray-200 shadow-lg">
             <CardHeader className="pb-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
-                  <FileText className="h-5 w-5 text-[#569cd6]" />
-                  <CardTitle className="text-[#cccccc]">Document Selection</CardTitle>
+                  <FileText className="h-5 w-5 text-blue-600" />
+                  <CardTitle className="text-gray-900">Document Selection</CardTitle>
                 </div>
                 <div className="flex space-x-2">
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={selectAllDocuments}
-                    className="border-[#3e3e42] text-[#cccccc] hover:bg-[#1e1e1e]"
+                    className="border-gray-300 text-gray-700 hover:bg-gray-50"
                   >
                     Select All
                   </Button>
@@ -412,13 +420,13 @@ export default function FetchPatternsBeta2() {
                     variant="outline"
                     size="sm"
                     onClick={clearSelection}
-                    className="border-[#3e3e42] text-[#cccccc] hover:bg-[#1e1e1e]"
+                    className="border-gray-300 text-gray-700 hover:bg-gray-50"
                   >
                     Clear
                   </Button>
                 </div>
               </div>
-              <CardDescription className="text-[#9cdcfe]">
+              <CardDescription className="text-gray-600">
                 Select documents for Q&A and context analysis ({selectedDocuments.length} selected)
               </CardDescription>
             </CardHeader>
@@ -429,14 +437,14 @@ export default function FetchPatternsBeta2() {
                     key={doc.id}
                     className={`p-3 rounded-md border cursor-pointer transition-colors ${
                       selectedDocuments.includes(doc.id)
-                        ? 'bg-[#0e639c] border-[#1177bb] text-white'
-                        : 'bg-[#1e1e1e] border-[#3e3e42] text-[#cccccc] hover:bg-[#2d2d30]'
+                        ? 'bg-blue-600 border-blue-600 text-white'
+                        : 'bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100'
                     }`}
                     onClick={() => toggleDocumentSelection(doc.id)}
                   >
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-medium">{doc.originalName}</span>
-                      <Badge variant="secondary" className="bg-[#2d2d30] text-[#cccccc] border-[#3e3e42]">
+                      <Badge variant="secondary" className="bg-gray-200 text-gray-700 border-gray-300">
                         {doc.classification}
                       </Badge>
                     </div>
@@ -448,13 +456,13 @@ export default function FetchPatternsBeta2() {
         )}
 
         {/* Q&A Section */}
-        <Card className="mb-8 bg-[#2d2d30] border-[#3e3e42]">
+        <Card className="mb-8 bg-white border border-gray-200 shadow-lg">
           <CardHeader className="pb-4">
             <div className="flex items-center space-x-2">
-              <MessageSquare className="h-5 w-5 text-[#569cd6]" />
-              <CardTitle className="text-[#cccccc]">Document Q&A</CardTitle>
+              <MessageSquare className="h-5 w-5 text-blue-600" />
+              <CardTitle className="text-gray-900">Document Q&A</CardTitle>
             </div>
-            <CardDescription className="text-[#9cdcfe]">
+            <CardDescription className="text-gray-600">
               Ask questions about your uploaded documents
             </CardDescription>
           </CardHeader>
@@ -464,12 +472,12 @@ export default function FetchPatternsBeta2() {
                 value={question}
                 onChange={(e) => setQuestion(e.target.value)}
                 placeholder="Ask a question about your documents..."
-                className="bg-[#1e1e1e] border-[#3e3e42] text-[#cccccc] placeholder-[#858585]"
+                className="bg-white border-gray-300 text-gray-900 placeholder-gray-500"
               />
               <Button
                 type="submit"
                 disabled={!question.trim() || questionMutation.isPending || completedAnalyses.length === 0}
-                className="bg-[#0e639c] hover:bg-[#1177bb] text-white font-medium"
+                className="bg-blue-600 hover:bg-blue-700 text-white font-medium"
               >
                 {questionMutation.isPending ? "Processing..." : "Ask Question"}
               </Button>
@@ -477,18 +485,18 @@ export default function FetchPatternsBeta2() {
             
             {qaHistory.length > 0 && (
               <div className="mt-6 space-y-4">
-                <h4 className="font-medium text-[#cccccc]">Q&A History:</h4>
+                <h4 className="font-medium text-gray-900">Q&A History:</h4>
                 {qaHistory.map((qa, index) => (
-                  <div key={index} className="p-4 bg-[#1e1e1e] rounded-md">
+                  <div key={index} className="p-4 bg-gray-50 rounded-md">
                     <div className="mb-2">
-                      <span className="font-medium text-[#569cd6]">Q: </span>
-                      <span className="text-[#cccccc]">{qa.question}</span>
+                      <span className="font-medium text-blue-600">Q: </span>
+                      <span className="text-gray-700">{qa.question}</span>
                     </div>
                     <div className="mb-2">
-                      <span className="font-medium text-[#4ec9b0]">A: </span>
-                      <span className="text-[#cccccc]">{qa.answer}</span>
+                      <span className="font-medium text-green-600">A: </span>
+                      <span className="text-gray-700">{qa.answer}</span>
                     </div>
-                    <div className="text-xs text-[#9cdcfe]">
+                    <div className="text-xs text-gray-500">
                       Confidence: {(qa.confidence * 100).toFixed(1)}%
                     </div>
                   </div>
@@ -499,13 +507,13 @@ export default function FetchPatternsBeta2() {
         </Card>
 
         {/* Context Analysis Section */}
-        <Card className="mb-8 bg-[#2d2d30] border-[#3e3e42]">
+        <Card className="mb-8 bg-white border border-gray-200 shadow-lg">
           <CardHeader className="pb-4">
             <div className="flex items-center space-x-2">
-              <Brain className="h-5 w-5 text-[#569cd6]" />
-              <CardTitle className="text-[#cccccc]">Context Analysis</CardTitle>
+              <Brain className="h-5 w-5 text-blue-600" />
+              <CardTitle className="text-gray-900">Context Analysis</CardTitle>
             </div>
-            <CardDescription className="text-[#9cdcfe]">
+            <CardDescription className="text-gray-600">
               Analyze specific contexts across your documents
             </CardDescription>
           </CardHeader>
@@ -515,12 +523,12 @@ export default function FetchPatternsBeta2() {
                 value={contextInput}
                 onChange={(e) => setContextInput(e.target.value)}
                 placeholder="Enter context to analyze (e.g., 'risk management', 'financial performance')..."
-                className="bg-[#1e1e1e] border-[#3e3e42] text-[#cccccc] placeholder-[#858585]"
+                className="bg-white border-gray-300 text-gray-900 placeholder-gray-500"
               />
               <Button
                 type="submit"
                 disabled={!contextInput.trim() || contextMutation.isPending || completedAnalyses.length === 0}
-                className="bg-[#0e639c] hover:bg-[#1177bb] text-white font-medium"
+                className="bg-blue-600 hover:bg-blue-700 text-white font-medium"
               >
                 {contextMutation.isPending ? "Analyzing..." : "Analyze Context"}
               </Button>
@@ -528,33 +536,33 @@ export default function FetchPatternsBeta2() {
             
             {contextHistory.length > 0 && (
               <div className="mt-6 space-y-4">
-                <h4 className="font-medium text-[#cccccc]">Context Analysis History:</h4>
+                <h4 className="font-medium text-gray-900">Context Analysis History:</h4>
                 {contextHistory.map((analysis, index) => (
-                  <div key={index} className="p-4 bg-[#1e1e1e] rounded-md">
-                    <h5 className="font-medium text-[#569cd6] mb-2">Context: {analysis.context}</h5>
+                  <div key={index} className="p-4 bg-gray-50 rounded-md">
+                    <h5 className="font-medium text-blue-600 mb-2">Context: {analysis.context}</h5>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <p className="text-sm font-medium text-[#cccccc] mb-1">Mentions: {analysis.mentions}</p>
-                        <p className="text-sm font-medium text-[#cccccc] mb-1">Sentiment Breakdown:</p>
-                        <div className="text-xs text-[#9cdcfe] space-y-1">
+                        <p className="text-sm font-medium text-gray-700 mb-1">Mentions: {analysis.mentions}</p>
+                        <p className="text-sm font-medium text-gray-700 mb-1">Sentiment Breakdown:</p>
+                        <div className="text-xs text-gray-600 space-y-1">
                           <div>Positive: {analysis.sentimentBreakdown.positive}%</div>
                           <div>Negative: {analysis.sentimentBreakdown.negative}%</div>
                           <div>Neutral: {analysis.sentimentBreakdown.neutral}%</div>
                         </div>
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-[#cccccc] mb-1">Emotional Tone:</p>
+                        <p className="text-sm font-medium text-gray-700 mb-1">Emotional Tone:</p>
                         <div className="flex flex-wrap gap-1 mb-2">
                           {analysis.emotionalTone.map((tone, i) => (
-                            <Badge key={i} variant="secondary" className="bg-[#2d2d30] text-[#cccccc] border-[#3e3e42]">
+                            <Badge key={i} variant="secondary" className="bg-gray-200 text-gray-700 border-gray-300">
                               {tone}
                             </Badge>
                           ))}
                         </div>
-                        <p className="text-sm font-medium text-[#cccccc] mb-1">Key Phrases:</p>
+                        <p className="text-sm font-medium text-gray-700 mb-1">Key Phrases:</p>
                         <div className="flex flex-wrap gap-1">
                           {analysis.keyPhrases.map((phrase, i) => (
-                            <Badge key={i} variant="outline" className="border-[#3e3e42] text-[#cccccc]">
+                            <Badge key={i} variant="outline" className="border-gray-300 text-gray-700">
                               {phrase}
                             </Badge>
                           ))}
@@ -562,8 +570,8 @@ export default function FetchPatternsBeta2() {
                       </div>
                     </div>
                     <div className="mt-3">
-                      <p className="text-sm font-medium text-[#cccccc] mb-1">Summary:</p>
-                      <p className="text-sm text-[#9cdcfe]">{analysis.summary}</p>
+                      <p className="text-sm font-medium text-gray-700 mb-1">Summary:</p>
+                      <p className="text-sm text-gray-600">{analysis.summary}</p>
                     </div>
                   </div>
                 ))}
@@ -574,23 +582,23 @@ export default function FetchPatternsBeta2() {
 
         {/* Document Analysis Results */}
         {completedAnalyses.length > 0 && (
-          <Card className="mb-8 bg-[#2d2d30] border-[#3e3e42]">
+          <Card className="mb-8 bg-white border border-gray-200 shadow-lg">
             <CardHeader className="pb-4">
               <div className="flex items-center space-x-2">
-                <BarChart3 className="h-5 w-5 text-[#569cd6]" />
-                <CardTitle className="text-[#cccccc]">Analysis Results</CardTitle>
+                <BarChart3 className="h-5 w-5 text-blue-600" />
+                <CardTitle className="text-gray-900">Analysis Results</CardTitle>
               </div>
-              <CardDescription className="text-[#9cdcfe]">
+              <CardDescription className="text-gray-600">
                 Completed document analyses and insights
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid gap-6">
                 {completedAnalyses.map((doc: DocumentAnalysis) => (
-                  <div key={doc.id} className="p-4 bg-[#1e1e1e] rounded-md">
+                  <div key={doc.id} className="p-4 bg-gray-50 rounded-md">
                     <div className="flex items-center justify-between mb-4">
-                      <h4 className="font-medium text-[#cccccc]">{doc.originalName}</h4>
-                      <Badge variant="secondary" className="bg-[#2d2d30] text-[#cccccc] border-[#3e3e42]">
+                      <h4 className="font-medium text-gray-900">{doc.originalName}</h4>
+                      <Badge variant="secondary" className="bg-gray-200 text-gray-700 border-gray-300">
                         {doc.classification}
                       </Badge>
                     </div>
