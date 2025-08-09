@@ -141,8 +141,16 @@ export default function FetchPatternsEnhanced() {
         formData.append('files', file);
       });
 
-      const response = await apiRequest("POST", "/api/upload", formData);
-      return response;
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error(`Upload failed: ${response.statusText}`);
+      }
+
+      return await response.json();
     },
     onSuccess: () => {
       setUploadedFiles([]);
