@@ -195,12 +195,26 @@ export default function FetchPatternsEnhanced() {
   // Upload mutation
   const uploadMutation = useMutation({
     mutationFn: async (files: File[]) => {
+      console.log('Starting upload mutation with files:', files);
       const formData = new FormData();
       files.forEach(file => formData.append('files', file));
       formData.append('userId', currentUser.id);
       
-      const res = await apiRequest('/api/upload', 'POST', formData);
-      return res.json();
+      console.log('FormData created, making direct fetch request to /api/upload');
+      
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Upload failed');
+      }
+
+      console.log('Upload successful, response status:', response.status);
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/document-analyses"] });
@@ -222,11 +236,22 @@ export default function FetchPatternsEnhanced() {
   // Question mutation
   const questionMutation = useMutation({
     mutationFn: async (question: string) => {
-      const res = await apiRequest('/api/question', 'POST', {
-        question,
-        documents: analyses.filter(a => a.status === 'completed')
+      const response = await fetch('/api/question', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          question,
+          documents: analyses.filter(a => a.status === 'completed')
+        }),
+        credentials: 'include',
       });
-      return res.json();
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Question failed');
+      }
+
+      return response.json();
     },
     onError: (error: Error) => {
       toast({
@@ -240,11 +265,22 @@ export default function FetchPatternsEnhanced() {
   // Context analysis mutation
   const contextMutation = useMutation({
     mutationFn: async (context: string) => {
-      const res = await apiRequest('/api/context-analysis', 'POST', {
-        context,
-        documents: analyses.filter(a => a.status === 'completed')
+      const response = await fetch('/api/context-analysis', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          context,
+          documents: analyses.filter(a => a.status === 'completed')
+        }),
+        credentials: 'include',
       });
-      return res.json();
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Context analysis failed');
+      }
+
+      return response.json();
     },
     onError: (error: Error) => {
       toast({
