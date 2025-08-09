@@ -1,5 +1,6 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
+import { setupAuth, isAuthenticated } from "./replitAuth";
 
 // Helper function to build org chart
 function buildOrgChart(employees: any[]): any[] {
@@ -140,6 +141,9 @@ const upload = multer({
 const freeVersionAnalyses = new Map<string, any>();
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Set up Replit Auth
+  await setupAuth(app);
+  
   // Initialize Razorpay
   initializeRazorpay();
 

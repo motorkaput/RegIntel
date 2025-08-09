@@ -96,17 +96,17 @@ export default function FetchPatternsOpenBeta() {
   // Session-based authentication
   const [user, setUser] = useState(null);
 
-  // Check session on mount
+  // Check Replit Auth session
   const { data: sessionUser, isLoading: sessionLoading } = useQuery({
-    queryKey: ['/api/fetch-patterns-open/session'],
+    queryKey: ['/api/fetch-patterns-open/user'],
     retry: false,
     refetchOnWindowFocus: false,
     onSuccess: (data) => {
-      console.log('Session loaded:', data);
+      console.log('User authenticated:', data);
       setUser(data);
     },
     onError: (error) => {
-      console.log('No valid session:', error);
+      console.log('User not authenticated:', error);
       setUser(null);
     }
   });
@@ -114,10 +114,10 @@ export default function FetchPatternsOpenBeta() {
   // Redirect if not authenticated after session check
   useEffect(() => {
     if (!sessionLoading && !sessionUser) {
-      console.log('No valid session, redirecting to login');
-      setLocation('/fetch-patterns-open-login');
+      console.log('User not authenticated, redirecting to login');
+      window.location.href = '/api/login?returnTo=/fetch-patterns-open';
     }
-  }, [sessionUser, sessionLoading, setLocation]);
+  }, [sessionUser, sessionLoading]);
 
   // Fetch user's document analyses
   const { data: analyses = [], isLoading } = useQuery({
@@ -331,17 +331,8 @@ export default function FetchPatternsOpenBeta() {
     });
   };
 
-  const handleLogout = async () => {
-    try {
-      await apiRequest('/api/fetch-patterns-open/logout', 'POST');
-      setUser(null);
-      setLocation('/fetch-patterns-open-login');
-    } catch (error) {
-      console.error('Logout error:', error);
-      // Force logout anyway
-      setUser(null);
-      setLocation('/fetch-patterns-open-login');
-    }
+  const handleLogout = () => {
+    window.location.href = '/api/logout';
   };
 
   const downloadPDF = () => {
