@@ -186,10 +186,11 @@ export default function FetchPatternsEnhanced() {
     displayName: "Enhanced User" 
   };
 
-  // Fetch analyses
+  // Fetch analyses with automatic polling when processing
   const { data: analyses = [], isLoading: analysesLoading } = useQuery<DocumentAnalysis[]>({
     queryKey: ["/api/document-analyses", currentUser.id],
     enabled: !!currentUser.id,
+    refetchInterval: 3000, // Poll every 3 seconds for processing updates
   });
 
   // Upload mutation
@@ -466,7 +467,7 @@ export default function FetchPatternsEnhanced() {
 
   return (
     <div className="min-h-screen" style={{ 
-      background: 'linear-gradient(135deg, #A0D2E8 0%, #E5EAF5 25%, #D3B0F4 50%, #A45BB3 75%, #49405F 100%)'
+      background: 'linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 25%, #d0d0d0 50%, #c0c0c0 75%, #a0a0a0 100%)'
     }}>
       <Navbar />
       
@@ -599,9 +600,9 @@ export default function FetchPatternsEnhanced() {
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="flex flex-col gap-8">
           {/* Upload Section */}
-          <div className="lg:col-span-2">
+          <div className="w-full">
             <Card className="backdrop-blur-sm border-2" style={{
               backgroundColor: 'rgba(229, 234, 245, 0.7)',
               borderColor: '#D3B0F4'
@@ -790,9 +791,7 @@ export default function FetchPatternsEnhanced() {
             )}
           </div>
 
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Q&A Section */}
+          {/* Document Q&A */}
             <Card className="backdrop-blur-sm border-2" style={{
               backgroundColor: 'rgba(229, 234, 245, 0.7)',
               borderColor: '#A0D2E8'
@@ -940,7 +939,6 @@ export default function FetchPatternsEnhanced() {
                 </CardContent>
               </Card>
             )}
-          </div>
         </div>
       </div>
 
