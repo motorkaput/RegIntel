@@ -8,14 +8,25 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 // Session configuration for white-label auth
+import connectPgSimple from 'connect-pg-simple';
+
+const PostgresSessionStore = connectPgSimple(session);
+
 app.use(session({
+  store: new PostgresSessionStore({
+    conString: process.env.DATABASE_URL,
+    createTableIfMissing: true,
+    tableName: 'sessions'
+  }),
   secret: process.env.SESSION_SECRET || 'fallback-secret-for-dev',
   resave: false,
   saveUninitialized: false,
+  name: 'fetchPatterns.sid', // Custom session name
   cookie: {
     secure: false, // Set to true in production with HTTPS
     httpOnly: true,
-    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    sameSite: 'lax' // Important for cookies to work properly
   }
 }));
 
