@@ -141,8 +141,7 @@ const upload = multer({
 const freeVersionAnalyses = new Map<string, any>();
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Set up Replit Auth
-  await setupAuth(app);
+  // White-label authentication system
   
   // Initialize Razorpay
   initializeRazorpay();
@@ -735,6 +734,125 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/fetch-patterns-open/session', async (req: any, res) => {
     try {
       const sessionUser = req.session.fetchPatternsUser;
+      console.log('Session check:', sessionUser);
+      
+      if (!sessionUser) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+      
+      res.json(sessionUser);
+    } catch (error) {
+      console.error("Session check error:", error);
+      res.status(500).json({ message: "Session check failed" });
+    }
+  });
+
+  app.post('/api/fetch-patterns-open/logout', async (req: any, res) => {
+    try {
+      req.session.destroy((err: any) => {
+        if (err) {
+          console.error("Logout error:", err);
+          return res.status(500).json({ message: "Logout failed" });
+        }
+        res.json({ message: "Logged out successfully" });
+      });
+    } catch (error) {
+      console.error("Logout error:", error);
+      res.status(500).json({ message: "Logout failed" });
+    }
+  });
+
+  // Fetch Patterns Open Beta Registration
+  app.post('/api/fetch-patterns-open/register', async (req, res) => {
+    try {
+      const { email, password, displayName } = req.body;
+      
+      if (!email || !password || !displayName) {
+        return res.status(400).json({ message: "All fields are required" });
+      }
+
+      // Check if user already exists
+      const existingUser = await storage.getOpenBetaUserByEmail(email);
+      if (existingUser) {
+        return res.status(409).json({ message: "Email already registered" });
+      }
+
+      // Hash password
+      const bcrypt = await import('bcrypt');
+      const saltRounds = 10;
+      const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+      // Create user
+      const userData = {
+        id: nanoid(),
+        email,
+        displayName,
+        passwordHash: hashedPassword,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+
+      const user = await storage.createOpenBetaUser(userData);
+      
+      // Create session
+      (req as any).session.fetchPatternsUser = {
+        id: user.id,
+        email: user.email,
+        displayName: user.displayName
+      };
+      
+      // Return user data without password
+      const { passwordHash: _, ...userResponse } = user;
+      res.status(201).json(userResponse);
+    } catch (error) {
+      console.error("Open beta registration error:", error);
+      res.status(500).json({ message: "Failed to create account" });
+    }
+  });
+
+  app.post('/api/fetch-patterns-open/login', async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      
+      if (!email || !password) {
+        return res.status(400).json({ message: "Email and password are required" });
+      }
+
+      // Find user
+      const user = await storage.getOpenBetaUserByEmail(email);
+      if (!user) {
+        return res.status(401).json({ message: "Invalid email or password" });
+      }
+
+      // Verify password using bcrypt
+      const bcrypt = await import('bcrypt');
+      const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
+      if (!isPasswordValid) {
+        return res.status(401).json({ message: "Invalid email or password" });
+      }
+
+      // Create server-side session
+      (req as any).session.fetchPatternsUser = {
+        id: user.id,
+        email: user.email,
+        displayName: user.displayName
+      };
+
+      console.log('Session created for user:', (req as any).session.fetchPatternsUser);
+
+      // Return user data without password
+      const { passwordHash: _, ...userResponse } = user;
+      res.json(userResponse);
+    } catch (error) {
+      console.error("Open beta login error:", error);
+      res.status(500).json({ message: "Login failed" });
+    }
+  });
+
+  // Session-based auth route
+  app.get('/api/fetch-patterns-open/session', async (req: any, res) => {
+    try {
+      const sessionUser = req.session?.fetchPatternsUser;
       console.log('Session check:', sessionUser);
       
       if (!sessionUser) {
