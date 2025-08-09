@@ -377,19 +377,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Fetch Patterns API routes - now free
-  // Get enhanced version analyses (specific endpoint for enhanced user)
-  app.get('/api/document-analyses/enhanced_user_1', async (req: any, res) => {
-    try {
-      const userAnalyses = Array.from(freeVersionAnalyses.values())
-        .filter(analysis => analysis.userId === 'enhanced_user_1')
-        .sort((a, b) => new Date(b.uploadDate).getTime() - new Date(a.uploadDate).getTime());
-      
-      res.json(userAnalyses);
-    } catch (error) {
-      console.error("Error fetching enhanced analyses:", error);
-      res.status(500).json({ message: "Failed to fetch analyses" });
-    }
-  });
+
 
   app.get('/api/fetch-patterns/analyses', async (req: any, res) => {
     try {
@@ -402,84 +390,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Enhanced Fetch Patterns upload endpoint
-  app.post('/api/upload', upload.array('files'), async (req: any, res) => {
-    try {
-      const files = req.files as Express.Multer.File[];
-      
-      if (!files || files.length === 0) {
-        return res.status(400).json({ message: "No files uploaded" });
-      }
 
-      // For enhanced version, use session-based storage
-      const sessionLimit = 20; // Allow up to 20 documents per session
-      
-      if (files.length > sessionLimit) {
-        return res.status(429).json({ message: `Please upload no more than ${sessionLimit} documents at once` });
-      }
-
-      const analysisPromises = files.map(async (file) => {
-        const analysisId = nanoid();
-        
-        // Create temporary analysis object without database storage
-        const analysis = {
-          id: analysisId,
-          userId: 'enhanced_user_1', // Enhanced user ID
-          filename: `${nanoid()}_${file.originalname}`,
-          originalName: file.originalname,
-          mimeType: file.mimetype,
-          size: file.size,
-          status: 'processing' as const,
-          uploadDate: new Date(),
-        };
-
-        // Store initial analysis in memory
-        freeVersionAnalyses.set(analysisId, analysis);
-
-        // Process document asynchronously with AI analysis
-        setImmediate(async () => {
-          try {
-            const result = await processDocumentWithAI(file.buffer, file.mimetype);
-            
-            // Update analysis with completed results in memory
-            const completedAnalysis = {
-              ...analysis,
-              status: 'completed',
-              extractedText: result.extractedText,
-              classification: result.classification,
-              sentiment: result.sentiment,
-              keywords: result.keywords,
-              insights: result.insights,
-              riskFlags: result.riskFlags,
-              summary: result.summary,
-              wordCloud: result.wordCloud,
-              completedAt: new Date(),
-            };
-            
-            freeVersionAnalyses.set(analysisId, completedAnalysis);
-            console.log(`Document ${file.originalname} processed successfully (enhanced version)`);
-          } catch (error) {
-            console.error(`Error processing document ${file.originalname}:`, error);
-            // Update with error status
-            const errorAnalysis = {
-              ...analysis,
-              status: 'error',
-              processingError: (error as Error).message,
-            };
-            freeVersionAnalyses.set(analysisId, errorAnalysis);
-          }
-        });
-
-        return analysis;
-      });
-
-      const analyses = await Promise.all(analysisPromises);
-      res.json({ message: `${files.length} files uploaded successfully`, analyses });
-    } catch (error) {
-      console.error("Error uploading files:", error);
-      res.status(500).json({ message: "Failed to upload files" });
-    }
-  });
 
   // Original Fetch Patterns upload endpoint  
   app.post('/api/fetch-patterns/upload', upload.array('files'), async (req: any, res) => {
@@ -590,42 +501,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Enhanced version question answering endpoint
-  app.post('/api/question', async (req: any, res) => {
-    try {
-      const { question, documents } = req.body;
-      
-      if (!question) {
-        return res.status(400).json({ message: "Question is required" });
-      }
 
-      if (!documents || documents.length === 0) {
-        return res.json({
-          answer: "No documents available to answer questions. Please upload some documents first.",
-          confidence: 0.0,
-          sources: []
-        });
-      }
-
-      // Get enhanced user analyses only
-      const enhancedAnalyses = Array.from(freeVersionAnalyses.values())
-        .filter(analysis => analysis.userId === 'enhanced_user_1' && analysis.status === 'completed');
-
-      if (enhancedAnalyses.length === 0) {
-        return res.json({
-          answer: "No completed document analyses available. Please upload and analyze some documents first.",
-          confidence: 0.0,
-          sources: []
-        });
-      }
-
-      const result = await answerQuestion(question, enhancedAnalyses);
-      res.json(result);
-    } catch (error) {
-      console.error("Error answering question:", error);
-      res.status(500).json({ message: "Failed to answer question" });
-    }
-  });
 
   // Question answering endpoint - now free
   app.post('/api/fetch-patterns/question', async (req: any, res) => {
@@ -652,48 +528,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Enhanced version context analysis endpoint
-  app.post('/api/context-analysis', async (req: any, res) => {
-    try {
-      const { context, documents } = req.body;
-      
-      if (!context) {
-        return res.status(400).json({ message: "Context is required" });
-      }
 
-      if (!documents || documents.length === 0) {
-        return res.json({
-          context,
-          mentions: 0,
-          sentimentBreakdown: { positive: 0, negative: 0, neutral: 100 },
-          emotionalTone: ['neutral'],
-          keyPhrases: [],
-          summary: "No documents available for context analysis."
-        });
-      }
-
-      // Get enhanced user analyses only
-      const enhancedAnalyses = Array.from(freeVersionAnalyses.values())
-        .filter(analysis => analysis.userId === 'enhanced_user_1' && analysis.status === 'completed');
-
-      if (enhancedAnalyses.length === 0) {
-        return res.json({
-          context,
-          mentions: 0,
-          sentimentBreakdown: { positive: 0, negative: 0, neutral: 100 },
-          emotionalTone: ['neutral'],
-          keyPhrases: [],
-          summary: "No completed document analyses available for context analysis."
-        });
-      }
-
-      const result = await analyzeContext(enhancedAnalyses, context);
-      res.json(result);
-    } catch (error) {
-      console.error("Error analyzing context:", error);
-      res.status(500).json({ message: "Failed to analyze context" });
-    }
-  });
 
   // Context analysis endpoint - now free
   app.post('/api/fetch-patterns/context-analysis', async (req: any, res) => {
