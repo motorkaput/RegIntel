@@ -199,7 +199,7 @@ export default function FetchPatternsEnhanced() {
       files.forEach(file => formData.append('files', file));
       formData.append('userId', currentUser.id);
       
-      const res = await apiRequest('POST', '/api/upload', formData);
+      const res = await apiRequest('/api/upload', 'POST', formData);
       return res.json();
     },
     onSuccess: () => {
@@ -222,7 +222,7 @@ export default function FetchPatternsEnhanced() {
   // Question mutation
   const questionMutation = useMutation({
     mutationFn: async (question: string) => {
-      const res = await apiRequest('POST', '/api/question', {
+      const res = await apiRequest('/api/question', 'POST', {
         question,
         documents: analyses.filter(a => a.status === 'completed')
       });
@@ -240,7 +240,7 @@ export default function FetchPatternsEnhanced() {
   // Context analysis mutation
   const contextMutation = useMutation({
     mutationFn: async (context: string) => {
-      const res = await apiRequest('POST', '/api/context-analysis', {
+      const res = await apiRequest('/api/context-analysis', 'POST', {
         context,
         documents: analyses.filter(a => a.status === 'completed')
       });
