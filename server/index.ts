@@ -20,13 +20,14 @@ app.use(session({
   }),
   secret: process.env.SESSION_SECRET || 'fallback-secret-for-dev',
   resave: false,
-  saveUninitialized: false,
-  name: 'fetchPatterns.sid', // Custom session name
+  saveUninitialized: true, // Save uninitialized sessions
+  name: 'fetchPatterns.sid',
   cookie: {
-    secure: false, // Set to true in production with HTTPS
+    secure: false,
     httpOnly: true,
-    maxAge: 24 * 60 * 60 * 1000, // 24 hours
-    sameSite: 'lax' // Important for cookies to work properly
+    maxAge: 24 * 60 * 60 * 1000,
+    sameSite: 'lax',
+    path: '/' // Ensure cookie works for all paths
   }
 }));
 

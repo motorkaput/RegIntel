@@ -682,6 +682,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const user = await storage.createOpenBetaUser(userData);
       
+      // Create server-side session
+      (req as any).session.fetchPatternsUser = {
+        id: user.id,
+        email: user.email,
+        displayName: user.displayName
+      };
+
+      // Force session save
+      await new Promise((resolve, reject) => {
+        (req as any).session.save((err: any) => {
+          if (err) {
+            console.error('Session save error:', err);
+            reject(err);
+          } else {
+            console.log('Session saved successfully for new user:', (req as any).session.fetchPatternsUser);
+            resolve(true);
+          }
+        });
+      });
+      
       // Return user data without password
       const { passwordHash: _, ...userResponse } = user;
       res.status(201).json(userResponse);
