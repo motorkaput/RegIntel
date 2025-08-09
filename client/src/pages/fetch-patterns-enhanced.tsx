@@ -187,7 +187,7 @@ export default function FetchPatternsEnhanced() {
   };
 
   // Fetch analyses
-  const { data: analyses = [], isLoading: analysesLoading } = useQuery({
+  const { data: analyses = [], isLoading: analysesLoading } = useQuery<DocumentAnalysis[]>({
     queryKey: ["/api/document-analyses", currentUser.id],
     enabled: !!currentUser.id,
   });
