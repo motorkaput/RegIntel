@@ -82,10 +82,15 @@ function AnalysisProcessingAnimation({ completedCount, totalCount }: AnalysisPro
   const progressPercentage = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
 
   return (
-    <div className="flex flex-col items-center justify-center p-8 bg-gradient-to-br from-purple-50 to-blue-50 rounded-lg border border-purple-200">
+    <div className="flex flex-col items-center justify-center p-8 rounded-lg border" style={{
+      background: 'linear-gradient(135deg, #E5EAF5 0%, #D3B0F4 100%)',
+      borderColor: '#A45BB3'
+    }}>
       {/* Animated brain icon */}
       <div className="relative mb-6">
-        <div className="w-16 h-16 bg-gradient-to-br from-purple-400 to-blue-400 rounded-full flex items-center justify-center animate-pulse">
+        <div className="w-16 h-16 rounded-full flex items-center justify-center animate-pulse" style={{
+          background: 'linear-gradient(135deg, #A45BB3 0%, #A0D2E8 100%)'
+        }}>
           <Brain className="w-8 h-8 text-white" />
         </div>
         {/* Floating dots animation */}
@@ -93,9 +98,10 @@ function AnalysisProcessingAnimation({ completedCount, totalCount }: AnalysisPro
           {[0, 1, 2].map((index) => (
             <div
               key={index}
-              className={`w-2 h-2 bg-purple-400 rounded-full transition-all duration-300 ${
+              className={`w-2 h-2 rounded-full transition-all duration-300 ${
                 currentDot === index ? 'scale-125 opacity-100' : 'scale-75 opacity-50'
               }`}
+              style={{ backgroundColor: '#A45BB3' }}
             />
           ))}
         </div>
@@ -103,42 +109,51 @@ function AnalysisProcessingAnimation({ completedCount, totalCount }: AnalysisPro
 
       {/* Progress information */}
       <div className="text-center mb-4">
-        <h3 className="text-lg font-semibold text-purple-800 mb-2">
+        <h3 className="text-lg font-semibold mb-2" style={{ color: '#49405F' }}>
           Analyzing Your Documents
         </h3>
-        <p className="text-sm text-purple-600 mb-4">
+        <p className="text-sm mb-4" style={{ color: '#49405F' }}>
           Our AI is processing your files and extracting insights...
         </p>
-        <div className="text-xs text-purple-500">
+        <div className="text-xs" style={{ color: '#A45BB3' }}>
           {completedCount} of {totalCount} documents analyzed
         </div>
       </div>
 
       {/* Custom progress bar */}
       <div className="w-full max-w-md">
-        <div className="w-full bg-purple-100 rounded-full h-3 mb-2">
+        <div className="w-full rounded-full h-3 mb-2" style={{ backgroundColor: '#E5EAF5' }}>
           <div 
-            className="bg-gradient-to-r from-purple-400 to-blue-400 h-3 rounded-full transition-all duration-500 ease-out"
-            style={{ width: `${progressPercentage}%` }}
+            className="h-3 rounded-full transition-all duration-500 ease-out"
+            style={{ 
+              width: `${progressPercentage}%`,
+              background: 'linear-gradient(90deg, #A45BB3 0%, #A0D2E8 100%)'
+            }}
           />
         </div>
-        <div className="text-center text-xs text-purple-500">
+        <div className="text-center text-xs" style={{ color: '#A45BB3' }}>
           {Math.round(progressPercentage)}% complete
         </div>
       </div>
 
       {/* Animated processing steps */}
-      <div className="mt-6 flex items-center space-x-4 text-xs text-purple-600">
+      <div className="mt-6 flex items-center space-x-4 text-xs" style={{ color: '#49405F' }}>
         <div className="flex items-center space-x-1">
-          <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" />
+          <div className="w-2 h-2 rounded-full animate-bounce" style={{ backgroundColor: '#A45BB3' }} />
           <span>Extracting text</span>
         </div>
         <div className="flex items-center space-x-1">
-          <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '200ms' }} />
+          <div className="w-2 h-2 rounded-full animate-bounce" style={{ 
+            backgroundColor: '#A0D2E8',
+            animationDelay: '200ms' 
+          }} />
           <span>Analyzing sentiment</span>
         </div>
         <div className="flex items-center space-x-1">
-          <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '400ms' }} />
+          <div className="w-2 h-2 rounded-full animate-bounce" style={{ 
+            backgroundColor: '#D3B0F4',
+            animationDelay: '400ms' 
+          }} />
           <span>Generating insights</span>
         </div>
       </div>
@@ -313,12 +328,12 @@ export default function FetchPatternsEnhanced() {
 
     // Header
     pdf.setFontSize(20);
-    pdf.setTextColor(160, 210, 232); // Light blue from color scheme
-    pdf.text('Fetch Patterns - Analysis Report', 20, yPosition);
+    pdf.setTextColor(160, 210, 232); // #A0D2E8 - Light blue from color scheme
+    pdf.text('Fetch Patterns Enhanced - Analysis Report', 20, yPosition);
     yPosition += 20;
 
     pdf.setFontSize(12);
-    pdf.setTextColor(73, 64, 95); // Dark purple from color scheme
+    pdf.setTextColor(73, 64, 95); // #49405F - Dark purple from color scheme
     pdf.text(`Generated on: ${new Date().toLocaleDateString()}`, 20, yPosition);
     pdf.text(`Total Documents Analyzed: ${completedAnalyses.length}`, 20, yPosition + 10);
     yPosition += 30;
@@ -331,7 +346,7 @@ export default function FetchPatternsEnhanced() {
       }
 
       pdf.setFontSize(14);
-      pdf.setTextColor(164, 91, 179); // Medium purple from color scheme
+      pdf.setTextColor(164, 91, 179); // #A45BB3 - Medium purple from color scheme
       pdf.text(`${index + 1}. ${analysis.originalName}`, 20, yPosition);
       yPosition += 15;
 
@@ -378,12 +393,12 @@ export default function FetchPatternsEnhanced() {
     }
 
     pdf.setFontSize(16);
-    pdf.setTextColor(164, 91, 179);
+    pdf.setTextColor(164, 91, 179); // #A45BB3 - Medium purple from color scheme
     pdf.text('Summary Statistics', 20, yPosition);
     yPosition += 20;
 
     pdf.setFontSize(10);
-    pdf.setTextColor(73, 64, 95);
+    pdf.setTextColor(73, 64, 95); // #49405F - Dark purple from color scheme
 
     const sentimentCounts = completedAnalyses.reduce((acc: any, analysis: DocumentAnalysis) => {
       if (analysis.sentiment) {
@@ -431,7 +446,12 @@ export default function FetchPatternsEnhanced() {
             <Button
               variant="outline"
               onClick={() => setShowGuide(true)}
-              className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+              className="text-white hover:text-white border-2"
+              style={{ 
+                backgroundColor: 'rgba(164, 91, 179, 0.2)',
+                borderColor: '#E5EAF5',
+                backdropFilter: 'blur(8px)'
+              }}
             >
               <HelpCircle className="w-4 h-4 mr-2" />
               User Guide
@@ -440,8 +460,13 @@ export default function FetchPatternsEnhanced() {
             {completedAnalyses.length > 0 && (
               <Button
                 onClick={generatePDFReport}
-                className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+                className="text-white hover:text-white border-2"
                 variant="outline"
+                style={{ 
+                  backgroundColor: 'rgba(160, 210, 232, 0.2)',
+                  borderColor: '#D3B0F4',
+                  backdropFilter: 'blur(8px)'
+                }}
               >
                 <FileDown className="w-4 h-4 mr-2" />
                 Download PDF Report
@@ -456,7 +481,12 @@ export default function FetchPatternsEnhanced() {
             <Button
               variant="outline"
               onClick={handleLogout}
-              className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+              className="text-white hover:text-white border-2"
+              style={{ 
+                backgroundColor: 'rgba(73, 64, 95, 0.3)',
+                borderColor: '#A0D2E8',
+                backdropFilter: 'blur(8px)'
+              }}
             >
               <LogOut className="w-4 h-4" />
             </Button>
@@ -468,19 +498,20 @@ export default function FetchPatternsEnhanced() {
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-lg p-6 max-w-2xl max-h-[80vh] overflow-y-auto">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-2xl font-bold text-purple-800">Fetch Patterns User Guide</h2>
+                <h2 className="text-2xl font-bold" style={{ color: '#49405F' }}>Fetch Patterns Enhanced User Guide</h2>
                 <Button
                   variant="ghost"
                   onClick={() => setShowGuide(false)}
-                  className="text-purple-600 hover:text-purple-800"
+                  style={{ color: '#A45BB3' }}
+                  className="hover:opacity-70"
                 >
                   ×
                 </Button>
               </div>
               
-              <div className="space-y-6 text-gray-700">
+              <div className="space-y-6" style={{ color: '#49405F' }}>
                 <section>
-                  <h3 className="text-lg font-semibold text-purple-700 mb-2">Getting Started</h3>
+                  <h3 className="text-lg font-semibold mb-2" style={{ color: '#A45BB3' }}>Getting Started</h3>
                   <p className="mb-2">Fetch Patterns Enhanced is your AI-powered document analysis tool. Here's how to use it:</p>
                   <ol className="list-decimal list-inside space-y-1 ml-4">
                     <li>Upload your documents using the file selector</li>
@@ -492,7 +523,7 @@ export default function FetchPatternsEnhanced() {
                 </section>
 
                 <section>
-                  <h3 className="text-lg font-semibold text-purple-700 mb-2">Supported File Types</h3>
+                  <h3 className="text-lg font-semibold mb-2" style={{ color: '#A45BB3' }}>Supported File Types</h3>
                   <ul className="list-disc list-inside space-y-1 ml-4">
                     <li>PDF documents (.pdf)</li>
                     <li>Word documents (.docx)</li>
@@ -503,7 +534,7 @@ export default function FetchPatternsEnhanced() {
                 </section>
 
                 <section>
-                  <h3 className="text-lg font-semibold text-purple-700 mb-2">Analysis Features</h3>
+                  <h3 className="text-lg font-semibold mb-2" style={{ color: '#A45BB3' }}>Analysis Features</h3>
                   <ul className="list-disc list-inside space-y-1 ml-4">
                     <li><strong>Sentiment Analysis:</strong> Understand emotional tone</li>
                     <li><strong>Classification:</strong> Automatic document categorization</li>
@@ -515,7 +546,7 @@ export default function FetchPatternsEnhanced() {
                 </section>
 
                 <section>
-                  <h3 className="text-lg font-semibold text-purple-700 mb-2">Tips for Best Results</h3>
+                  <h3 className="text-lg font-semibold mb-2" style={{ color: '#A45BB3' }}>Tips for Best Results</h3>
                   <ul className="list-disc list-inside space-y-1 ml-4">
                     <li>Upload clear, high-quality documents</li>
                     <li>Use specific questions for better answers</li>
@@ -532,13 +563,16 @@ export default function FetchPatternsEnhanced() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Upload Section */}
           <div className="lg:col-span-2">
-            <Card className="bg-white/90 backdrop-blur-sm border-white/20">
+            <Card className="backdrop-blur-sm border-2" style={{
+              backgroundColor: 'rgba(229, 234, 245, 0.7)',
+              borderColor: '#D3B0F4'
+            }}>
               <CardHeader>
-                <CardTitle className="flex items-center text-purple-800">
+                <CardTitle className="flex items-center" style={{ color: '#49405F' }}>
                   <Upload className="w-5 h-5 mr-2" />
                   Document Upload & Analysis
                 </CardTitle>
-                <CardDescription className="text-purple-600">
+                <CardDescription style={{ color: '#A45BB3' }}>
                   Upload your documents for AI-powered analysis and insights
                 </CardDescription>
               </CardHeader>
@@ -549,10 +583,14 @@ export default function FetchPatternsEnhanced() {
                     multiple
                     accept=".pdf,.docx,.xlsx,.pptx,.jpg,.jpeg,.png"
                     onChange={handleFileSelect}
-                    className="border-purple-200 focus:border-purple-400"
+                    className="border-2 focus:border-2"
+                    style={{ 
+                      borderColor: '#A0D2E8',
+                      backgroundColor: 'rgba(255, 255, 255, 0.8)'
+                    }}
                   />
                   {files.length > 0 && (
-                    <div className="mt-2 text-sm text-purple-600">
+                    <div className="mt-2 text-sm" style={{ color: '#A45BB3' }}>
                       Selected: {files.map(f => f.name).join(", ")}
                     </div>
                   )}
@@ -561,7 +599,10 @@ export default function FetchPatternsEnhanced() {
                 <Button 
                   onClick={handleUpload}
                   disabled={files.length === 0 || uploadMutation.isPending}
-                  className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                  className="w-full text-white hover:opacity-90"
+                  style={{
+                    background: 'linear-gradient(135deg, #A45BB3 0%, #A0D2E8 100%)'
+                  }}
                 >
                   {uploadMutation.isPending ? "Uploading..." : "Upload & Analyze"}
                 </Button>
@@ -580,9 +621,12 @@ export default function FetchPatternsEnhanced() {
 
             {/* Document Results */}
             {completedAnalyses.length > 0 && (
-              <Card className="bg-white/90 backdrop-blur-sm border-white/20 mt-6">
+              <Card className="backdrop-blur-sm border-2 mt-6" style={{
+                backgroundColor: 'rgba(229, 234, 245, 0.7)',
+                borderColor: '#D3B0F4'
+              }}>
                 <CardHeader>
-                  <CardTitle className="flex items-center justify-between text-purple-800">
+                  <CardTitle className="flex items-center justify-between" style={{ color: '#49405F' }}>
                     <span className="flex items-center">
                       <FileText className="w-5 h-5 mr-2" />
                       Analysis Results ({completedAnalyses.length})
@@ -594,13 +638,17 @@ export default function FetchPatternsEnhanced() {
                     {completedAnalyses.map((doc: DocumentAnalysis) => (
                       <div
                         key={doc.id}
-                        className="p-4 border border-purple-100 rounded-lg hover:bg-purple-50 transition-colors cursor-pointer"
+                        className="p-4 border-2 rounded-lg transition-colors cursor-pointer hover:opacity-80"
+                        style={{
+                          borderColor: '#A0D2E8',
+                          backgroundColor: 'rgba(255, 255, 255, 0.6)'
+                        }}
                         onClick={() => setSelectedAnalysis(selectedAnalysis?.id === doc.id ? null : doc)}
                       >
                         <div className="flex items-center justify-between">
                           <div>
-                            <h3 className="font-medium text-purple-800">{doc.originalName}</h3>
-                            <p className="text-sm text-purple-600">
+                            <h3 className="font-medium" style={{ color: '#49405F' }}>{doc.originalName}</h3>
+                            <p className="text-sm" style={{ color: '#A45BB3' }}>
                               {new Date(doc.uploadDate).toLocaleDateString()}
                             </p>
                           </div>
@@ -609,13 +657,20 @@ export default function FetchPatternsEnhanced() {
                               <Badge 
                                 variant={doc.sentiment.label === 'positive' ? 'default' : 
                                        doc.sentiment.label === 'negative' ? 'destructive' : 'secondary'}
-                                className="bg-gradient-to-r from-purple-100 to-blue-100 text-purple-800"
+                                className="text-white"
+                                style={{
+                                  background: doc.sentiment.label === 'positive' ? '#A0D2E8' :
+                                            doc.sentiment.label === 'negative' ? '#A45BB3' : '#D3B0F4'
+                                }}
                               >
                                 {doc.sentiment.label}
                               </Badge>
                             )}
                             {doc.classification && (
-                              <Badge variant="outline" className="border-purple-200 text-purple-700">
+                              <Badge variant="outline" className="border-2" style={{
+                                borderColor: '#A45BB3',
+                                color: '#49405F'
+                              }}>
                                 {doc.classification}
                               </Badge>
                             )}
@@ -623,20 +678,23 @@ export default function FetchPatternsEnhanced() {
                         </div>
 
                         {selectedAnalysis?.id === doc.id && (
-                          <div className="mt-4 space-y-4 border-t border-purple-100 pt-4">
+                          <div className="mt-4 space-y-4 border-t pt-4" style={{ borderColor: '#D3B0F4' }}>
                             {doc.summary && (
                               <div>
-                                <h4 className="font-medium text-purple-800 mb-2">Summary</h4>
-                                <p className="text-sm text-gray-700">{doc.summary}</p>
+                                <h4 className="font-medium mb-2" style={{ color: '#49405F' }}>Summary</h4>
+                                <p className="text-sm" style={{ color: '#49405F' }}>{doc.summary}</p>
                               </div>
                             )}
 
                             {doc.keywords && doc.keywords.length > 0 && (
                               <div>
-                                <h4 className="font-medium text-purple-800 mb-2">Keywords</h4>
+                                <h4 className="font-medium mb-2" style={{ color: '#49405F' }}>Keywords</h4>
                                 <div className="flex flex-wrap gap-1">
                                   {doc.keywords.slice(0, 10).map((keyword, index) => (
-                                    <Badge key={index} variant="secondary" className="text-xs bg-purple-100 text-purple-700">
+                                    <Badge key={index} variant="secondary" className="text-xs" style={{
+                                      backgroundColor: '#E5EAF5',
+                                      color: '#A45BB3'
+                                    }}>
                                       {keyword}
                                     </Badge>
                                   ))}
@@ -646,11 +704,11 @@ export default function FetchPatternsEnhanced() {
 
                             {doc.insights && doc.insights.length > 0 && (
                               <div>
-                                <h4 className="font-medium text-purple-800 mb-2">Key Insights</h4>
-                                <ul className="text-sm text-gray-700 space-y-1">
+                                <h4 className="font-medium mb-2" style={{ color: '#49405F' }}>Key Insights</h4>
+                                <ul className="text-sm space-y-1" style={{ color: '#49405F' }}>
                                   {doc.insights.slice(0, 3).map((insight, index) => (
                                     <li key={index} className="flex items-start">
-                                      <span className="text-purple-400 mr-2">•</span>
+                                      <span className="mr-2" style={{ color: '#A45BB3' }}>•</span>
                                       {insight}
                                     </li>
                                   ))}
@@ -660,10 +718,12 @@ export default function FetchPatternsEnhanced() {
 
                             {doc.riskFlags && doc.riskFlags.length > 0 && (
                               <div>
-                                <h4 className="font-medium text-red-600 mb-2">Risk Flags</h4>
+                                <h4 className="font-medium mb-2" style={{ color: '#A45BB3' }}>Risk Flags</h4>
                                 <div className="flex flex-wrap gap-1">
                                   {doc.riskFlags.map((flag, index) => (
-                                    <Badge key={index} variant="destructive" className="text-xs">
+                                    <Badge key={index} variant="destructive" className="text-xs text-white" style={{
+                                      backgroundColor: '#A45BB3'
+                                    }}>
                                       {flag}
                                     </Badge>
                                   ))}
@@ -673,8 +733,10 @@ export default function FetchPatternsEnhanced() {
 
                             {doc.wordCloud && doc.wordCloud.length > 0 && (
                               <div>
-                                <h4 className="font-medium text-purple-800 mb-2">Word Cloud</h4>
-                                <div className="bg-gradient-to-br from-purple-50 to-blue-50 p-4 rounded-lg">
+                                <h4 className="font-medium mb-2" style={{ color: '#49405F' }}>Word Cloud</h4>
+                                <div className="p-4 rounded-lg" style={{
+                                  background: 'linear-gradient(135deg, #E5EAF5 0%, #A0D2E8 100%)'
+                                }}>
                                   <WordCloud words={doc.wordCloud} />
                                 </div>
                               </div>
@@ -692,13 +754,16 @@ export default function FetchPatternsEnhanced() {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Q&A Section */}
-            <Card className="bg-white/90 backdrop-blur-sm border-white/20">
+            <Card className="backdrop-blur-sm border-2" style={{
+              backgroundColor: 'rgba(229, 234, 245, 0.7)',
+              borderColor: '#A0D2E8'
+            }}>
               <CardHeader>
-                <CardTitle className="flex items-center text-purple-800">
+                <CardTitle className="flex items-center" style={{ color: '#49405F' }}>
                   <MessageSquare className="w-5 h-5 mr-2" />
                   Document Q&A
                 </CardTitle>
-                <CardDescription className="text-purple-600">
+                <CardDescription style={{ color: '#A45BB3' }}>
                   Ask questions about your uploaded documents
                 </CardDescription>
               </CardHeader>
@@ -707,22 +772,32 @@ export default function FetchPatternsEnhanced() {
                   placeholder="What would you like to know about your documents?"
                   value={question}
                   onChange={(e) => setQuestion(e.target.value)}
-                  className="border-purple-200 focus:border-purple-400"
+                  className="border-2 focus:border-2"
+                  style={{ 
+                    borderColor: '#D3B0F4',
+                    backgroundColor: 'rgba(255, 255, 255, 0.8)'
+                  }}
                 />
                 <Button 
                   onClick={handleAskQuestion}
                   disabled={!question.trim() || questionMutation.isPending}
-                  className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                  className="w-full text-white hover:opacity-90"
+                  style={{
+                    background: 'linear-gradient(135deg, #A45BB3 0%, #A0D2E8 100%)'
+                  }}
                 >
                   {questionMutation.isPending ? "Thinking..." : "Ask Question"}
                 </Button>
 
                 {questionMutation.data && (
-                  <div className="mt-4 p-4 bg-gradient-to-br from-purple-50 to-blue-50 rounded-lg border border-purple-100">
-                    <h4 className="font-medium text-purple-800 mb-2">Answer</h4>
-                    <p className="text-sm text-gray-700 mb-2">{questionMutation.data.answer}</p>
+                  <div className="mt-4 p-4 rounded-lg border-2" style={{
+                    background: 'linear-gradient(135deg, #E5EAF5 0%, #A0D2E8 100%)',
+                    borderColor: '#D3B0F4'
+                  }}>
+                    <h4 className="font-medium mb-2" style={{ color: '#49405F' }}>Answer</h4>
+                    <p className="text-sm mb-2" style={{ color: '#49405F' }}>{questionMutation.data.answer}</p>
                     {questionMutation.data.confidence && (
-                      <div className="text-xs text-purple-600">
+                      <div className="text-xs" style={{ color: '#A45BB3' }}>
                         Confidence: {(questionMutation.data.confidence * 100).toFixed(1)}%
                       </div>
                     )}
@@ -732,13 +807,16 @@ export default function FetchPatternsEnhanced() {
             </Card>
 
             {/* Context Analysis */}
-            <Card className="bg-white/90 backdrop-blur-sm border-white/20">
+            <Card className="backdrop-blur-sm border-2" style={{
+              backgroundColor: 'rgba(229, 234, 245, 0.7)',
+              borderColor: '#A0D2E8'
+            }}>
               <CardHeader>
-                <CardTitle className="flex items-center text-purple-800">
+                <CardTitle className="flex items-center" style={{ color: '#49405F' }}>
                   <Brain className="w-5 h-5 mr-2" />
                   Context Analysis
                 </CardTitle>
-                <CardDescription className="text-purple-600">
+                <CardDescription style={{ color: '#A45BB3' }}>
                   Analyze specific topics across all documents
                 </CardDescription>
               </CardHeader>
@@ -747,25 +825,35 @@ export default function FetchPatternsEnhanced() {
                   placeholder="Enter a topic or context to analyze"
                   value={contextQuery}
                   onChange={(e) => setContextQuery(e.target.value)}
-                  className="border-purple-200 focus:border-purple-400"
+                  className="border-2 focus:border-2"
+                  style={{ 
+                    borderColor: '#D3B0F4',
+                    backgroundColor: 'rgba(255, 255, 255, 0.8)'
+                  }}
                 />
                 <Button 
                   onClick={handleContextAnalysis}
                   disabled={!contextQuery.trim() || contextMutation.isPending}
-                  className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                  className="w-full text-white hover:opacity-90"
+                  style={{
+                    background: 'linear-gradient(135deg, #A45BB3 0%, #A0D2E8 100%)'
+                  }}
                 >
                   {contextMutation.isPending ? "Analyzing..." : "Analyze Context"}
                 </Button>
 
                 {contextMutation.data && (
-                  <div className="mt-4 p-4 bg-gradient-to-br from-purple-50 to-blue-50 rounded-lg border border-purple-100">
-                    <h4 className="font-medium text-purple-800 mb-2">Context Analysis</h4>
+                  <div className="mt-4 p-4 rounded-lg border-2" style={{
+                    background: 'linear-gradient(135deg, #E5EAF5 0%, #A0D2E8 100%)',
+                    borderColor: '#D3B0F4'
+                  }}>
+                    <h4 className="font-medium mb-2" style={{ color: '#49405F' }}>Context Analysis</h4>
                     <div className="space-y-2 text-sm">
-                      <div className="text-gray-700">
+                      <div style={{ color: '#49405F' }}>
                         <strong>Mentions:</strong> {contextMutation.data.mentions}
                       </div>
                       {contextMutation.data.summary && (
-                        <div className="text-gray-700">
+                        <div style={{ color: '#49405F' }}>
                           <strong>Summary:</strong> {contextMutation.data.summary}
                         </div>
                       )}
@@ -777,16 +865,19 @@ export default function FetchPatternsEnhanced() {
 
             {/* Analytics Overview */}
             {completedAnalyses.length > 0 && (
-              <Card className="bg-white/90 backdrop-blur-sm border-white/20">
+              <Card className="backdrop-blur-sm border-2" style={{
+                backgroundColor: 'rgba(229, 234, 245, 0.7)',
+                borderColor: '#A0D2E8'
+              }}>
                 <CardHeader>
-                  <CardTitle className="flex items-center text-purple-800">
+                  <CardTitle className="flex items-center" style={{ color: '#49405F' }}>
                     <BarChart3 className="w-5 h-5 mr-2" />
                     Analytics Overview
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4 text-sm">
-                    <div className="flex justify-between text-purple-700">
+                    <div className="flex justify-between" style={{ color: '#49405F' }}>
                       <span>Total Documents:</span>
                       <span className="font-medium">{completedAnalyses.length}</span>
                     </div>
@@ -800,7 +891,7 @@ export default function FetchPatternsEnhanced() {
                       }, {});
 
                       return Object.entries(sentimentCounts).map(([sentiment, count]) => (
-                        <div key={sentiment} className="flex justify-between text-purple-700">
+                        <div key={sentiment} className="flex justify-between" style={{ color: '#A45BB3' }}>
                           <span className="capitalize">{sentiment}:</span>
                           <span className="font-medium">{count as number}</span>
                         </div>
