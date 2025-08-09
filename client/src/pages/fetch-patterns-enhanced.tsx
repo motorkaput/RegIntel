@@ -222,9 +222,9 @@ export default function FetchPatternsEnhanced() {
   // Question mutation
   const questionMutation = useMutation({
     mutationFn: async (question: string) => {
-      const res = await apiRequest('POST', '/api/ask', {
+      const res = await apiRequest('POST', '/api/question', {
         question,
-        userId: currentUser.id
+        documents: analyses.filter(a => a.status === 'completed')
       });
       return res.json();
     },
@@ -240,9 +240,9 @@ export default function FetchPatternsEnhanced() {
   // Context analysis mutation
   const contextMutation = useMutation({
     mutationFn: async (context: string) => {
-      const res = await apiRequest('POST', '/api/analyze-context', {
+      const res = await apiRequest('POST', '/api/context-analysis', {
         context,
-        userId: currentUser.id
+        documents: analyses.filter(a => a.status === 'completed')
       });
       return res.json();
     },
