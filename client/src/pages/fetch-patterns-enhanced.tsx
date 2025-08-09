@@ -6,18 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Upload, 
-  FileText, 
-  BarChart3, 
-  Brain, 
-  MessageSquare,
-  Download,
-  User,
-  LogOut,
-  HelpCircle,
-  FileDown
-} from "lucide-react";
+// Icons removed as requested
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import fetchPatternsIcon from "@assets/FetchPatterns_Icon_1752663550310_1753148786989.png";
@@ -83,15 +72,15 @@ function AnalysisProcessingAnimation({ completedCount, totalCount }: AnalysisPro
 
   return (
     <div className="flex flex-col items-center justify-center p-8 rounded-lg border" style={{
-      background: 'linear-gradient(135deg, #E5EAF5 0%, #D3B0F4 100%)',
-      borderColor: '#A45BB3'
+      background: 'linear-gradient(135deg, #0049B7 0%, #FF1D58 100%)',
+      borderColor: '#00DDFF'
     }}>
-      {/* Animated brain icon */}
+      {/* Animated fetch dog */}
       <div className="relative mb-6">
-        <div className="w-16 h-16 rounded-full flex items-center justify-center animate-pulse" style={{
-          background: 'linear-gradient(135deg, #A45BB3 0%, #A0D2E8 100%)'
+        <div className="w-16 h-16 rounded-full flex items-center justify-center animate-bounce" style={{
+          background: 'linear-gradient(135deg, #FF1D58 0%, #00DDFF 100%)'
         }}>
-          <Brain className="w-8 h-8 text-white" />
+          <div className="text-2xl animate-pulse">🐕</div>
         </div>
         {/* Floating dots animation */}
         <div className="absolute -top-2 -right-2 flex space-x-1">
@@ -109,49 +98,49 @@ function AnalysisProcessingAnimation({ completedCount, totalCount }: AnalysisPro
 
       {/* Progress information */}
       <div className="text-center mb-4">
-        <h3 className="text-lg font-semibold mb-2" style={{ color: '#49405F' }}>
+        <h3 className="text-lg font-semibold mb-2 text-white">
           Analyzing Your Documents
         </h3>
-        <p className="text-sm mb-4" style={{ color: '#49405F' }}>
+        <p className="text-sm mb-4 text-white">
           Our AI is processing your files and extracting insights...
         </p>
-        <div className="text-xs" style={{ color: '#A45BB3' }}>
+        <div className="text-xs text-white">
           {completedCount} of {totalCount} documents analyzed
         </div>
       </div>
 
       {/* Custom progress bar */}
       <div className="w-full max-w-md">
-        <div className="w-full rounded-full h-3 mb-2" style={{ backgroundColor: '#E5EAF5' }}>
+        <div className="w-full rounded-full h-3 mb-2" style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)' }}>
           <div 
             className="h-3 rounded-full transition-all duration-500 ease-out"
             style={{ 
               width: `${progressPercentage}%`,
-              background: 'linear-gradient(90deg, #A45BB3 0%, #A0D2E8 100%)'
+              background: 'linear-gradient(90deg, #FFF685 0%, #00DDFF 100%)'
             }}
           />
         </div>
-        <div className="text-center text-xs" style={{ color: '#A45BB3' }}>
+        <div className="text-center text-xs text-white">
           {Math.round(progressPercentage)}% complete
         </div>
       </div>
 
       {/* Animated processing steps */}
-      <div className="mt-6 flex items-center space-x-4 text-xs" style={{ color: '#49405F' }}>
+      <div className="mt-6 flex items-center space-x-4 text-xs text-white">
         <div className="flex items-center space-x-1">
-          <div className="w-2 h-2 rounded-full animate-bounce" style={{ backgroundColor: '#A45BB3' }} />
+          <div className="w-2 h-2 rounded-full animate-bounce" style={{ backgroundColor: '#FFF685' }} />
           <span>Extracting text</span>
         </div>
         <div className="flex items-center space-x-1">
           <div className="w-2 h-2 rounded-full animate-bounce" style={{ 
-            backgroundColor: '#A0D2E8',
+            backgroundColor: '#00DDFF',
             animationDelay: '200ms' 
           }} />
           <span>Analyzing sentiment</span>
         </div>
         <div className="flex items-center space-x-1">
           <div className="w-2 h-2 rounded-full animate-bounce" style={{ 
-            backgroundColor: '#D3B0F4',
+            backgroundColor: '#F75990',
             animationDelay: '400ms' 
           }} />
           <span>Generating insights</span>
@@ -363,67 +352,75 @@ export default function FetchPatternsEnhanced() {
       return;
     }
 
-    const pdf = new jsPDF();
-    let yPosition = 20;
+    const pdf = new jsPDF('p', 'mm', 'a4'); // A4 portrait format
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const margin = 20;
+    const contentWidth = pageWidth - (2 * margin);
+    let yPosition = margin;
 
     // Header
-    pdf.setFontSize(20);
-    pdf.setTextColor(160, 210, 232); // #A0D2E8 - Light blue from color scheme
-    pdf.text('Fetch Patterns Enhanced - Analysis Report', 20, yPosition);
-    yPosition += 20;
+    pdf.setFontSize(18);
+    pdf.setTextColor(0, 73, 183); // #0049B7
+    pdf.text('Fetch Patterns Enhanced - Analysis Report', margin, yPosition);
+    yPosition += 15;
 
-    pdf.setFontSize(12);
-    pdf.setTextColor(73, 64, 95); // #49405F - Dark purple from color scheme
-    pdf.text(`Generated on: ${new Date().toLocaleDateString()}`, 20, yPosition);
-    pdf.text(`Total Documents Analyzed: ${completedAnalyses.length}`, 20, yPosition + 10);
-    yPosition += 30;
+    pdf.setFontSize(10);
+    pdf.setTextColor(0, 0, 0);
+    pdf.text(`Generated on: ${new Date().toLocaleDateString()}`, margin, yPosition);
+    pdf.text(`Total Documents Analyzed: ${completedAnalyses.length}`, margin, yPosition + 6);
+    yPosition += 20;
 
     // Document analyses
     completedAnalyses.forEach((analysis: DocumentAnalysis, index: number) => {
-      if (yPosition > 250) {
+      if (yPosition > pageHeight - 40) { // Leave 40mm at bottom
         pdf.addPage();
-        yPosition = 20;
+        yPosition = margin;
       }
 
-      pdf.setFontSize(14);
-      pdf.setTextColor(164, 91, 179); // #A45BB3 - Medium purple from color scheme
-      pdf.text(`${index + 1}. ${analysis.originalName}`, 20, yPosition);
-      yPosition += 15;
+      pdf.setFontSize(12);
+      pdf.setTextColor(255, 29, 88); // #FF1D58
+      pdf.text(`${index + 1}. ${analysis.originalName}`, margin, yPosition);
+      yPosition += 8;
 
-      pdf.setFontSize(10);
-      pdf.setTextColor(73, 64, 95);
+      pdf.setFontSize(9);
+      pdf.setTextColor(0, 0, 0);
 
       if (analysis.classification) {
-        pdf.text(`Classification: ${analysis.classification}`, 25, yPosition);
-        yPosition += 10;
+        pdf.text(`Classification: ${analysis.classification}`, margin + 5, yPosition);
+        yPosition += 6;
       }
 
       if (analysis.sentiment) {
-        pdf.text(`Sentiment: ${analysis.sentiment.label} (${(analysis.sentiment.score * 100).toFixed(1)}%)`, 25, yPosition);
-        yPosition += 10;
+        pdf.text(`Sentiment: ${analysis.sentiment.label} (${(analysis.sentiment.score * 100).toFixed(1)}%)`, margin + 5, yPosition);
+        yPosition += 6;
       }
 
       if (analysis.summary) {
-        const summaryLines = pdf.splitTextToSize(analysis.summary, 160);
-        pdf.text('Summary:', 25, yPosition);
-        yPosition += 10;
-        pdf.text(summaryLines, 25, yPosition);
-        yPosition += summaryLines.length * 5 + 10;
+        const summaryLines = pdf.splitTextToSize(analysis.summary, contentWidth - 10);
+        pdf.text('Summary:', margin + 5, yPosition);
+        yPosition += 6;
+        pdf.text(summaryLines, margin + 5, yPosition);
+        yPosition += summaryLines.length * 4 + 6;
       }
 
       if (analysis.keywords && analysis.keywords.length > 0) {
-        pdf.text(`Keywords: ${analysis.keywords.slice(0, 10).join(', ')}`, 25, yPosition);
-        yPosition += 10;
+        const keywordText = `Keywords: ${analysis.keywords.slice(0, 10).join(', ')}`;
+        const keywordLines = pdf.splitTextToSize(keywordText, contentWidth - 10);
+        pdf.text(keywordLines, margin + 5, yPosition);
+        yPosition += keywordLines.length * 4 + 3;
       }
 
       if (analysis.riskFlags && analysis.riskFlags.length > 0) {
-        pdf.setTextColor(220, 38, 127); // Warning color
-        pdf.text(`Risk Flags: ${analysis.riskFlags.join(', ')}`, 25, yPosition);
-        pdf.setTextColor(73, 64, 95);
-        yPosition += 10;
+        pdf.setTextColor(255, 29, 88); // #FF1D58
+        const riskText = `Risk Flags: ${analysis.riskFlags.join(', ')}`;
+        const riskLines = pdf.splitTextToSize(riskText, contentWidth - 10);
+        pdf.text(riskLines, margin + 5, yPosition);
+        pdf.setTextColor(0, 0, 0);
+        yPosition += riskLines.length * 4 + 6;
       }
 
-      yPosition += 10;
+      yPosition += 8;
     });
 
     // Summary statistics
@@ -493,7 +490,6 @@ export default function FetchPatternsEnhanced() {
                 backdropFilter: 'blur(8px)'
               }}
             >
-              <HelpCircle className="w-4 h-4 mr-2" />
               User Guide
             </Button>
             
@@ -508,13 +504,11 @@ export default function FetchPatternsEnhanced() {
                   backdropFilter: 'blur(8px)'
                 }}
               >
-                <FileDown className="w-4 h-4 mr-2" />
                 Download PDF Report
               </Button>
             )}
             
             <div className="flex items-center space-x-2 text-white">
-              <User className="w-4 h-4" />
               <span>{currentUser.displayName || currentUser.username}</span>
             </div>
             
@@ -528,7 +522,7 @@ export default function FetchPatternsEnhanced() {
                 backdropFilter: 'blur(8px)'
               }}
             >
-              <LogOut className="w-4 h-4" />
+              Logout
             </Button>
           </div>
         </div>
@@ -604,15 +598,14 @@ export default function FetchPatternsEnhanced() {
           {/* Upload Section */}
           <div className="w-full">
             <Card className="backdrop-blur-sm border-2" style={{
-              backgroundColor: 'rgba(229, 234, 245, 0.7)',
-              borderColor: '#D3B0F4'
+              backgroundColor: 'rgba(0, 73, 183, 0.8)',
+              borderColor: '#00DDFF'
             }}>
               <CardHeader>
-                <CardTitle className="flex items-center" style={{ color: '#49405F' }}>
-                  <Upload className="w-5 h-5 mr-2" />
+                <CardTitle className="flex items-center text-white">
                   Document Upload & Analysis
                 </CardTitle>
-                <CardDescription style={{ color: '#A45BB3' }}>
+                <CardDescription className="text-white/80">
                   Upload your documents for AI-powered analysis and insights
                 </CardDescription>
               </CardHeader>
@@ -625,12 +618,12 @@ export default function FetchPatternsEnhanced() {
                     onChange={handleFileSelect}
                     className="border-2 focus:border-2"
                     style={{ 
-                      borderColor: '#A0D2E8',
-                      backgroundColor: 'rgba(255, 255, 255, 0.8)'
+                      borderColor: '#00DDFF',
+                      backgroundColor: 'rgba(255, 255, 255, 0.9)'
                     }}
                   />
                   {files.length > 0 && (
-                    <div className="mt-2 text-sm" style={{ color: '#A45BB3' }}>
+                    <div className="mt-2 text-sm text-white">
                       Selected: {files.map(f => f.name).join(", ")}
                     </div>
                   )}
@@ -662,13 +655,12 @@ export default function FetchPatternsEnhanced() {
             {/* Document Results */}
             {completedAnalyses.length > 0 && (
               <Card className="backdrop-blur-sm border-2 mt-6" style={{
-                backgroundColor: 'rgba(229, 234, 245, 0.7)',
-                borderColor: '#D3B0F4'
+                backgroundColor: 'rgba(0, 73, 183, 0.8)',
+                borderColor: '#00DDFF'
               }}>
                 <CardHeader>
-                  <CardTitle className="flex items-center justify-between" style={{ color: '#49405F' }}>
+                  <CardTitle className="flex items-center justify-between text-white">
                     <span className="flex items-center">
-                      <FileText className="w-5 h-5 mr-2" />
                       Analysis Results ({completedAnalyses.length})
                     </span>
                   </CardTitle>
@@ -680,15 +672,15 @@ export default function FetchPatternsEnhanced() {
                         key={doc.id}
                         className="p-4 border-2 rounded-lg transition-colors cursor-pointer hover:opacity-80"
                         style={{
-                          borderColor: '#A0D2E8',
-                          backgroundColor: 'rgba(255, 255, 255, 0.6)'
+                          borderColor: '#00DDFF',
+                          backgroundColor: 'rgba(0, 73, 183, 0.3)'
                         }}
                         onClick={() => setSelectedAnalysis(selectedAnalysis?.id === doc.id ? null : doc)}
                       >
                         <div className="flex items-center justify-between">
                           <div>
-                            <h3 className="font-medium" style={{ color: '#49405F' }}>{doc.originalName}</h3>
-                            <p className="text-sm" style={{ color: '#A45BB3' }}>
+                            <h3 className="font-medium text-white">{doc.originalName}</h3>
+                            <p className="text-sm text-white/80">
                               {new Date(doc.uploadDate).toLocaleDateString()}
                             </p>
                           </div>
@@ -721,19 +713,19 @@ export default function FetchPatternsEnhanced() {
                           <div className="mt-4 space-y-4 border-t pt-4" style={{ borderColor: '#D3B0F4' }}>
                             {doc.summary && (
                               <div>
-                                <h4 className="font-medium mb-2" style={{ color: '#49405F' }}>Summary</h4>
-                                <p className="text-sm" style={{ color: '#49405F' }}>{doc.summary}</p>
+                                <h4 className="font-medium mb-2 text-white">Summary</h4>
+                                <p className="text-sm text-white/90">{doc.summary}</p>
                               </div>
                             )}
 
                             {doc.keywords && doc.keywords.length > 0 && (
                               <div>
-                                <h4 className="font-medium mb-2" style={{ color: '#49405F' }}>Keywords</h4>
+                                <h4 className="font-medium mb-2 text-white">Keywords</h4>
                                 <div className="flex flex-wrap gap-1">
                                   {doc.keywords.slice(0, 10).map((keyword, index) => (
                                     <Badge key={index} variant="secondary" className="text-xs" style={{
-                                      backgroundColor: '#E5EAF5',
-                                      color: '#A45BB3'
+                                      backgroundColor: '#FFF685',
+                                      color: '#0049B7'
                                     }}>
                                       {keyword}
                                     </Badge>
@@ -744,11 +736,11 @@ export default function FetchPatternsEnhanced() {
 
                             {doc.insights && doc.insights.length > 0 && (
                               <div>
-                                <h4 className="font-medium mb-2" style={{ color: '#49405F' }}>Key Insights</h4>
-                                <ul className="text-sm space-y-1" style={{ color: '#49405F' }}>
+                                <h4 className="font-medium mb-2 text-white">Key Insights</h4>
+                                <ul className="text-sm space-y-1 text-white/90">
                                   {doc.insights.slice(0, 3).map((insight, index) => (
                                     <li key={index} className="flex items-start">
-                                      <span className="mr-2" style={{ color: '#A45BB3' }}>•</span>
+                                      <span className="mr-2 text-white">•</span>
                                       {insight}
                                     </li>
                                   ))}
@@ -758,11 +750,11 @@ export default function FetchPatternsEnhanced() {
 
                             {doc.riskFlags && doc.riskFlags.length > 0 && (
                               <div>
-                                <h4 className="font-medium mb-2" style={{ color: '#A45BB3' }}>Risk Flags</h4>
+                                <h4 className="font-medium mb-2 text-white">Risk Flags</h4>
                                 <div className="flex flex-wrap gap-1">
                                   {doc.riskFlags.map((flag, index) => (
                                     <Badge key={index} variant="destructive" className="text-xs text-white" style={{
-                                      backgroundColor: '#A45BB3'
+                                      backgroundColor: '#FF1D58'
                                     }}>
                                       {flag}
                                     </Badge>
@@ -773,9 +765,9 @@ export default function FetchPatternsEnhanced() {
 
                             {doc.wordCloud && doc.wordCloud.length > 0 && (
                               <div>
-                                <h4 className="font-medium mb-2" style={{ color: '#49405F' }}>Word Cloud</h4>
+                                <h4 className="font-medium mb-2 text-white">Word Cloud</h4>
                                 <div className="p-4 rounded-lg" style={{
-                                  background: 'linear-gradient(135deg, #E5EAF5 0%, #A0D2E8 100%)'
+                                  background: 'linear-gradient(135deg, #0049B7 0%, #FF1D58 100%)'
                                 }}>
                                   <WordCloud words={doc.wordCloud} />
                                 </div>
@@ -793,15 +785,14 @@ export default function FetchPatternsEnhanced() {
 
           {/* Document Q&A */}
             <Card className="backdrop-blur-sm border-2" style={{
-              backgroundColor: 'rgba(229, 234, 245, 0.7)',
-              borderColor: '#A0D2E8'
+              backgroundColor: 'rgba(0, 73, 183, 0.8)',
+              borderColor: '#00DDFF'
             }}>
               <CardHeader>
-                <CardTitle className="flex items-center" style={{ color: '#49405F' }}>
-                  <MessageSquare className="w-5 h-5 mr-2" />
+                <CardTitle className="flex items-center text-white">
                   Document Q&A
                 </CardTitle>
-                <CardDescription style={{ color: '#A45BB3' }}>
+                <CardDescription className="text-white/80">
                   Ask questions about your uploaded documents
                 </CardDescription>
               </CardHeader>
@@ -821,7 +812,7 @@ export default function FetchPatternsEnhanced() {
                   disabled={!question.trim() || questionMutation.isPending}
                   className="w-full text-white hover:opacity-90"
                   style={{
-                    background: 'linear-gradient(135deg, #A45BB3 0%, #A0D2E8 100%)'
+                    background: 'linear-gradient(135deg, #FF1D58 0%, #FFF685 100%)'
                   }}
                 >
                   {questionMutation.isPending ? "Thinking..." : "Ask Question"}
@@ -829,13 +820,13 @@ export default function FetchPatternsEnhanced() {
 
                 {questionMutation.data && (
                   <div className="mt-4 p-4 rounded-lg border-2" style={{
-                    background: 'linear-gradient(135deg, #E5EAF5 0%, #A0D2E8 100%)',
-                    borderColor: '#D3B0F4'
+                    background: 'linear-gradient(135deg, #0049B7 0%, #FF1D58 100%)',
+                    borderColor: '#00DDFF'
                   }}>
-                    <h4 className="font-medium mb-2" style={{ color: '#49405F' }}>Answer</h4>
-                    <p className="text-sm mb-2" style={{ color: '#49405F' }}>{questionMutation.data.answer}</p>
+                    <h4 className="font-medium mb-2 text-white">Answer</h4>
+                    <p className="text-sm mb-2 text-white">{questionMutation.data.answer}</p>
                     {questionMutation.data.confidence && (
-                      <div className="text-xs" style={{ color: '#A45BB3' }}>
+                      <div className="text-xs text-white/80">
                         Confidence: {(questionMutation.data.confidence * 100).toFixed(1)}%
                       </div>
                     )}
@@ -846,15 +837,14 @@ export default function FetchPatternsEnhanced() {
 
             {/* Context Analysis */}
             <Card className="backdrop-blur-sm border-2" style={{
-              backgroundColor: 'rgba(229, 234, 245, 0.7)',
-              borderColor: '#A0D2E8'
+              backgroundColor: 'rgba(0, 73, 183, 0.8)',
+              borderColor: '#00DDFF'
             }}>
               <CardHeader>
-                <CardTitle className="flex items-center" style={{ color: '#49405F' }}>
-                  <Brain className="w-5 h-5 mr-2" />
+                <CardTitle className="flex items-center text-white">
                   Context Analysis
                 </CardTitle>
-                <CardDescription style={{ color: '#A45BB3' }}>
+                <CardDescription className="text-white/80">
                   Analyze specific topics across all documents
                 </CardDescription>
               </CardHeader>
@@ -865,8 +855,8 @@ export default function FetchPatternsEnhanced() {
                   onChange={(e) => setContextQuery(e.target.value)}
                   className="border-2 focus:border-2"
                   style={{ 
-                    borderColor: '#D3B0F4',
-                    backgroundColor: 'rgba(255, 255, 255, 0.8)'
+                    borderColor: '#00DDFF',
+                    backgroundColor: 'rgba(255, 255, 255, 0.9)'
                   }}
                 />
                 <Button 
@@ -874,7 +864,7 @@ export default function FetchPatternsEnhanced() {
                   disabled={!contextQuery.trim() || contextMutation.isPending}
                   className="w-full text-white hover:opacity-90"
                   style={{
-                    background: 'linear-gradient(135deg, #A45BB3 0%, #A0D2E8 100%)'
+                    background: 'linear-gradient(135deg, #FF1D58 0%, #FFF685 100%)'
                   }}
                 >
                   {contextMutation.isPending ? "Analyzing..." : "Analyze Context"}
@@ -882,16 +872,16 @@ export default function FetchPatternsEnhanced() {
 
                 {contextMutation.data && (
                   <div className="mt-4 p-4 rounded-lg border-2" style={{
-                    background: 'linear-gradient(135deg, #E5EAF5 0%, #A0D2E8 100%)',
-                    borderColor: '#D3B0F4'
+                    background: 'linear-gradient(135deg, #0049B7 0%, #FF1D58 100%)',
+                    borderColor: '#00DDFF'
                   }}>
-                    <h4 className="font-medium mb-2" style={{ color: '#49405F' }}>Context Analysis</h4>
+                    <h4 className="font-medium mb-2 text-white">Context Analysis</h4>
                     <div className="space-y-2 text-sm">
-                      <div style={{ color: '#49405F' }}>
+                      <div className="text-white">
                         <strong>Mentions:</strong> {contextMutation.data.mentions}
                       </div>
                       {contextMutation.data.summary && (
-                        <div style={{ color: '#49405F' }}>
+                        <div className="text-white">
                           <strong>Summary:</strong> {contextMutation.data.summary}
                         </div>
                       )}
@@ -904,18 +894,17 @@ export default function FetchPatternsEnhanced() {
             {/* Analytics Overview */}
             {completedAnalyses.length > 0 && (
               <Card className="backdrop-blur-sm border-2" style={{
-                backgroundColor: 'rgba(229, 234, 245, 0.7)',
-                borderColor: '#A0D2E8'
+                backgroundColor: 'rgba(0, 73, 183, 0.8)',
+                borderColor: '#00DDFF'
               }}>
                 <CardHeader>
-                  <CardTitle className="flex items-center" style={{ color: '#49405F' }}>
-                    <BarChart3 className="w-5 h-5 mr-2" />
+                  <CardTitle className="flex items-center text-white">
                     Analytics Overview
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4 text-sm">
-                    <div className="flex justify-between" style={{ color: '#49405F' }}>
+                    <div className="flex justify-between text-white">
                       <span>Total Documents:</span>
                       <span className="font-medium">{completedAnalyses.length}</span>
                     </div>
@@ -929,12 +918,59 @@ export default function FetchPatternsEnhanced() {
                       }, {});
 
                       return Object.entries(sentimentCounts).map(([sentiment, count]) => (
-                        <div key={sentiment} className="flex justify-between" style={{ color: '#A45BB3' }}>
+                        <div key={sentiment} className="flex justify-between text-white/80">
                           <span className="capitalize">{sentiment}:</span>
                           <span className="font-medium">{count as number}</span>
                         </div>
                       ));
                     })()}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Word Graph Section */}
+            {completedAnalyses.length > 0 && (
+              <Card className="backdrop-blur-sm border-2" style={{
+                backgroundColor: 'rgba(0, 73, 183, 0.8)',
+                borderColor: '#00DDFF'
+              }}>
+                <CardHeader>
+                  <CardTitle className="flex items-center text-white">
+                    Word Graph Analysis
+                  </CardTitle>
+                  <CardDescription className="text-white/80">
+                    Visual representation of word frequency and relationships
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {completedAnalyses.slice(0, 4).map((doc: DocumentAnalysis) => (
+                      <div key={doc.id} className="p-4 rounded-lg border-2" style={{
+                        backgroundColor: 'rgba(0, 73, 183, 0.3)',
+                        borderColor: '#00DDFF'
+                      }}>
+                        <h4 className="font-medium mb-3 text-white truncate">{doc.originalName}</h4>
+                        {doc.wordCloud && doc.wordCloud.length > 0 ? (
+                          <div className="h-48 rounded-lg overflow-hidden" style={{
+                            background: 'linear-gradient(135deg, #0049B7 0%, #FF1D58 100%)'
+                          }}>
+                            <WordCloud words={doc.wordCloud} />
+                          </div>
+                        ) : (
+                          <div className="h-48 flex items-center justify-center rounded-lg" style={{
+                            backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                          }}>
+                            <p className="text-white/60 text-sm">No word data available</p>
+                          </div>
+                        )}
+                        {doc.wordCount && (
+                          <div className="mt-2 text-xs text-white/80">
+                            Word Count: {doc.wordCount}
+                          </div>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 </CardContent>
               </Card>
