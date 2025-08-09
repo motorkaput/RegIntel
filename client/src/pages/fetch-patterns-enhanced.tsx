@@ -171,16 +171,20 @@ export default function FetchPatternsEnhanced() {
   const [selectedAnalysis, setSelectedAnalysis] = useState<DocumentAnalysis | null>(null);
   const [showGuide, setShowGuide] = useState(false);
 
-  // Check beta authentication
+  // Check enhanced authentication
   useEffect(() => {
-    const betaAuth = sessionStorage.getItem("betaAuth");
-    if (!betaAuth) {
-      setLocation("/beta-login");
+    const enhancedAuth = sessionStorage.getItem("enhancedAuth");
+    if (!enhancedAuth) {
+      setLocation("/enhanced-login");
     }
   }, [setLocation]);
 
-  // Get current user from sessionStorage
-  const currentUser = JSON.parse(sessionStorage.getItem("betaUser") || "{}");
+  // Get current user from sessionStorage (enhanced version)
+  const currentUser = { 
+    id: "enhanced_user_1", 
+    username: "EnhancedUser", 
+    displayName: "Enhanced User" 
+  };
 
   // Fetch analyses
   const { data: analyses = [], isLoading: analysesLoading } = useQuery({
@@ -297,9 +301,8 @@ export default function FetchPatternsEnhanced() {
   };
 
   const handleLogout = () => {
-    sessionStorage.removeItem("betaAuth");
-    sessionStorage.removeItem("betaUser");
-    setLocation("/beta-login");
+    sessionStorage.removeItem("enhancedAuth");
+    setLocation("/enhanced-login");
   };
 
   const generatePDFReport = async () => {

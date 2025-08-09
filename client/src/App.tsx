@@ -16,6 +16,7 @@ import FetchPatternsApp from "@/pages/fetch-patterns-app";
 import FetchPatternsEnhanced from "@/pages/fetch-patterns-enhanced";
 
 import BetaLogin from "@/pages/beta-login";
+import EnhancedLogin from "@/pages/enhanced-login";
 import PerMeateBetaLogin from "@/pages/permeate-beta-login";
 import PerMeaTeEnterpriseApp from "@/pages/permeate-enterprise-app";
 import PerMeaTeEnhanced from "@/pages/permeate-enhanced";
@@ -51,6 +52,7 @@ function Router() {
       
       {/* SaaS Application routes - beta protected */}
       <Route path="/beta-login" component={BetaLogin} />
+      <Route path="/enhanced-login" component={EnhancedLogin} />
       <Route path="/x7k9p/fp-analyzer" component={FetchPatternsApp} />
       <Route path="/q4w8r/fp-enhanced" component={FetchPatternsEnhanced} />
       <Route path="/z9m3k/pe-beta-login" component={PerMeateBetaLogin} />
