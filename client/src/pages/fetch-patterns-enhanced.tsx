@@ -10,6 +10,8 @@ import { FileText, MessageSquare, Brain, BarChart3, Upload, Download } from "luc
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import fetchPatternsIcon from "@assets/FetchPatterns_Icon_1752663550310_1753148786989.png";
+import Navbar from "@/components/navbar";
+import Footer from "@/components/footer";
 import html2canvas from 'html2canvas';
 import { useLocation } from "wouter";
 import jsPDF from 'jspdf';
@@ -139,9 +141,7 @@ export default function FetchPatternsEnhanced() {
         formData.append('files', file);
       });
 
-      const response = await apiRequest("POST", "/api/upload", formData, {
-        'Content-Type': 'multipart/form-data',
-      });
+      const response = await apiRequest("POST", "/api/upload", formData);
       return response;
     },
     onSuccess: () => {
@@ -184,7 +184,7 @@ export default function FetchPatternsEnhanced() {
       const response = await apiRequest("POST", "/api/context-analysis", contextData);
       return response;
     },
-    onSuccess: (data, variables) => {
+    onSuccess: (data: ContextAnalysis, variables) => {
       setContextHistory(prev => [...prev, { query: variables.context, result: data }]);
       setContextQuery("");
     },
@@ -347,8 +347,11 @@ export default function FetchPatternsEnhanced() {
 
   return (
     <div className="min-h-screen bg-surface-white">
-      {/* Sticky Header */}
-      <div className="fixed top-0 left-0 right-0 z-50 bg-surface-white border-b border-border-light">
+      {/* Dark Street Header */}
+      <Navbar />
+      
+      {/* Sticky Fetch Patterns Header */}
+      <div className="fixed top-12 left-0 right-0 z-40 bg-surface-white border-b border-border-light">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-12">
             <div className="flex items-center space-x-3">
@@ -395,7 +398,7 @@ export default function FetchPatternsEnhanced() {
       </div>
 
       {/* Main Content */}
-      <div className="pt-12">
+      <div className="pt-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* File Upload */}
           <Card className="mb-8 border-border-light bg-surface-white">
@@ -746,6 +749,9 @@ export default function FetchPatternsEnhanced() {
           )}
         </div>
       </div>
+      
+      {/* Dark Street Footer */}
+      <Footer />
     </div>
   );
 }
