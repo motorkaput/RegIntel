@@ -5,8 +5,6 @@ import {
   documents,
   performanceMetrics,
   documentAnalyses,
-  openBetaUsers,
-  openBetaDocumentAnalyses,
   permeateCompanies,
   permeateEmployees,
   permeateGoals,
@@ -24,10 +22,6 @@ import {
   type InsertPerformanceMetric,
   type DocumentAnalysis,
   type InsertDocumentAnalysis,
-  type OpenBetaUser,
-  type InsertOpenBetaUser,
-  type OpenBetaDocumentAnalysis,
-  type InsertOpenBetaDocumentAnalysis,
   type PermeateCompany,
   type InsertPermeateCompany,
   type PermeateEmployee,
@@ -77,17 +71,7 @@ export interface IStorage {
   deleteDocumentAnalysis(id: string): Promise<void>;
   getUserDocumentAnalysisCount(userId: string): Promise<number>;
 
-  // Open Beta User operations
-  getOpenBetaUser(id: string): Promise<OpenBetaUser | undefined>;
-  getOpenBetaUserByEmail(email: string): Promise<OpenBetaUser | undefined>;
-  createOpenBetaUser(user: InsertOpenBetaUser): Promise<OpenBetaUser>;
 
-  // Open Beta document analysis operations
-  createOpenBetaDocumentAnalysis(analysis: InsertOpenBetaDocumentAnalysis): Promise<OpenBetaDocumentAnalysis>;
-  getOpenBetaUserDocumentAnalyses(userId: string, limit?: number): Promise<OpenBetaDocumentAnalysis[]>;
-  getOpenBetaDocumentAnalysis(id: string): Promise<OpenBetaDocumentAnalysis | undefined>;
-  updateOpenBetaDocumentAnalysis(id: string, updates: Partial<OpenBetaDocumentAnalysis>): Promise<OpenBetaDocumentAnalysis>;
-  deleteOpenBetaDocumentAnalysis(id: string): Promise<void>;
 
   // PerMeaTe Enterprise operations
   getPermeateCompany(companyId: string): Promise<PermeateCompany | undefined>;
@@ -477,65 +461,7 @@ export class DatabaseStorage implements IStorage {
     return updated;
   }
 
-  // Open Beta User operations implementation
-  async getOpenBetaUser(id: string): Promise<OpenBetaUser | undefined> {
-    const [user] = await db.select().from(openBetaUsers).where(eq(openBetaUsers.id, id));
-    return user;
-  }
 
-  async getOpenBetaUserByEmail(email: string): Promise<OpenBetaUser | undefined> {
-    const [user] = await db.select().from(openBetaUsers).where(eq(openBetaUsers.email, email));
-    return user;
-  }
-
-  async createOpenBetaUser(userData: InsertOpenBetaUser): Promise<OpenBetaUser> {
-    const [user] = await db
-      .insert(openBetaUsers)
-      .values(userData)
-      .returning();
-    return user;
-  }
-
-  // Open Beta document analysis operations implementation
-  async createOpenBetaDocumentAnalysis(analysis: InsertOpenBetaDocumentAnalysis): Promise<OpenBetaDocumentAnalysis> {
-    const [created] = await db
-      .insert(openBetaDocumentAnalyses)
-      .values(analysis)
-      .returning();
-    return created;
-  }
-
-  async getOpenBetaUserDocumentAnalyses(userId: string, limit = 50): Promise<OpenBetaDocumentAnalysis[]> {
-    return await db
-      .select()
-      .from(openBetaDocumentAnalyses)
-      .where(eq(openBetaDocumentAnalyses.userId, userId))
-      .orderBy(desc(openBetaDocumentAnalyses.uploadDate))
-      .limit(limit);
-  }
-
-  async getOpenBetaDocumentAnalysis(id: string): Promise<OpenBetaDocumentAnalysis | undefined> {
-    const [analysis] = await db
-      .select()
-      .from(openBetaDocumentAnalyses)
-      .where(eq(openBetaDocumentAnalyses.id, id));
-    return analysis;
-  }
-
-  async updateOpenBetaDocumentAnalysis(id: string, updates: Partial<OpenBetaDocumentAnalysis>): Promise<OpenBetaDocumentAnalysis> {
-    const [updated] = await db
-      .update(openBetaDocumentAnalyses)
-      .set(updates)
-      .where(eq(openBetaDocumentAnalyses.id, id))
-      .returning();
-    return updated;
-  }
-
-  async deleteOpenBetaDocumentAnalysis(id: string): Promise<void> {
-    await db
-      .delete(openBetaDocumentAnalyses)
-      .where(eq(openBetaDocumentAnalyses.id, id));
-  }
 }
 
 export const storage = new DatabaseStorage();

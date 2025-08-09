@@ -118,37 +118,7 @@ export const documentAnalyses = pgTable("document_analyses", {
   completedAt: timestamp("completed_at"),
 });
 
-// Open Beta Users for Fetch Patterns
-export const openBetaUsers = pgTable("open_beta_users", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  email: varchar("email").unique().notNull(),
-  passwordHash: varchar("password_hash").notNull(),
-  displayName: varchar("display_name").notNull(),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
 
-// Open Beta Document Analyses for Fetch Patterns
-export const openBetaDocumentAnalyses = pgTable("open_beta_document_analyses", {
-  id: varchar("id").primaryKey(),
-  userId: varchar("user_id").references(() => openBetaUsers.id).notNull(),
-  filename: varchar("filename").notNull(),
-  originalName: varchar("original_name").notNull(),
-  mimeType: varchar("mime_type"),
-  size: integer("size"),
-  status: varchar("status").default("processing"), // processing, completed, error
-  extractedText: text("extracted_text"),
-  classification: varchar("classification"),
-  sentiment: jsonb("sentiment"), // {label, score, reasoning}
-  keywords: jsonb("keywords"), // string[]
-  insights: jsonb("insights"), // string[]
-  riskFlags: jsonb("risk_flags"), // string[]
-  summary: text("summary"),
-  wordCloud: jsonb("word_cloud"), // {text: string, value: number}[]
-  processingError: text("processing_error"),
-  uploadDate: timestamp("upload_date").defaultNow(),
-  completedAt: timestamp("completed_at"),
-});
 
 // Relations
 export const usersRelations = relations(users, ({ many, one }) => ({
@@ -192,17 +162,7 @@ export const documentAnalysesRelations = relations(documentAnalyses, ({ one }) =
   }),
 }));
 
-// Open Beta Relations
-export const openBetaUsersRelations = relations(openBetaUsers, ({ many }) => ({
-  documentAnalyses: many(openBetaDocumentAnalyses),
-}));
 
-export const openBetaDocumentAnalysesRelations = relations(openBetaDocumentAnalyses, ({ one }) => ({
-  user: one(openBetaUsers, {
-    fields: [openBetaDocumentAnalyses.userId],
-    references: [openBetaUsers.id],
-  }),
-}));
 
 // Zod schemas
 export const insertUserSchema = createInsertSchema(users);
@@ -211,8 +171,7 @@ export const insertSubscriptionSchema = createInsertSchema(subscriptions);
 export const insertDocumentSchema = createInsertSchema(documents);
 export const insertPerformanceMetricSchema = createInsertSchema(performanceMetrics);
 export const insertDocumentAnalysisSchema = createInsertSchema(documentAnalyses);
-export const insertOpenBetaUserSchema = createInsertSchema(openBetaUsers);
-export const insertOpenBetaDocumentAnalysisSchema = createInsertSchema(openBetaDocumentAnalyses);
+
 
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
@@ -226,10 +185,7 @@ export type PerformanceMetric = typeof performanceMetrics.$inferSelect;
 export type InsertPerformanceMetric = typeof performanceMetrics.$inferInsert;
 export type DocumentAnalysis = typeof documentAnalyses.$inferSelect;
 export type InsertDocumentAnalysis = typeof documentAnalyses.$inferInsert;
-export type OpenBetaUser = typeof openBetaUsers.$inferSelect;
-export type InsertOpenBetaUser = typeof openBetaUsers.$inferInsert;
-export type OpenBetaDocumentAnalysis = typeof openBetaDocumentAnalyses.$inferSelect;
-export type InsertOpenBetaDocumentAnalysis = typeof openBetaDocumentAnalyses.$inferInsert;
+
 
 // PerMeaTe Enterprise Tables
 export const permeateCompanies = pgTable("permeate_companies", {
