@@ -21,6 +21,7 @@ import {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import fetchPatternsIcon from "@assets/FetchPatterns_Icon_1752663550310_1753148786989.png";
+import fetchDogGif from "@assets/fetch_dog_1754824417165.gif";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import html2canvas from 'html2canvas';
@@ -1085,7 +1086,7 @@ export default function FetchPatternsApp() {
                         }}
                       >
                         <img 
-                          src="/attached_assets/fetch_dog_1754824417165.gif" 
+                          src={fetchDogGif} 
                           alt="Walking dog"
                           className="w-full h-full object-contain"
                         />
