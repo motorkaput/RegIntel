@@ -468,7 +468,7 @@ export default function FetchPatternsApp() {
               background: white;
               padding: 2px;
               border: 1px solid #e5e7eb;
-              border-radius: 8px; 
+              border-radius: 0; 
             }
             .header h1 { 
               margin: 0; 
@@ -645,15 +645,6 @@ export default function FetchPatternsApp() {
             `).join('')}
           </div>` : ''}
           
-          <!-- Word Cloud -->
-          ${wordCloudDataUrl ? `
-          <div class="section" style="page-break-inside: avoid; margin-bottom: 32px;">
-            <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 16px; color: #1f2937; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px;">Word Cloud Analysis (${wordCount} words)</h3>
-            <div style="text-align: center; background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; margin: 16px 0;">
-              <img src="${wordCloudDataUrl}" style="max-width: 100%; height: auto; display: block; margin: 0 auto;" alt="Word Cloud Visualization" />
-            </div>
-          </div>` : ''}
-          
           <!-- Q&A History -->
           ${questionHistory.length > 0 ? `
           <div class="section">
@@ -757,7 +748,14 @@ export default function FetchPatternsApp() {
             `).join('')}
           </div>` : ''}
           
-
+          <!-- Word Cloud - Moved to end like in app -->
+          ${wordCloudDataUrl ? `
+          <div class="section" style="page-break-inside: avoid; margin-bottom: 32px;">
+            <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 16px; color: #1f2937; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px;">Word Cloud Analysis (${wordCount} words)</h3>
+            <div style="text-align: center; background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; margin: 16px 0;">
+              <img src="${wordCloudDataUrl}" style="max-width: 100%; height: auto; display: block; margin: 0 auto;" alt="Word Cloud Visualization" />
+            </div>
+          </div>` : ''}
           
           <!-- Footer -->
           <div style="margin-top: 40px; padding-top: 16px; border-top: 1px solid #e5e7eb; text-align: center; color: #6b7280; font-size: 12px;">
