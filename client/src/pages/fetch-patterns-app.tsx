@@ -1060,10 +1060,43 @@ export default function FetchPatternsApp() {
                 </label>
               </div>
 
-              {/* Progress Bar with textual states and walking dog */}
+              {/* Walking dog container - separate but visually connected */}
+              {progressStage && progressStage !== 'done' && (
+                <div className="bg-gray-50 border border-b-0 rounded-t-lg" style={{ paddingTop: '12px', paddingBottom: '8px', paddingLeft: '16px', paddingRight: '16px' }}>
+                  <div className="relative w-full h-10">
+                    {/* Walking dog animation */}
+                    <div 
+                      className="absolute top-0 transition-all duration-500 ease-linear"
+                      style={{ 
+                        left: `calc(${Math.min(uploadProgress, 90)}% - 20px)`,
+                        width: '40px',
+                        height: '40px'
+                      }}
+                    >
+                      <img 
+                        src={fetchDogGif} 
+                        alt="Walking dog"
+                        style={{ 
+                          width: '40px', 
+                          height: '40px',
+                          objectFit: 'contain'
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Progress Bar with textual states */}
               {progressStage && (
-                <div className="space-y-3 bg-gray-50 rounded-lg border" style={{ paddingTop: '80px', paddingBottom: '20px', paddingLeft: '16px', paddingRight: '16px' }}>
+                <div className="space-y-3 bg-gray-50 p-4 border rounded-b-lg" style={{ borderTop: progressStage !== 'done' ? 'none' : undefined, borderRadius: progressStage !== 'done' ? '0 0 8px 8px' : '8px' }}>
                   <div className="flex items-center justify-between">
+                    <div className="text-sm font-medium text-gray-700">
+                      {progressStage === 'uploading' && 'Uploading...'}
+                      {progressStage === 'analyzing' && 'Analyzing...'}
+                      {progressStage === 'fetching' && 'Fetching patterns...'}
+                      {progressStage === 'done' && 'Done'}
+                    </div>
                     <div className="text-sm text-gray-500">{uploadProgress}%</div>
                   </div>
                   <div className="relative w-full bg-gray-200 rounded-full h-2">
@@ -1071,41 +1104,6 @@ export default function FetchPatternsApp() {
                       className="bg-blue-600 h-2 rounded-full transition-all duration-500"
                       style={{ width: `${uploadProgress}%` }}
                     />
-                    {/* Status text positioned behind the dog */}
-                    {progressStage !== 'done' && (
-                      <div 
-                        className="absolute top-[-65px] text-sm font-medium text-gray-700 transition-all duration-500 ease-linear whitespace-nowrap"
-                        style={{ 
-                          left: `calc(${Math.max(Math.min(uploadProgress, 80) - 20, 0)}% + 12px)`
-                        }}
-                      >
-                        {progressStage === 'uploading' && 'Uploading...'}
-                        {progressStage === 'analyzing' && 'Analyzing...'}
-                        {progressStage === 'fetching' && 'Fetching patterns...'}
-                      </div>
-                    )}
-                    {/* Walking dog animation - much larger and more visible */}
-                    {progressStage !== 'done' && (
-                      <div 
-                        className="absolute transition-all duration-500 ease-linear z-10"
-                        style={{ 
-                          top: '-78px',
-                          left: `calc(${Math.min(uploadProgress, 88)}% - 32px)`,
-                          width: '64px',
-                          height: '64px'
-                        }}
-                      >
-                        <img 
-                          src={fetchDogGif} 
-                          alt="Walking dog"
-                          style={{ 
-                            width: '64px', 
-                            height: '64px',
-                            objectFit: 'contain'
-                          }}
-                        />
-                      </div>
-                    )}
                   </div>
                 </div>
               )}
