@@ -466,6 +466,8 @@ export default function FetchPatternsApp() {
               height: 40px; 
               object-fit: contain; 
             }
+            
+
             .header h1 { 
               margin: 0; 
               font-size: 24px; 
@@ -1057,7 +1059,7 @@ export default function FetchPatternsApp() {
                 </label>
               </div>
 
-              {/* Progress Bar with textual states */}
+              {/* Progress Bar with textual states and walking dog */}
               {progressStage && (
                 <div className="space-y-3 bg-gray-50 p-4 rounded-lg border">
                   <div className="flex items-center justify-between">
@@ -1069,11 +1071,26 @@ export default function FetchPatternsApp() {
                     </div>
                     <div className="text-sm text-gray-500">{uploadProgress}%</div>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="relative w-full bg-gray-200 rounded-full h-2">
                     <div 
                       className="bg-blue-600 h-2 rounded-full transition-all duration-500"
                       style={{ width: `${uploadProgress}%` }}
                     />
+                    {/* Walking dog animation */}
+                    {progressStage !== 'done' && (
+                      <div 
+                        className="absolute top-[-24px] w-8 h-8 transition-all duration-1000 ease-linear"
+                        style={{ 
+                          left: `calc(${Math.min(uploadProgress, 95)}% - 16px)`
+                        }}
+                      >
+                        <img 
+                          src="/attached_assets/fetch_dog_1754824417165.gif" 
+                          alt="Walking dog"
+                          className="w-full h-full object-contain"
+                        />
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
