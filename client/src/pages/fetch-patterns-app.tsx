@@ -465,10 +465,6 @@ export default function FetchPatternsApp() {
               width: 40px; 
               height: 40px; 
               object-fit: contain; 
-              background: white;
-              padding: 2px;
-              border: 1px solid #e5e7eb;
-              border-radius: 0; 
             }
             .header h1 { 
               margin: 0; 
@@ -604,14 +600,14 @@ export default function FetchPatternsApp() {
                 <div style="font-size: 12px; color: #6b7280;">Unique Keywords</div>
               </div>
               <div class="metric-card">
-                <div style="font-size: 28px; font-weight: bold; color: #374151; margin-bottom: 8px;">${highConfidence}</div>
-                <div style="font-size: 12px; color: #6b7280;">High Confidence</div>
-                <div style="font-size: 10px; color: #9ca3af;">Sentiment confidence > 80%</div>
+                <div style="font-size: 28px; font-weight: bold; color: #374151; margin-bottom: 8px;">${positiveSentimentDocs.length}</div>
+                <div style="font-size: 12px; color: #6b7280;">Positive Sentiment Documents</div>
+                <div style="font-size: 10px; color: #9ca3af;">${positivePercentage}% of all documents</div>
               </div>
               <div class="metric-card">
-                <div style="font-size: 28px; font-weight: bold; color: #374151; margin-bottom: 8px;">${highRisk}</div>
-                <div style="font-size: 12px; color: #6b7280;">High Risk Documents</div>
-                <div style="font-size: 10px; color: #9ca3af;">Negative sentiment documents</div>
+                <div style="font-size: 28px; font-weight: bold; color: #374151; margin-bottom: 8px;">${negativeSentimentDocs.length}</div>
+                <div style="font-size: 12px; color: #6b7280;">Negative Sentiment Documents</div>
+                <div style="font-size: 10px; color: #9ca3af;">${negativePercentage}% of all documents</div>
               </div>
             </div>
           </div>
@@ -811,12 +807,18 @@ export default function FetchPatternsApp() {
   // Calculate statistics
   const completedAnalyses = analyses.filter(a => a.status === 'completed');
   const uniqueKeywords = Array.from(new Set(completedAnalyses.flatMap(a => a.keywords || []))).length;
-  const highConfidence = completedAnalyses.filter(a => 
-    a.sentiment && a.sentiment.score > 0.8
-  ).length;
-  const highRisk = completedAnalyses.filter(a => 
+  const positiveSentimentDocs = completedAnalyses.filter(a => 
+    a.sentiment && a.sentiment.label === 'positive'
+  );
+  const negativeSentimentDocs = completedAnalyses.filter(a => 
     a.sentiment && a.sentiment.label === 'negative'
-  ).length;
+  );
+  
+  // Calculate percentages
+  const positivePercentage = completedAnalyses.length > 0 ? 
+    Math.round((positiveSentimentDocs.length / completedAnalyses.length) * 100) : 0;
+  const negativePercentage = completedAnalyses.length > 0 ? 
+    Math.round((negativeSentimentDocs.length / completedAnalyses.length) * 100) : 0;
 
   // Generate word cloud data
   // Professional word cloud data generation following the react-wordcloud algorithm
@@ -1098,14 +1100,14 @@ export default function FetchPatternsApp() {
             <div className="text-sm text-gray-500">Unique Keywords</div>
           </Card>
           <Card className="bg-white text-center p-6">
-            <div className="text-4xl font-bold text-gray-700 mb-2">{highConfidence}</div>
-            <div className="text-sm text-gray-500">High Confidence</div>
-            <div className="text-xs text-gray-400">Sentiment confidence &gt; 80%</div>
+            <div className="text-4xl font-bold text-gray-700 mb-2">{positiveSentimentDocs.length}</div>
+            <div className="text-sm text-gray-500">Positive Sentiment Documents</div>
+            <div className="text-xs text-gray-400">{positivePercentage}% of all documents</div>
           </Card>
           <Card className="bg-white text-center p-6">
-            <div className="text-4xl font-bold text-gray-700 mb-2">{highRisk}</div>
-            <div className="text-sm text-gray-500">High Risk Documents</div>
-            <div className="text-xs text-gray-400">Negative sentiment documents</div>
+            <div className="text-4xl font-bold text-gray-700 mb-2">{negativeSentimentDocs.length}</div>
+            <div className="text-sm text-gray-500">Negative Sentiment Documents</div>
+            <div className="text-xs text-gray-400">{negativePercentage}% of all documents</div>
           </Card>
         </div>
 
