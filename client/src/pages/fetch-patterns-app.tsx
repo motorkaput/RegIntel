@@ -1068,7 +1068,7 @@ export default function FetchPatternsApp() {
                     <div 
                       className="absolute top-0 transition-all duration-500 ease-linear"
                       style={{ 
-                        left: `calc(${Math.min(uploadProgress + 2, 95)}% - 0px)`,
+                        left: `calc(${Math.min(uploadProgress, 95)}% - 0px)`,
                         width: '40px',
                         height: '40px'
                       }}
