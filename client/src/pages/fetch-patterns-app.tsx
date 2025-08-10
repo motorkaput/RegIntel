@@ -1062,13 +1062,13 @@ export default function FetchPatternsApp() {
 
               {/* Walking dog container - separate but visually connected */}
               {progressStage && progressStage !== 'done' && (
-                <div className="bg-gray-50 border border-b-0 rounded-t-lg" style={{ paddingTop: '12px', paddingBottom: '0px', paddingLeft: '16px', paddingRight: '16px', marginBottom: '0px' }}>
-                  <div className="relative w-full h-10">
+                <div className="bg-gray-50 border border-b-0 rounded-t-lg" style={{ paddingTop: '8px', paddingBottom: '4px', paddingLeft: '16px', paddingRight: '16px', marginBottom: '0px' }}>
+                  <div className="relative w-full h-12">
                     {/* Walking dog animation */}
                     <div 
                       className="absolute top-0 transition-all duration-500 ease-linear"
                       style={{ 
-                        left: `calc(${Math.max(uploadProgress * 0.9, 0)}% - 0px)`,
+                        left: `calc(${Math.min(uploadProgress + 2, 95)}% - 0px)`,
                         width: '40px',
                         height: '40px'
                       }}
