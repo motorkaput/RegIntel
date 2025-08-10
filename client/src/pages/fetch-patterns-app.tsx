@@ -1062,7 +1062,7 @@ export default function FetchPatternsApp() {
 
               {/* Progress Bar with textual states and walking dog */}
               {progressStage && (
-                <div className="space-y-3 bg-gray-50 p-4 rounded-lg border" style={{ paddingTop: '60px', paddingBottom: '16px' }}>
+                <div className="space-y-3 bg-gray-50 rounded-lg border" style={{ paddingTop: '80px', paddingBottom: '20px', paddingLeft: '16px', paddingRight: '16px' }}>
                   <div className="flex items-center justify-between">
                     <div className="text-sm text-gray-500">{uploadProgress}%</div>
                   </div>
@@ -1071,12 +1071,12 @@ export default function FetchPatternsApp() {
                       className="bg-blue-600 h-2 rounded-full transition-all duration-500"
                       style={{ width: `${uploadProgress}%` }}
                     />
-                    {/* Status text positioned in front of the dog */}
+                    {/* Status text positioned behind the dog */}
                     {progressStage !== 'done' && (
                       <div 
-                        className="absolute top-[-28px] text-sm font-medium text-gray-700 transition-all duration-500 ease-linear whitespace-nowrap"
+                        className="absolute top-[-65px] text-sm font-medium text-gray-700 transition-all duration-500 ease-linear whitespace-nowrap"
                         style={{ 
-                          left: `calc(${Math.max(Math.min(uploadProgress, 85) - 15, 0)}% + 12px)`
+                          left: `calc(${Math.max(Math.min(uploadProgress, 80) - 20, 0)}% + 12px)`
                         }}
                       >
                         {progressStage === 'uploading' && 'Uploading...'}
@@ -1084,23 +1084,23 @@ export default function FetchPatternsApp() {
                         {progressStage === 'fetching' && 'Fetching patterns...'}
                       </div>
                     )}
-                    {/* Walking dog animation - now truly 48x48px */}
+                    {/* Walking dog animation - much larger and more visible */}
                     {progressStage !== 'done' && (
                       <div 
-                        className="absolute transition-all duration-500 ease-linear"
+                        className="absolute transition-all duration-500 ease-linear z-10"
                         style={{ 
-                          top: '-50px',
-                          left: `calc(${Math.min(uploadProgress, 90)}% - 24px)`,
-                          width: '48px',
-                          height: '48px'
+                          top: '-78px',
+                          left: `calc(${Math.min(uploadProgress, 88)}% - 32px)`,
+                          width: '64px',
+                          height: '64px'
                         }}
                       >
                         <img 
                           src={fetchDogGif} 
                           alt="Walking dog"
                           style={{ 
-                            width: '48px', 
-                            height: '48px',
+                            width: '64px', 
+                            height: '64px',
                             objectFit: 'contain'
                           }}
                         />
