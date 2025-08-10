@@ -1062,13 +1062,13 @@ export default function FetchPatternsApp() {
 
               {/* Walking dog container - separate but visually connected */}
               {progressStage && progressStage !== 'done' && (
-                <div className="bg-gray-50 border border-b-0 rounded-t-lg" style={{ paddingTop: '12px', paddingBottom: '8px', paddingLeft: '16px', paddingRight: '16px' }}>
+                <div className="bg-gray-50 border border-b-0 rounded-t-lg" style={{ paddingTop: '12px', paddingBottom: '0px', paddingLeft: '16px', paddingRight: '16px', marginBottom: '0px' }}>
                   <div className="relative w-full h-10">
                     {/* Walking dog animation */}
                     <div 
                       className="absolute top-0 transition-all duration-500 ease-linear"
                       style={{ 
-                        left: `calc(${Math.min(uploadProgress, 90)}% - 20px)`,
+                        left: `calc(${Math.max(uploadProgress * 0.9, 0)}% - 0px)`,
                         width: '40px',
                         height: '40px'
                       }}
@@ -1092,8 +1092,13 @@ export default function FetchPatternsApp() {
 
               {/* Progress Bar with textual states */}
               {progressStage && (
-                <div className="space-y-3 bg-gray-50 p-4 border rounded-b-lg" style={{ borderTop: progressStage !== 'done' ? 'none' : undefined, borderRadius: progressStage !== 'done' ? '0 0 8px 8px' : '8px' }}>
-                  <div className="flex items-center justify-between">
+                <div className="bg-gray-50 p-4 border" style={{ 
+                  borderTop: progressStage !== 'done' ? 'none' : '1px solid #d1d5db', 
+                  borderRadius: progressStage !== 'done' ? '0 0 8px 8px' : '8px',
+                  marginTop: progressStage !== 'done' ? '0px' : undefined,
+                  paddingTop: progressStage !== 'done' ? '0px' : '16px'
+                }}>
+                  <div className="flex items-center justify-between mb-3">
                     <div className="text-sm font-medium text-gray-700">
                       {progressStage === 'uploading' && 'Uploading...'}
                       {progressStage === 'analyzing' && 'Analyzing...'}
