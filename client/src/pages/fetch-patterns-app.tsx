@@ -379,16 +379,16 @@ export default function FetchPatternsApp() {
         second: '2-digit'
       });
       
-      // Generate word cloud image directly for PDF
+      // Generate word cloud image directly for PDF (mimicking D3.js layout)
       let wordCloudDataUrl = '';
       if (completedAnalyses.length > 0 && topWords.length > 0) {
         try {
-          console.log('Generating word cloud image for PDF...');
+          console.log('Generating advanced word cloud image for PDF...');
           
           // Create a temporary canvas for word cloud generation
           const canvas = document.createElement('canvas');
           canvas.width = 600;
-          canvas.height = 400;
+          canvas.height = 450;
           const ctx = canvas.getContext('2d');
           
           if (ctx) {
@@ -396,47 +396,97 @@ export default function FetchPatternsApp() {
             ctx.fillStyle = '#ffffff';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            // Professional color palette
+            // Professional color palette (matching the real word cloud)
             const colors = [
               '#2563eb', '#059669', '#d97706', '#7c3aed', '#dc2626',
-              '#0891b2', '#65a30d', '#ea580c', '#4338ca', '#be123c'
+              '#0891b2', '#65a30d', '#ea580c', '#4338ca', '#be123c',
+              '#1e40af', '#047857', '#b45309', '#6d28d9', '#b91c1c'
             ];
             
-            // Calculate font sizes based on word frequency
+            // Calculate font sizes based on word frequency (much better scaling)
             const maxValue = Math.max(...topWords.map(([, value]) => value));
             const minValue = Math.min(...topWords.map(([, value]) => value));
             
-            // Draw words in a simple grid layout
-            const wordsToShow = topWords.slice(0, 20); // Show top 20 words
-            const cols = 5;
-            const rows = 4;
-            const cellWidth = canvas.width / cols;
-            const cellHeight = canvas.height / rows;
+            const wordsToShow = topWords.slice(0, 25); // Show top 25 words
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
             
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fontFamily = 'Arial, sans-serif';
+            ctx.fontFamily = 'Roboto, Arial, sans-serif';
+            
+            // Place words using Fibonacci spiral (like D3.js word cloud)
+            const placedWords = [];
             
             wordsToShow.forEach(([word, value], index) => {
-              const row = Math.floor(index / cols);
-              const col = index % cols;
-              const x = col * cellWidth + cellWidth / 2;
-              const y = row * cellHeight + cellHeight / 2;
+              // Calculate font size (14px to 48px for better visibility)
+              const normalizedValue = (value - minValue) / (maxValue - minValue);
+              const fontSize = Math.max(14, Math.min(48, 14 + normalizedValue * 34));
               
-              // Calculate font size (12px to 32px)
-              const fontSize = Math.max(12, Math.min(32, 12 + (value - minValue) / (maxValue - minValue) * 20));
-              ctx.font = `${fontSize}px Arial`;
+              ctx.font = `600 ${fontSize}px Roboto, Arial, sans-serif`;
+              const textMetrics = ctx.measureText(word);
+              const wordWidth = textMetrics.width;
+              const wordHeight = fontSize;
+              
+              // Fibonacci spiral positioning
+              const angle = index * 0.618 * 2 * Math.PI; // Golden angle
+              const radius = Math.sqrt(index) * 12; // Spiral outward
+              
+              let x = centerX + Math.cos(angle) * radius;
+              let y = centerY + Math.sin(angle) * radius;
+              
+              // Try multiple positions to avoid overlap
+              let attempts = 0;
+              let placed = false;
+              
+              while (!placed && attempts < 50) {
+                let overlaps = false;
+                
+                for (const placed of placedWords) {
+                  const dx = Math.abs(x - placed.x);
+                  const dy = Math.abs(y - placed.y);
+                  if (dx < (wordWidth + placed.width) / 2 + 10 && 
+                      dy < (wordHeight + placed.height) / 2 + 5) {
+                    overlaps = true;
+                    break;
+                  }
+                }
+                
+                if (!overlaps && x - wordWidth/2 > 20 && x + wordWidth/2 < canvas.width - 20 &&
+                    y - wordHeight/2 > 20 && y + wordHeight/2 < canvas.height - 20) {
+                  placed = true;
+                } else {
+                  // Try new position
+                  const spiralRadius = Math.sqrt(attempts + index) * 15;
+                  const spiralAngle = (attempts + index) * 0.618 * 2 * Math.PI;
+                  x = centerX + Math.cos(spiralAngle) * spiralRadius;
+                  y = centerY + Math.sin(spiralAngle) * spiralRadius;
+                  attempts++;
+                }
+              }
+              
+              // Random rotation (like D3.js word cloud)
+              const rotation = (Math.random() < 0.3) ? (Math.random() < 0.5 ? -90 : 90) : 0;
+              
+              ctx.save();
+              ctx.translate(x, y);
+              if (rotation !== 0) {
+                ctx.rotate(rotation * Math.PI / 180);
+              }
+              
               ctx.fillStyle = colors[index % colors.length];
+              ctx.fillText(word, 0, 0);
               
-              // Add some randomness to positioning within the cell
-              const offsetX = (Math.random() - 0.5) * 40;
-              const offsetY = (Math.random() - 0.5) * 20;
+              ctx.restore();
               
-              ctx.fillText(word, x + offsetX, y + offsetY);
+              // Track placed word
+              placedWords.push({
+                x, y, width: wordWidth, height: wordHeight, word, fontSize
+              });
             });
             
             wordCloudDataUrl = canvas.toDataURL('image/png');
-            console.log('Word cloud image generated successfully, length:', wordCloudDataUrl.length);
+            console.log('Advanced word cloud image generated successfully, length:', wordCloudDataUrl.length);
           }
         } catch (error) {
           console.error('Word cloud generation error:', error);
