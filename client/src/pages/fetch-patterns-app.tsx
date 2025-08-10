@@ -379,91 +379,68 @@ export default function FetchPatternsApp() {
         second: '2-digit'
       });
       
-      // Capture word cloud if it exists
+      // Generate word cloud image directly for PDF
       let wordCloudDataUrl = '';
-      try {
-        // First, let's wait for word cloud to be ready
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        // Get the word cloud element and check if word cloud data exists
-        const wordCloudElement = document.getElementById('word-cloud');
-        
-        console.log('Word cloud capture attempt:', {
-          elementFound: !!wordCloudElement,
-          analysesCount: completedAnalyses.length,
-          topWordsCount: topWords.length
-        });
-        
-        if (wordCloudElement && completedAnalyses.length > 0 && topWords.length > 0) {
-          console.log('Starting word cloud capture process...');
+      if (completedAnalyses.length > 0 && topWords.length > 0) {
+        try {
+          console.log('Generating word cloud image for PDF...');
           
-          // Wait longer for D3.js word cloud to render completely
-          await new Promise(resolve => setTimeout(resolve, 5000));
+          // Create a temporary canvas for word cloud generation
+          const canvas = document.createElement('canvas');
+          canvas.width = 600;
+          canvas.height = 400;
+          const ctx = canvas.getContext('2d');
           
-          // Look for SVG in multiple ways
-          let targetElement = null;
-          let svgElement = wordCloudElement.querySelector('svg');
-          
-          if (svgElement) {
-            console.log('Found direct SVG in word cloud element');
-            targetElement = svgElement.parentElement || wordCloudElement;
-          } else {
-            // Try to find SVG in nested divs
-            const cardContent = wordCloudElement.querySelector('[data-testid*="word"], .bg-white, div[style*="min-h"]');
-            if (cardContent) {
-              svgElement = cardContent.querySelector('svg');
-              if (svgElement) {
-                console.log('Found SVG in nested content');
-                targetElement = cardContent;
-              }
-            }
-          }
-          
-          // Last resort: capture the entire word cloud card
-          if (!targetElement) {
-            console.log('No SVG found, capturing entire word cloud container');
-            targetElement = wordCloudElement;
-          }
-          
-          if (targetElement) {
-            console.log('Capturing element:', targetElement.tagName);
-            if (svgElement) {
-              console.log('SVG details:', {
-                width: svgElement.getAttribute('width'),
-                height: svgElement.getAttribute('height'),
-                childrenCount: svgElement.children.length
-              });
-            }
+          if (ctx) {
+            // Set background
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            const canvas = await html2canvas(targetElement as HTMLElement, {
-              backgroundColor: '#ffffff',
-              scale: 1.5,
-              useCORS: true,
-              allowTaint: true,
-              foreignObjectRendering: true,
-              logging: false,
-              onclone: (clonedDoc) => {
-                // Ensure all SVG elements are visible in the cloned document
-                const allSvgs = clonedDoc.querySelectorAll('svg');
-                allSvgs.forEach(svg => {
-                  svg.style.display = 'block';
-                  svg.style.visibility = 'visible';
-                  svg.style.opacity = '1';
-                  svg.setAttribute('width', '600');
-                  svg.setAttribute('height', '450');
-                });
-              }
+            // Professional color palette
+            const colors = [
+              '#2563eb', '#059669', '#d97706', '#7c3aed', '#dc2626',
+              '#0891b2', '#65a30d', '#ea580c', '#4338ca', '#be123c'
+            ];
+            
+            // Calculate font sizes based on word frequency
+            const maxValue = Math.max(...topWords.map(([, value]) => value));
+            const minValue = Math.min(...topWords.map(([, value]) => value));
+            
+            // Draw words in a simple grid layout
+            const wordsToShow = topWords.slice(0, 20); // Show top 20 words
+            const cols = 5;
+            const rows = 4;
+            const cellWidth = canvas.width / cols;
+            const cellHeight = canvas.height / rows;
+            
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fontFamily = 'Arial, sans-serif';
+            
+            wordsToShow.forEach(([word, value], index) => {
+              const row = Math.floor(index / cols);
+              const col = index % cols;
+              const x = col * cellWidth + cellWidth / 2;
+              const y = row * cellHeight + cellHeight / 2;
+              
+              // Calculate font size (12px to 32px)
+              const fontSize = Math.max(12, Math.min(32, 12 + (value - minValue) / (maxValue - minValue) * 20));
+              ctx.font = `${fontSize}px Arial`;
+              ctx.fillStyle = colors[index % colors.length];
+              
+              // Add some randomness to positioning within the cell
+              const offsetX = (Math.random() - 0.5) * 40;
+              const offsetY = (Math.random() - 0.5) * 20;
+              
+              ctx.fillText(word, x + offsetX, y + offsetY);
             });
             
             wordCloudDataUrl = canvas.toDataURL('image/png');
-            console.log('Word cloud capture result:', {
-              success: wordCloudDataUrl.length > 1000,
-              dataUrlLength: wordCloudDataUrl.length
-            });
+            console.log('Word cloud image generated successfully, length:', wordCloudDataUrl.length);
           }
+        } catch (error) {
+          console.error('Word cloud generation error:', error);
         }
-      } catch (error) {
-        console.error('Word cloud capture error:', error);
       }
 
       // Create a styled HTML report
