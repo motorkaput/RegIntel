@@ -1080,9 +1080,9 @@ export default function FetchPatternsApp() {
                     {/* Walking dog animation */}
                     {progressStage !== 'done' && (
                       <div 
-                        className="absolute top-[-24px] w-8 h-8 transition-all duration-1000 ease-linear"
+                        className="absolute top-[-32px] w-12 h-12 transition-all duration-500 ease-linear"
                         style={{ 
-                          left: `calc(${Math.min(uploadProgress, 95)}% - 16px)`
+                          left: `calc(${Math.min(uploadProgress, 92)}% - 24px)`
                         }}
                       >
                         <img 
