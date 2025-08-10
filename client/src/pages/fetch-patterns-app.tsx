@@ -383,24 +383,42 @@ export default function FetchPatternsApp() {
       let wordCloudDataUrl = '';
       try {
         const wordCloudElement = document.getElementById('word-cloud');
-        if (wordCloudElement && completedAnalyses.length > 0) {
-          // Wait a moment for the word cloud to fully render
-          await new Promise(resolve => setTimeout(resolve, 1000));
+        const wordCloudContent = wordCloudElement?.querySelector('div[style*="min-h-[500px]"]');
+        
+        if (wordCloudContent && completedAnalyses.length > 0 && topWords.length > 0) {
+          // Wait longer for the word cloud SVG to fully render
+          await new Promise(resolve => setTimeout(resolve, 2000));
           
-          const canvas = await html2canvas(wordCloudElement, {
-            backgroundColor: '#ffffff',
-            scale: 2,
-            useCORS: true,
-            allowTaint: true,
-            foreignObjectRendering: true,
-            logging: false,
-            width: wordCloudElement.offsetWidth,
-            height: wordCloudElement.offsetHeight
-          });
-          wordCloudDataUrl = canvas.toDataURL('image/png');
-          console.log('Word cloud captured successfully, data URL length:', wordCloudDataUrl.length);
+          // Force a re-render to ensure SVG is visible
+          const svgElement = wordCloudContent.querySelector('svg') as SVGElement;
+          if (svgElement) {
+            console.log('Found SVG element in word cloud, dimensions:', svgElement.getBoundingClientRect());
+            
+            const canvas = await html2canvas(wordCloudContent as HTMLElement, {
+              backgroundColor: '#ffffff',
+              scale: 1.5,
+              useCORS: true,
+              allowTaint: true,
+              foreignObjectRendering: true,
+              logging: true,
+              width: 600,
+              height: 450,
+              onclone: (clonedDoc) => {
+                // Ensure SVG is visible in cloned document
+                const clonedSvg = clonedDoc.querySelector('svg');
+                if (clonedSvg) {
+                  clonedSvg.style.display = 'block';
+                  clonedSvg.style.visibility = 'visible';
+                }
+              }
+            });
+            wordCloudDataUrl = canvas.toDataURL('image/png');
+            console.log('Word cloud captured successfully, data URL length:', wordCloudDataUrl.length);
+          } else {
+            console.log('No SVG found in word cloud content');
+          }
         } else {
-          console.log('Word cloud element not found or no completed analyses');
+          console.log('Word cloud element not found or no data available');
         }
       } catch (error) {
         console.log('Word cloud capture failed:', error);
@@ -658,10 +676,10 @@ export default function FetchPatternsApp() {
                 </div>
                 <div style="margin-bottom: 12px; line-height: 1.5;">
                   <strong style="color: #1f2937; font-size: 14px;">Answer:</strong>
-                  <div style="margin-top: 4px; color: #374151; font-size: 14px; line-height: 1.6;">${(qa.data?.answer || qa.answer || 'N/A').replace(/\*\*/g, '').replace(/\*/g, '').replace(/—/g, '-').replace(/–/g, '-')}</div>
+                  <div style="margin-top: 4px; color: #374151; font-size: 14px; line-height: 1.6;">${(qa.data?.answer || (qa as any).answer || 'N/A').replace(/\*\*/g, '').replace(/\*/g, '').replace(/—/g, '-').replace(/–/g, '-')}</div>
                 </div>
                 <div style="font-size: 12px; color: #6b7280; border-top: 1px solid #e5e7eb; padding-top: 8px;">
-                  <strong>Confidence Score:</strong> ${qa.data?.confidence ? (qa.data.confidence * 100).toFixed(1) : (qa.confidence ? (qa.confidence * 100).toFixed(1) : 'N/A')}%
+                  <strong>Confidence Score:</strong> ${qa.data?.confidence ? (qa.data.confidence * 100).toFixed(1) : ((qa as any).confidence ? ((qa as any).confidence * 100).toFixed(1) : 'N/A')}%
                 </div>
               </div>
             `).join('')}
@@ -676,13 +694,13 @@ export default function FetchPatternsApp() {
                 <div style="margin-bottom: 16px;">
                   <h4 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 600; color: #1f2937;">Context Query:</h4>
                   <div style="background: white; padding: 12px; border-radius: 6px; border: 1px solid #e5e7eb; font-size: 14px; color: #374151; line-height: 1.5;">
-                    "${context.query || context.context || 'N/A'}"
+                    "${context.query || (context as any).context || 'N/A'}"
                   </div>
                 </div>
                 
                 <div style="margin-bottom: 16px;">
                   <h5 style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600; color: #1f2937;">Analysis Summary:</h5>
-                  <p style="margin: 0; font-size: 14px; color: #374151; line-height: 1.6;">${(context.data?.summary || context.summary || 'N/A').replace(/\*\*/g, '').replace(/\*/g, '').replace(/—/g, '-').replace(/–/g, '-')}</p>
+                  <p style="margin: 0; font-size: 14px; color: #374151; line-height: 1.6;">${(context.data?.summary || (context as any).summary || 'N/A').replace(/\*\*/g, '').replace(/\*/g, '').replace(/—/g, '-').replace(/–/g, '-')}</p>
                 </div>
                 
                 <div style="margin-bottom: 16px;">
@@ -691,24 +709,24 @@ export default function FetchPatternsApp() {
                     <div style="display: flex; align-items: center; gap: 16px;">
                       <div style="width: 80px; font-size: 14px; font-weight: 500; color: #374151;">Positive</div>
                       <div style="flex: 1; background: #e5e7eb; border-radius: 9999px; height: 24px; position: relative;">
-                        <div style="background: #10b981; height: 24px; border-radius: 9999px; display: flex; align-items: center; justify-content: flex-end; padding-right: 8px; width: ${context.data?.sentimentBreakdown?.positive || context.sentimentBreakdown?.positive || 0}%;">
-                          <span style="color: white; font-size: 14px; font-weight: 500;">${context.data?.sentimentBreakdown?.positive || context.sentimentBreakdown?.positive || 0}%</span>
+                        <div style="background: #10b981; height: 24px; border-radius: 9999px; display: flex; align-items: center; justify-content: flex-end; padding-right: 8px; width: ${context.data?.sentimentBreakdown?.positive || (context as any).sentimentBreakdown?.positive || 0}%;">
+                          <span style="color: white; font-size: 14px; font-weight: 500;">${context.data?.sentimentBreakdown?.positive || (context as any).sentimentBreakdown?.positive || 0}%</span>
                         </div>
                       </div>
                     </div>
                     <div style="display: flex; align-items: center; gap: 16px;">
                       <div style="width: 80px; font-size: 14px; font-weight: 500; color: #374151;">Negative</div>
                       <div style="flex: 1; background: #e5e7eb; border-radius: 9999px; height: 24px; position: relative;">
-                        <div style="background: #a855f7; height: 24px; border-radius: 9999px; display: flex; align-items: center; justify-content: flex-end; padding-right: 8px; width: ${context.data?.sentimentBreakdown?.negative || context.sentimentBreakdown?.negative || 0}%;">
-                          <span style="color: white; font-size: 14px; font-weight: 500;">${context.data?.sentimentBreakdown?.negative || context.sentimentBreakdown?.negative || 0}%</span>
+                        <div style="background: #a855f7; height: 24px; border-radius: 9999px; display: flex; align-items: center; justify-content: flex-end; padding-right: 8px; width: ${context.data?.sentimentBreakdown?.negative || (context as any).sentimentBreakdown?.negative || 0}%;">
+                          <span style="color: white; font-size: 14px; font-weight: 500;">${context.data?.sentimentBreakdown?.negative || (context as any).sentimentBreakdown?.negative || 0}%</span>
                         </div>
                       </div>
                     </div>
                     <div style="display: flex; align-items: center; gap: 16px;">
                       <div style="width: 80px; font-size: 14px; font-weight: 500; color: #374151;">Neutral</div>
                       <div style="flex: 1; background: #e5e7eb; border-radius: 9999px; height: 24px; position: relative;">
-                        <div style="background: #6b7280; height: 24px; border-radius: 9999px; display: flex; align-items: center; justify-content: flex-end; padding-right: 8px; width: ${context.data?.sentimentBreakdown?.neutral || context.sentimentBreakdown?.neutral || 0}%;">
-                          <span style="color: white; font-size: 14px; font-weight: 500;">${context.data?.sentimentBreakdown?.neutral || context.sentimentBreakdown?.neutral || 0}%</span>
+                        <div style="background: #6b7280; height: 24px; border-radius: 9999px; display: flex; align-items: center; justify-content: flex-end; padding-right: 8px; width: ${context.data?.sentimentBreakdown?.neutral || (context as any).sentimentBreakdown?.neutral || 0}%;">
+                          <span style="color: white; font-size: 14px; font-weight: 500;">${context.data?.sentimentBreakdown?.neutral || (context as any).sentimentBreakdown?.neutral || 0}%</span>
                         </div>
                       </div>
                     </div>
@@ -719,7 +737,7 @@ export default function FetchPatternsApp() {
                   <div style="margin-bottom: 16px;">
                     <div style="color: #1f2937; font-weight: 600; margin-bottom: 8px;">Emotional Tone:</div>
                     <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                      ${(context.data?.emotionalTone || context.emotionalTone || ['neutral']).map(tone => 
+                      ${(context.data?.emotionalTone || (context as any).emotionalTone || ['neutral']).map((tone: string) => 
                         `<span style="background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; padding: 4px 8px; border-radius: 4px; font-size: 12px;">${tone}</span>`
                       ).join('')}
                     </div>
@@ -728,7 +746,7 @@ export default function FetchPatternsApp() {
                   <div style="margin-bottom: 16px;">
                     <div style="color: #1f2937; font-weight: 600; margin-bottom: 8px;">Key Phrases:</div>
                     <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                      ${(context.data?.keyPhrases || context.keyPhrases || []).slice(0, 5).map(phrase => 
+                      ${(context.data?.keyPhrases || (context as any).keyPhrases || []).slice(0, 5).map((phrase: string) => 
                         `<span style="background: #fce7f3; color: #be185d; border: 1px solid #f9a8d4; padding: 4px 8px; border-radius: 4px; font-size: 12px;">"${phrase}"</span>`
                       ).join('')}
                     </div>
@@ -737,17 +755,33 @@ export default function FetchPatternsApp() {
                   <div>
                     <div style="color: #1f2937; font-weight: 600; margin-bottom: 8px;">Context Summary:</div>
                     <div style="background: white; padding: 12px; border-radius: 6px; border: 1px solid #bfdbfe; font-size: 14px; color: #374151; line-height: 1.5;">
-                      ${(context.data?.summary || context.summary || 'N/A').replace(/\*\*/g, '').replace(/\*/g, '').replace(/—/g, '-').replace(/–/g, '-')}
+                      ${(context.data?.summary || (context as any).summary || 'N/A').replace(/\*\*/g, '').replace(/\*/g, '').replace(/—/g, '-').replace(/–/g, '-')}
                     </div>
                   </div>
                   
                   <div style="margin-top: 12px; font-size: 12px; color: #6b7280;">
-                    <strong>Total Mentions:</strong> ${context.data?.mentions || context.mentions || 0}
+                    <strong>Total Mentions:</strong> ${context.data?.mentions || (context as any).mentions || 0}
                   </div>
                 </div>
               </div>
             `).join('')}
           </div>` : ''}
+          
+          <!-- Word Cloud -->
+          ${wordCloudDataUrl ? `
+          <div class="section">
+            <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 16px; color: #1f2937;">Word Cloud</h3>
+            <div style="text-align: center; background: white; padding: 20px; border: 1px solid #e5e7eb; border-radius: 8px;">
+              <img src="${wordCloudDataUrl}" alt="Word Cloud Visualization" style="max-width: 100%; height: auto; border-radius: 6px;" />
+              <p style="margin-top: 12px; font-size: 12px; color: #6b7280;">Generated from ${topWords.length} most frequent words across all documents</p>
+            </div>
+          </div>` : `
+          <div class="section">
+            <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 16px; color: #1f2937;">Word Cloud</h3>
+            <div style="text-align: center; background: #f9fafb; padding: 40px 20px; border: 1px solid #e5e7eb; border-radius: 8px; color: #6b7280;">
+              <p>Word cloud visualization not available - please ensure documents are processed and word cloud is visible before generating PDF</p>
+            </div>
+          </div>`}
           
           <!-- Footer -->
           <div style="margin-top: 40px; padding-top: 16px; border-top: 1px solid #e5e7eb; text-align: center; color: #6b7280; font-size: 12px;">
