@@ -1062,7 +1062,7 @@ export default function FetchPatternsApp() {
 
               {/* Progress Bar with textual states and walking dog */}
               {progressStage && (
-                <div className="space-y-3 bg-gray-50 p-4 rounded-lg border">
+                <div className="space-y-3 bg-gray-50 p-4 rounded-lg border" style={{ paddingTop: '60px', paddingBottom: '16px' }}>
                   <div className="flex items-center justify-between">
                     <div className="text-sm text-gray-500">{uploadProgress}%</div>
                   </div>
@@ -1074,7 +1074,7 @@ export default function FetchPatternsApp() {
                     {/* Status text positioned in front of the dog */}
                     {progressStage !== 'done' && (
                       <div 
-                        className="absolute top-[-28px] text-sm font-medium text-gray-700 transition-all duration-500 ease-linear"
+                        className="absolute top-[-28px] text-sm font-medium text-gray-700 transition-all duration-500 ease-linear whitespace-nowrap"
                         style={{ 
                           left: `calc(${Math.max(Math.min(uploadProgress, 85) - 15, 0)}% + 12px)`
                         }}
@@ -1084,19 +1084,25 @@ export default function FetchPatternsApp() {
                         {progressStage === 'fetching' && 'Fetching patterns...'}
                       </div>
                     )}
-                    {/* Walking dog animation */}
+                    {/* Walking dog animation - now truly 48x48px */}
                     {progressStage !== 'done' && (
                       <div 
-                        className="absolute top-[-48px] w-12 h-12 transition-all duration-500 ease-linear"
+                        className="absolute transition-all duration-500 ease-linear"
                         style={{ 
-                          left: `calc(${Math.min(uploadProgress, 92)}% - 24px)`
+                          top: '-50px',
+                          left: `calc(${Math.min(uploadProgress, 90)}% - 24px)`,
+                          width: '48px',
+                          height: '48px'
                         }}
                       >
                         <img 
                           src={fetchDogGif} 
                           alt="Walking dog"
-                          className="w-full h-full object-contain"
-                          style={{ width: '48px', height: '48px' }}
+                          style={{ 
+                            width: '48px', 
+                            height: '48px',
+                            objectFit: 'contain'
+                          }}
                         />
                       </div>
                     )}
