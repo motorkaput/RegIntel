@@ -424,7 +424,7 @@ export default function FetchPatternsApp() {
             }
             const placedWords: PlacedWord[] = [];
             
-            topWords.forEach(([word, value], index) => {
+            topWords.slice(0, Math.min(wordCount, topWords.length)).forEach(([word, value], index) => {
               // Exact font size calculation from component
               const fontSize = Math.max(14, Math.min(60, 14 + (value - minValue) / (maxValue - minValue) * 46));
               
@@ -570,7 +570,10 @@ export default function FetchPatternsApp() {
               width: 40px; 
               height: 40px; 
               object-fit: contain; 
-              border-radius: 6px; 
+              background: white;
+              padding: 2px;
+              border: 1px solid #e5e7eb;
+              border-radius: 8px; 
             }
             .header h1 { 
               margin: 0; 
