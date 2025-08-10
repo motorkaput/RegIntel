@@ -1079,7 +1079,10 @@ export default function FetchPatternsApp() {
                         style={{ 
                           width: '40px', 
                           height: '40px',
-                          objectFit: 'contain'
+                          objectFit: 'contain',
+                          imageRendering: 'pixelated',
+                          transform: 'scale(2.5)',
+                          transformOrigin: 'center'
                         }}
                       />
                     </div>
