@@ -383,42 +383,79 @@ export default function FetchPatternsApp() {
       let wordCloudDataUrl = '';
       try {
         const wordCloudElement = document.getElementById('word-cloud');
-        const wordCloudContent = wordCloudElement?.querySelector('div[style*="min-h-[500px]"]');
         
-        if (wordCloudContent && completedAnalyses.length > 0 && topWords.length > 0) {
-          // Wait longer for the word cloud SVG to fully render
-          await new Promise(resolve => setTimeout(resolve, 2000));
+        if (wordCloudElement && completedAnalyses.length > 0 && topWords.length > 0) {
+          console.log('Word cloud element found, starting capture process...');
+          console.log('Top words available:', topWords.length);
           
-          // Force a re-render to ensure SVG is visible
-          const svgElement = wordCloudContent.querySelector('svg') as SVGElement;
+          // Wait for the word cloud to render completely (D3 needs time)
+          await new Promise(resolve => setTimeout(resolve, 4000));
+          
+          // Try multiple selectors to find the SVG
+          let svgElement = wordCloudElement.querySelector('svg') as SVGElement;
+          if (!svgElement) {
+            // Look deeper in the DOM structure
+            svgElement = wordCloudElement.querySelector('div svg') as SVGElement;
+          }
+          if (!svgElement) {
+            // Look for any SVG in child elements
+            const allSvgs = wordCloudElement.querySelectorAll('svg');
+            if (allSvgs.length > 0) {
+              svgElement = allSvgs[0] as SVGElement;
+            }
+          }
+          
           if (svgElement) {
-            console.log('Found SVG element in word cloud, dimensions:', svgElement.getBoundingClientRect());
+            console.log('Found SVG element:', svgElement);
+            console.log('SVG dimensions:', svgElement.getBoundingClientRect());
+            console.log('SVG children count:', svgElement.children.length);
             
-            const canvas = await html2canvas(wordCloudContent as HTMLElement, {
+            // Get the parent container that holds the SVG
+            const captureElement = svgElement.parentElement || svgElement;
+            
+            // Get dimensions safely
+            const elementWidth = (captureElement as HTMLElement).offsetWidth || 600;
+            const elementHeight = (captureElement as HTMLElement).offsetHeight || 450;
+            
+            const canvas = await html2canvas(captureElement as HTMLElement, {
               backgroundColor: '#ffffff',
-              scale: 1.5,
+              scale: 2,
               useCORS: true,
               allowTaint: true,
               foreignObjectRendering: true,
               logging: true,
-              width: 600,
-              height: 450,
+              width: elementWidth,
+              height: elementHeight,
               onclone: (clonedDoc) => {
-                // Ensure SVG is visible in cloned document
-                const clonedSvg = clonedDoc.querySelector('svg');
-                if (clonedSvg) {
-                  clonedSvg.style.display = 'block';
-                  clonedSvg.style.visibility = 'visible';
-                }
+                const clonedSvgs = clonedDoc.querySelectorAll('svg');
+                clonedSvgs.forEach(svg => {
+                  svg.style.display = 'block';
+                  svg.style.visibility = 'visible';
+                  svg.style.opacity = '1';
+                });
               }
             });
             wordCloudDataUrl = canvas.toDataURL('image/png');
             console.log('Word cloud captured successfully, data URL length:', wordCloudDataUrl.length);
           } else {
-            console.log('No SVG found in word cloud content');
+            console.log('No SVG found in word cloud element');
+            console.log('Word cloud element children:', wordCloudElement.children.length);
+            console.log('Word cloud HTML structure:', wordCloudElement.innerHTML.substring(0, 500));
+            // Try to capture the whole word cloud div as fallback
+            const canvas = await html2canvas(wordCloudElement as HTMLElement, {
+              backgroundColor: '#ffffff',
+              scale: 2,
+              logging: true,
+            });
+            wordCloudDataUrl = canvas.toDataURL('image/png');
+            console.log('Fallback capture completed, data URL length:', wordCloudDataUrl.length);
           }
         } else {
-          console.log('Word cloud element not found or no data available');
+          console.log('Word cloud conditions not met:', {
+            elementFound: !!wordCloudElement,
+            analysesCount: completedAnalyses.length,
+            wordsCount: topWords.length
+          });
         }
       } catch (error) {
         console.log('Word cloud capture failed:', error);
