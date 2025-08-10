@@ -24,6 +24,7 @@ import fetchPatternsIcon from "@assets/FetchPatterns_Icon_1752663550310_17531487
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import html2canvas from 'html2canvas';
+// @ts-ignore
 import html2pdf from 'html2pdf.js';
 import { useLocation } from "wouter";
 
@@ -378,12 +379,28 @@ export default function FetchPatternsApp() {
         second: '2-digit'
       });
       
+      // Capture word cloud if it exists
+      let wordCloudDataUrl = '';
+      try {
+        const wordCloudElement = document.getElementById('word-cloud');
+        if (wordCloudElement && completedAnalyses.length > 0) {
+          const canvas = await html2canvas(wordCloudElement, {
+            backgroundColor: '#ffffff',
+            scale: 1,
+            useCORS: true
+          });
+          wordCloudDataUrl = canvas.toDataURL('image/png');
+        }
+      } catch (error) {
+        console.log('Word cloud capture failed:', error);
+      }
+
       // Create a styled HTML report
       const reportHtml = `
         <div id="pdf-report" style="font-family: system-ui, -apple-system, sans-serif; max-width: 800px; margin: 0; padding: 20px; color: #1f2937; background: white;">
           <!-- Header -->
           <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid #e5e7eb;">
-            <div style="width: 40px; height: 40px; background: #3b82f6; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 16px;">FP</div>
+            <img src="${fetchPatternsIcon}" style="width: 40px; height: 40px; border-radius: 8px;" alt="FetchPatterns" />
             <div>
               <h1 style="margin: 0; font-size: 24px; font-weight: bold; color: #1f2937;">FetchPatterns</h1>
               <p style="margin: 0; font-size: 12px; color: #6b7280;">AI-Powered Document Analysis & Visualization</p>
@@ -457,6 +474,15 @@ export default function FetchPatternsApp() {
             </div>
           </div>` : ''}
           
+          <!-- Word Cloud -->
+          ${wordCloudDataUrl ? `
+          <div style="margin-bottom: 32px;">
+            <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 16px; color: #1f2937;">Word Cloud Visualization</h3>
+            <div style="text-align: center; background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px;">
+              <img src="${wordCloudDataUrl}" style="max-width: 100%; height: auto;" alt="Word Cloud" />
+            </div>
+          </div>` : ''}
+          
           <!-- Q&A History -->
           ${questionHistory.length > 0 ? `
           <div style="margin-bottom: 32px;">
@@ -465,13 +491,13 @@ export default function FetchPatternsApp() {
               ${questionHistory.map((qa, index) => `
                 <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px;">
                   <div style="margin-bottom: 8px;">
-                    <strong style="color: #1f2937;">Q${index + 1}:</strong> <span style="color: #374151;">${qa.question}</span>
+                    <strong style="color: #1f2937;">Q${index + 1}:</strong> <span style="color: #374151;">${qa.question || 'N/A'}</span>
                   </div>
                   <div style="margin-bottom: 8px;">
-                    <strong style="color: #1f2937;">A${index + 1}:</strong> <span style="color: #374151;">${qa.answer}</span>
+                    <strong style="color: #1f2937;">A${index + 1}:</strong> <span style="color: #374151;">${qa.data?.answer || qa.answer || 'N/A'}</span>
                   </div>
                   <div style="font-size: 12px; color: #6b7280;">
-                    <strong>Confidence:</strong> ${(qa.confidence * 100).toFixed(1)}%
+                    <strong>Confidence:</strong> ${qa.data?.confidence ? (qa.data.confidence * 100).toFixed(1) : (qa.confidence ? (qa.confidence * 100).toFixed(1) : 'N/A')}%
                   </div>
                 </div>
               `).join('')}
@@ -485,25 +511,25 @@ export default function FetchPatternsApp() {
             <div style="display: grid; gap: 16px;">
               ${contextHistory.map((context, index) => `
                 <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px;">
-                  <h4 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 600; color: #1f2937;">Context ${index + 1}: ${context.context}</h4>
-                  <p style="margin: 0 0 12px 0; font-size: 14px; color: #374151;">${context.summary}</p>
+                  <h4 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 600; color: #1f2937;">Context ${index + 1}: ${context.query || context.context || 'N/A'}</h4>
+                  <p style="margin: 0 0 12px 0; font-size: 14px; color: #374151;">${context.data?.summary || context.summary || 'N/A'}</p>
                   <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 12px;">
                     <div style="text-align: center;">
-                      <div style="font-size: 20px; font-weight: bold; color: #059669;">${context.sentimentBreakdown.positive}%</div>
+                      <div style="font-size: 20px; font-weight: bold; color: #059669;">${context.data?.sentimentBreakdown?.positive || context.sentimentBreakdown?.positive || 0}%</div>
                       <div style="font-size: 12px; color: #6b7280;">Positive</div>
                     </div>
                     <div style="text-align: center;">
-                      <div style="font-size: 20px; font-weight: bold; color: #dc2626;">${context.sentimentBreakdown.negative}%</div>
+                      <div style="font-size: 20px; font-weight: bold; color: #dc2626;">${context.data?.sentimentBreakdown?.negative || context.sentimentBreakdown?.negative || 0}%</div>
                       <div style="font-size: 12px; color: #6b7280;">Negative</div>
                     </div>
                     <div style="text-align: center;">
-                      <div style="font-size: 20px; font-weight: bold; color: #6b7280;">${context.sentimentBreakdown.neutral}%</div>
+                      <div style="font-size: 20px; font-weight: bold; color: #6b7280;">${context.data?.sentimentBreakdown?.neutral || context.sentimentBreakdown?.neutral || 0}%</div>
                       <div style="font-size: 12px; color: #6b7280;">Neutral</div>
                     </div>
                   </div>
                   <div style="font-size: 12px; color: #6b7280;">
-                    <strong>Mentions:</strong> ${context.mentions} | 
-                    <strong>Key Phrases:</strong> ${context.keyPhrases.join(', ')}
+                    <strong>Mentions:</strong> ${context.data?.mentions || context.mentions || 0} | 
+                    <strong>Key Phrases:</strong> ${(context.data?.keyPhrases || context.keyPhrases || []).join(', ') || 'None'}
                   </div>
                 </div>
               `).join('')}
