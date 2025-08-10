@@ -399,18 +399,157 @@ export default function FetchPatternsApp() {
 
       // Create a styled HTML report
       const reportHtml = `
-        <div id="pdf-report" style="font-family: system-ui, -apple-system, sans-serif; max-width: 800px; margin: 0; padding: 20px; color: #1f2937; background: white;">
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="UTF-8">
+          <title>FetchPatterns Analysis Report</title>
+          <style>
+            @media print {
+              body { margin: 0; padding: 20px; }
+              .page-break { page-break-before: always; }
+              .no-break { page-break-inside: avoid; }
+              .header { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid #e5e7eb; }
+              .header img { width: 40px; height: 40px; object-fit: contain; border-radius: 6px; }
+              .header h1 { margin: 0; font-size: 24px; font-weight: bold; color: #1f2937; }
+              .header p { margin: 0; font-size: 12px; color: #6b7280; }
+            }
+            body { 
+              font-family: system-ui, -apple-system, sans-serif; 
+              max-width: 800px; 
+              margin: 0; 
+              padding: 20px; 
+              color: #1f2937; 
+              background: white; 
+              line-height: 1.4;
+            }
+            .header { 
+              display: flex; 
+              align-items: center; 
+              gap: 12px; 
+              margin-bottom: 24px; 
+              padding-bottom: 16px; 
+              border-bottom: 2px solid #e5e7eb; 
+            }
+            .header img { 
+              width: 40px; 
+              height: 40px; 
+              object-fit: contain; 
+              border-radius: 6px; 
+            }
+            .header h1 { 
+              margin: 0; 
+              font-size: 24px; 
+              font-weight: bold; 
+              color: #1f2937; 
+            }
+            .header p { 
+              margin: 0; 
+              font-size: 12px; 
+              color: #6b7280; 
+            }
+            .report-header { 
+              background: #f9fafb; 
+              padding: 16px; 
+              border-radius: 8px; 
+              margin-bottom: 24px; 
+            }
+            .metrics-grid { 
+              display: grid; 
+              grid-template-columns: repeat(2, 1fr); 
+              gap: 16px; 
+              margin-bottom: 32px; 
+            }
+            .metric-card { 
+              background: white; 
+              border: 1px solid #e5e7eb; 
+              border-radius: 8px; 
+              padding: 16px; 
+              text-align: center; 
+            }
+            .section { 
+              margin-bottom: 32px; 
+            }
+            .qa-item, .context-item { 
+              background: #f9fafb; 
+              border: 1px solid #e5e7eb; 
+              border-radius: 8px; 
+              padding: 16px; 
+              margin-bottom: 16px; 
+              page-break-inside: avoid; 
+            }
+            .sentiment-grid { 
+              display: flex; 
+              justify-content: space-around; 
+              background: white; 
+              padding: 16px; 
+              border-radius: 6px; 
+              border: 1px solid #e5e7eb; 
+            }
+            .sentiment-box { 
+              text-align: center; 
+              flex: 1; 
+              margin: 0 4px; 
+            }
+            .sentiment-positive { 
+              background: #dcfce7; 
+              color: #15803d; 
+              padding: 8px 12px; 
+              border-radius: 6px; 
+              font-size: 18px; 
+              font-weight: bold; 
+              margin-bottom: 4px; 
+            }
+            .sentiment-negative { 
+              background: #fef2f2; 
+              color: #dc2626; 
+              padding: 8px 12px; 
+              border-radius: 6px; 
+              font-size: 18px; 
+              font-weight: bold; 
+              margin-bottom: 4px; 
+            }
+            .sentiment-neutral { 
+              background: #f3f4f6; 
+              color: #6b7280; 
+              padding: 8px 12px; 
+              border-radius: 6px; 
+              font-size: 18px; 
+              font-weight: bold; 
+              margin-bottom: 4px; 
+            }
+            .tag { 
+              display: inline-block; 
+              padding: 4px 8px; 
+              border-radius: 4px; 
+              font-size: 12px; 
+              margin-right: 8px; 
+              margin-bottom: 4px; 
+            }
+            .tag-classification { 
+              background: #dbeafe; 
+              color: #1e40af; 
+              border: 1px solid #bfdbfe; 
+            }
+            .tag-keyword { 
+              background: #f3e8ff; 
+              color: #7c3aed; 
+              border: 1px solid #e9d5ff; 
+            }
+          </style>
+        </head>
+        <body>
           <!-- Header -->
-          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid #e5e7eb;">
-            <img src="${fetchPatternsIcon}" style="width: 40px; height: 40px; object-fit: contain; border-radius: 6px;" alt="FetchPatterns" />
+          <div class="header">
+            <img src="${fetchPatternsIcon}" alt="FetchPatterns" />
             <div>
-              <h1 style="margin: 0; font-size: 24px; font-weight: bold; color: #1f2937;">FetchPatterns</h1>
-              <p style="margin: 0; font-size: 12px; color: #6b7280;">AI-Powered Document Analysis & Visualization</p>
+              <h1>FetchPatterns</h1>
+              <p>AI-Powered Document Analysis & Visualization</p>
             </div>
           </div>
           
           <!-- Report Header -->
-          <div style="background: #f9fafb; padding: 16px; border-radius: 8px; margin-bottom: 24px;">
+          <div class="report-header">
             <h2 style="margin: 0 0 8px 0; font-size: 20px; color: #1f2937;">Analysis Report</h2>
             <div style="font-size: 14px; color: #6b7280;">
               <p style="margin: 4px 0;">Generated by: Beta User</p>
@@ -421,23 +560,23 @@ export default function FetchPatternsApp() {
           </div>
           
           <!-- Session Metrics -->
-          <div style="margin-bottom: 32px;">
+          <div class="section">
             <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 16px; color: #1f2937;">Session Metrics</h3>
-            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;">
-              <div style="background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; text-align: center;">
+            <div class="metrics-grid">
+              <div class="metric-card">
                 <div style="font-size: 28px; font-weight: bold; color: #374151; margin-bottom: 8px;">${completedAnalyses.length}</div>
                 <div style="font-size: 12px; color: #6b7280;">Documents Processed</div>
               </div>
-              <div style="background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; text-align: center;">
+              <div class="metric-card">
                 <div style="font-size: 28px; font-weight: bold; color: #374151; margin-bottom: 8px;">${uniqueKeywords}</div>
                 <div style="font-size: 12px; color: #6b7280;">Unique Keywords</div>
               </div>
-              <div style="background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; text-align: center;">
+              <div class="metric-card">
                 <div style="font-size: 28px; font-weight: bold; color: #374151; margin-bottom: 8px;">${highConfidence}</div>
                 <div style="font-size: 12px; color: #6b7280;">High Confidence</div>
                 <div style="font-size: 10px; color: #9ca3af;">Sentiment confidence > 80%</div>
               </div>
-              <div style="background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; text-align: center;">
+              <div class="metric-card">
                 <div style="font-size: 28px; font-weight: bold; color: #374151; margin-bottom: 8px;">${highRisk}</div>
                 <div style="font-size: 12px; color: #6b7280;">High Risk Documents</div>
                 <div style="font-size: 10px; color: #9ca3af;">Negative sentiment documents</div>
@@ -447,174 +586,159 @@ export default function FetchPatternsApp() {
           
           <!-- Document Analyses -->
           ${completedAnalyses.length > 0 ? `
-          <div style="margin-bottom: 32px;">
+          <div class="section">
             <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 16px; color: #1f2937;">Document Analyses</h3>
-            <div style="display: grid; gap: 16px;">
-              ${completedAnalyses.map((analysis, index) => `
-                <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px;">
-                  <h4 style="margin: 0 0 12px 0; font-size: 16px; font-weight: 600; color: #1f2937;">${analysis.originalName}</h4>
-                  
-                  <!-- Classification and Keywords -->
-                  <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px;">
-                    ${analysis.classification ? `<span style="background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; padding: 4px 8px; border-radius: 4px; font-size: 12px;">${analysis.classification}</span>` : ''}
-                    ${analysis.keywords ? analysis.keywords.slice(0, 3).map(keyword => `<span style="background: #f3e8ff; color: #7c3aed; border: 1px solid #e9d5ff; padding: 4px 8px; border-radius: 4px; font-size: 12px;">${keyword}</span>`).join('') : ''}
-                  </div>
-                  
-                  ${analysis.summary ? `<p style="margin: 0 0 12px 0; font-size: 14px; color: #374151; line-height: 1.5;">${analysis.summary}</p>` : ''}
-                  
-                  ${analysis.sentiment ? `
-                  <div style="margin-bottom: 8px;">
-                    <span style="font-size: 12px; color: #6b7280;"><strong>Sentiment:</strong> ${analysis.sentiment.label} (${(analysis.sentiment.score * 100).toFixed(1)}%)</span>
-                  </div>` : ''}
-                  
-                  ${analysis.wordCount ? `
-                  <div style="font-size: 12px; color: #6b7280;">
-                    <strong>Word Count:</strong> ${analysis.wordCount} words
-                  </div>` : ''}
+            ${completedAnalyses.map((analysis, index) => `
+              <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; margin-bottom: 16px; page-break-inside: avoid;">
+                <h4 style="margin: 0 0 12px 0; font-size: 16px; font-weight: 600; color: #1f2937;">${analysis.originalName}</h4>
+                
+                <!-- Classification and Keywords -->
+                <div style="margin-bottom: 12px;">
+                  ${analysis.classification ? `<span class="tag tag-classification">${analysis.classification}</span>` : ''}
+                  ${analysis.keywords ? analysis.keywords.slice(0, 3).map(keyword => `<span class="tag tag-keyword">${keyword}</span>`).join('') : ''}
                 </div>
-              `).join('')}
-            </div>
+                
+                ${analysis.summary ? `<p style="margin: 0 0 12px 0; font-size: 14px; color: #374151; line-height: 1.5;">${analysis.summary}</p>` : ''}
+                
+                ${analysis.sentiment ? `
+                <div style="margin-bottom: 8px;">
+                  <span style="font-size: 12px; color: #6b7280;"><strong>Sentiment:</strong> ${analysis.sentiment.label} (${(analysis.sentiment.score * 100).toFixed(1)}%)</span>
+                </div>` : ''}
+                
+                ${analysis.wordCount ? `
+                <div style="font-size: 12px; color: #6b7280;">
+                  <strong>Word Count:</strong> ${analysis.wordCount} words
+                </div>` : ''}
+              </div>
+            `).join('')}
           </div>` : ''}
           
           <!-- Word Cloud -->
           ${wordCloudDataUrl ? `
-          <div style="margin-bottom: 32px;">
+          <div class="section">
             <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 16px; color: #1f2937;">Word Cloud Visualization</h3>
-            <div style="text-align: center; background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px;">
+            <div style="text-align: center; background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; page-break-inside: avoid;">
               <img src="${wordCloudDataUrl}" style="max-width: 100%; height: auto;" alt="Word Cloud" />
             </div>
           </div>` : ''}
           
           <!-- Q&A History -->
           ${questionHistory.length > 0 ? `
-          <div style="margin-bottom: 32px; page-break-inside: avoid;">
+          <div class="section">
             <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 16px; color: #1f2937;">Q&A History</h3>
-            <div style="display: grid; gap: 16px;">
-              ${questionHistory.map((qa, index) => `
-                <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; page-break-inside: avoid; break-inside: avoid;">
-                  <div style="margin-bottom: 12px; line-height: 1.5;">
-                    <strong style="color: #1f2937; font-size: 14px;">Question ${index + 1}:</strong>
-                    <div style="margin-top: 4px; color: #374151; font-size: 14px; line-height: 1.6;">${qa.question || 'N/A'}</div>
-                  </div>
-                  <div style="margin-bottom: 12px; line-height: 1.5;">
-                    <strong style="color: #1f2937; font-size: 14px;">Answer:</strong>
-                    <div style="margin-top: 4px; color: #374151; font-size: 14px; line-height: 1.6;">${qa.data?.answer || qa.answer || 'N/A'}</div>
-                  </div>
-                  <div style="font-size: 12px; color: #6b7280; border-top: 1px solid #e5e7eb; padding-top: 8px;">
-                    <strong>Confidence Score:</strong> ${qa.data?.confidence ? (qa.data.confidence * 100).toFixed(1) : (qa.confidence ? (qa.confidence * 100).toFixed(1) : 'N/A')}%
-                  </div>
+            ${questionHistory.map((qa, index) => `
+              <div class="qa-item">
+                <div style="margin-bottom: 12px; line-height: 1.5;">
+                  <strong style="color: #1f2937; font-size: 14px;">Question ${index + 1}:</strong>
+                  <div style="margin-top: 4px; color: #374151; font-size: 14px; line-height: 1.6;">${qa.question || 'N/A'}</div>
                 </div>
-              `).join('')}
-            </div>
+                <div style="margin-bottom: 12px; line-height: 1.5;">
+                  <strong style="color: #1f2937; font-size: 14px;">Answer:</strong>
+                  <div style="margin-top: 4px; color: #374151; font-size: 14px; line-height: 1.6;">${qa.data?.answer || qa.answer || 'N/A'}</div>
+                </div>
+                <div style="font-size: 12px; color: #6b7280; border-top: 1px solid #e5e7eb; padding-top: 8px;">
+                  <strong>Confidence Score:</strong> ${qa.data?.confidence ? (qa.data.confidence * 100).toFixed(1) : (qa.confidence ? (qa.confidence * 100).toFixed(1) : 'N/A')}%
+                </div>
+              </div>
+            `).join('')}
           </div>` : ''}
           
           <!-- Context-Specific Sentiment Analysis -->
           ${contextHistory.length > 0 ? `
-          <div style="margin-bottom: 32px; page-break-inside: avoid;">
+          <div class="section">
             <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 16px; color: #1f2937;">Context-Specific Sentiment Analysis</h3>
-            <div style="display: grid; gap: 20px;">
-              ${contextHistory.map((context, index) => `
-                <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; page-break-inside: avoid; break-inside: avoid;">
-                  <div style="margin-bottom: 16px;">
-                    <h4 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 600; color: #1f2937;">Context Query:</h4>
-                    <div style="background: white; padding: 12px; border-radius: 6px; border: 1px solid #e5e7eb; font-size: 14px; color: #374151; line-height: 1.5;">
-                      "${context.query || context.context || 'N/A'}"
-                    </div>
-                  </div>
-                  
-                  <div style="margin-bottom: 16px;">
-                    <h5 style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600; color: #1f2937;">Analysis Summary:</h5>
-                    <p style="margin: 0; font-size: 14px; color: #374151; line-height: 1.6;">${context.data?.summary || context.summary || 'N/A'}</p>
-                  </div>
-                  
-                  <div style="margin-bottom: 16px;">
-                    <h5 style="margin: 0 0 12px 0; font-size: 14px; font-weight: 600; color: #1f2937;">Sentiment Breakdown:</h5>
-                    <div style="display: flex; justify-content: space-around; background: white; padding: 16px; border-radius: 6px; border: 1px solid #e5e7eb;">
-                      <div style="text-align: center; flex: 1;">
-                        <div style="background: #dcfce7; color: #15803d; padding: 8px 12px; border-radius: 6px; font-size: 18px; font-weight: bold; margin-bottom: 4px;">
-                          ${context.data?.sentimentBreakdown?.positive || context.sentimentBreakdown?.positive || 0}%
-                        </div>
-                        <div style="font-size: 12px; color: #6b7280; font-weight: 500;">Positive</div>
-                      </div>
-                      <div style="text-align: center; flex: 1; margin: 0 8px;">
-                        <div style="background: #fef2f2; color: #dc2626; padding: 8px 12px; border-radius: 6px; font-size: 18px; font-weight: bold; margin-bottom: 4px;">
-                          ${context.data?.sentimentBreakdown?.negative || context.sentimentBreakdown?.negative || 0}%
-                        </div>
-                        <div style="font-size: 12px; color: #6b7280; font-weight: 500;">Negative</div>
-                      </div>
-                      <div style="text-align: center; flex: 1;">
-                        <div style="background: #f3f4f6; color: #6b7280; padding: 8px 12px; border-radius: 6px; font-size: 18px; font-weight: bold; margin-bottom: 4px;">
-                          ${context.data?.sentimentBreakdown?.neutral || context.sentimentBreakdown?.neutral || 0}%
-                        </div>
-                        <div style="font-size: 12px; color: #6b7280; font-weight: 500;">Neutral</div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #6b7280; border-top: 1px solid #e5e7eb; padding-top: 12px;">
-                    <span><strong>Total Mentions:</strong> ${context.data?.mentions || context.mentions || 0}</span>
-                    <span style="max-width: 60%; text-align: right;"><strong>Key Phrases:</strong> ${(context.data?.keyPhrases || context.keyPhrases || []).slice(0, 3).join(', ') || 'None'}</span>
+            ${contextHistory.map((context, index) => `
+              <div class="context-item" style="padding: 20px;">
+                <div style="margin-bottom: 16px;">
+                  <h4 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 600; color: #1f2937;">Context Query:</h4>
+                  <div style="background: white; padding: 12px; border-radius: 6px; border: 1px solid #e5e7eb; font-size: 14px; color: #374151; line-height: 1.5;">
+                    "${context.query || context.context || 'N/A'}"
                   </div>
                 </div>
-              `).join('')}
-            </div>
+                
+                <div style="margin-bottom: 16px;">
+                  <h5 style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600; color: #1f2937;">Analysis Summary:</h5>
+                  <p style="margin: 0; font-size: 14px; color: #374151; line-height: 1.6;">${context.data?.summary || context.summary || 'N/A'}</p>
+                </div>
+                
+                <div style="margin-bottom: 16px;">
+                  <h5 style="margin: 0 0 12px 0; font-size: 14px; font-weight: 600; color: #1f2937;">Sentiment Breakdown:</h5>
+                  <div class="sentiment-grid">
+                    <div class="sentiment-box">
+                      <div class="sentiment-positive">
+                        ${context.data?.sentimentBreakdown?.positive || context.sentimentBreakdown?.positive || 0}%
+                      </div>
+                      <div style="font-size: 12px; color: #6b7280; font-weight: 500;">Positive</div>
+                    </div>
+                    <div class="sentiment-box">
+                      <div class="sentiment-negative">
+                        ${context.data?.sentimentBreakdown?.negative || context.sentimentBreakdown?.negative || 0}%
+                      </div>
+                      <div style="font-size: 12px; color: #6b7280; font-weight: 500;">Negative</div>
+                    </div>
+                    <div class="sentiment-box">
+                      <div class="sentiment-neutral">
+                        ${context.data?.sentimentBreakdown?.neutral || context.sentimentBreakdown?.neutral || 0}%
+                      </div>
+                      <div style="font-size: 12px; color: #6b7280; font-weight: 500;">Neutral</div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #6b7280; border-top: 1px solid #e5e7eb; padding-top: 12px;">
+                  <span><strong>Total Mentions:</strong> ${context.data?.mentions || context.mentions || 0}</span>
+                  <span style="max-width: 60%; text-align: right;"><strong>Key Phrases:</strong> ${(context.data?.keyPhrases || context.keyPhrases || []).slice(0, 3).join(', ') || 'None'}</span>
+                </div>
+              </div>
+            `).join('')}
           </div>` : ''}
           
           <!-- Footer -->
           <div style="margin-top: 40px; padding-top: 16px; border-top: 1px solid #e5e7eb; text-align: center; color: #6b7280; font-size: 12px;">
             Generated by FetchPatterns - AI-Powered Document Analysis & Visualization
           </div>
-        </div>
+        </body>
+        </html>
       `;
       
-      // Create temporary container
-      const tempContainer = document.createElement('div');
-      tempContainer.innerHTML = reportHtml;
-      tempContainer.style.position = 'absolute';
-      tempContainer.style.left = '-9999px';
-      tempContainer.style.top = '-9999px';
-      document.body.appendChild(tempContainer);
-      
-      const reportElement = tempContainer.querySelector('#pdf-report');
-      
-      // PDF options for native content rendering
-      const opt = {
-        margin: [0.5, 0.5, 0.5, 0.5],
-        filename: `FetchPatterns_Report_${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(currentDate.getDate()).padStart(2, '0')}_${String(currentDate.getHours()).padStart(2, '0')}-${String(currentDate.getMinutes()).padStart(2, '0')}.pdf`,
-        image: { type: 'jpeg', quality: 0.95 },
-        html2canvas: { 
-          scale: 1,
-          useCORS: true,
-          allowTaint: true,
-          backgroundColor: '#ffffff',
-          logging: false,
-          foreignObjectRendering: true,
-          removeContainer: true
-        },
-        jsPDF: { 
-          unit: 'in', 
-          format: 'letter', 
-          orientation: 'portrait',
-          compressPdf: true
-        },
-        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
-      };
-      
-      // Generate PDF
-      await html2pdf().set(opt).from(reportElement).save();
-      
-      // Clean up
-      document.body.removeChild(tempContainer);
-      
-      toast({
-        title: "PDF Downloaded",
-        description: "Comprehensive analysis report has been downloaded as PDF.",
-      });
+      // Open report in new window and trigger print dialog
+      const printWindow = window.open('', '_blank');
+      if (printWindow) {
+        printWindow.document.write(reportHtml);
+        printWindow.document.close();
+        
+        // Wait for content to load, then focus and print
+        printWindow.onload = () => {
+          printWindow.focus();
+          setTimeout(() => {
+            printWindow.print();
+          }, 500);
+        };
+        
+        toast({
+          title: "Print Dialog Opened",
+          description: "Use your browser's print dialog to save as PDF with perfect formatting.",
+        });
+      } else {
+        // Fallback: create blob and download
+        const blob = new Blob([reportHtml], { type: 'text/html' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `FetchPatterns_Report_${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(currentDate.getDate()).padStart(2, '0')}_${String(currentDate.getHours()).padStart(2, '0')}-${String(currentDate.getMinutes()).padStart(2, '0')}.html`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+        
+        toast({
+          title: "HTML Report Downloaded",
+          description: "Open the HTML file and use your browser's print function to save as PDF.",
+        });
+      }
     } catch (error) {
       console.error('PDF Export Error:', error);
       toast({
-        title: "PDF Export Failed",
-        description: "Failed to generate PDF report. Please try again.",
+        title: "Export Failed",
+        description: "Failed to generate report. Please try again.",
         variant: "destructive",
       });
     }
