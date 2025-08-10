@@ -406,13 +406,21 @@ export default function FetchPatternsApp() {
           <title>FetchPatterns Analysis Report</title>
           <style>
             @media print {
-              body { margin: 0; padding: 20px; }
-              .page-break { page-break-before: always; }
-              .no-break { page-break-inside: avoid; }
-              .header { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid #e5e7eb; }
-              .header img { width: 40px; height: 40px; object-fit: contain; border-radius: 6px; }
-              .header h1 { margin: 0; font-size: 24px; font-weight: bold; color: #1f2937; }
-              .header p { margin: 0; font-size: 12px; color: #6b7280; }
+              body { 
+                margin: 0; 
+                padding: 20px; 
+                page-break-inside: auto !important;
+              }
+              * { 
+                page-break-inside: auto !important; 
+                break-inside: auto !important;
+                page-break-before: auto !important;
+                page-break-after: auto !important;
+              }
+              @page {
+                size: auto;
+                margin: 0.5in;
+              }
             }
             body { 
               font-family: system-ui, -apple-system, sans-serif; 
@@ -476,7 +484,6 @@ export default function FetchPatternsApp() {
               border-radius: 8px; 
               padding: 16px; 
               margin-bottom: 16px; 
-              page-break-inside: avoid; 
             }
             .sentiment-grid { 
               display: flex; 
@@ -589,7 +596,7 @@ export default function FetchPatternsApp() {
           <div class="section">
             <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 16px; color: #1f2937;">Document Analyses</h3>
             ${completedAnalyses.map((analysis, index) => `
-              <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; margin-bottom: 16px; page-break-inside: avoid;">
+              <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; margin-bottom: 16px;">
                 <h4 style="margin: 0 0 12px 0; font-size: 16px; font-weight: 600; color: #1f2937;">${analysis.originalName}</h4>
                 
                 <!-- Classification and Keywords -->
@@ -617,7 +624,7 @@ export default function FetchPatternsApp() {
           ${wordCloudDataUrl ? `
           <div class="section">
             <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 16px; color: #1f2937;">Word Cloud Visualization</h3>
-            <div style="text-align: center; background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; page-break-inside: avoid;">
+            <div style="text-align: center; background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px;">
               <img src="${wordCloudDataUrl}" style="max-width: 100%; height: auto;" alt="Word Cloud" />
             </div>
           </div>` : ''}
