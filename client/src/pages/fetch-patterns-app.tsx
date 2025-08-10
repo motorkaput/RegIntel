@@ -1064,12 +1064,6 @@ export default function FetchPatternsApp() {
               {progressStage && (
                 <div className="space-y-3 bg-gray-50 p-4 rounded-lg border">
                   <div className="flex items-center justify-between">
-                    <div className="text-sm font-medium text-gray-700">
-                      {progressStage === 'uploading' && 'Uploading...'}
-                      {progressStage === 'analyzing' && 'Analyzing...'}
-                      {progressStage === 'fetching' && 'Fetching patterns...'}
-                      {progressStage === 'done' && 'Done'}
-                    </div>
                     <div className="text-sm text-gray-500">{uploadProgress}%</div>
                   </div>
                   <div className="relative w-full bg-gray-200 rounded-full h-2">
@@ -1077,10 +1071,23 @@ export default function FetchPatternsApp() {
                       className="bg-blue-600 h-2 rounded-full transition-all duration-500"
                       style={{ width: `${uploadProgress}%` }}
                     />
+                    {/* Status text positioned in front of the dog */}
+                    {progressStage !== 'done' && (
+                      <div 
+                        className="absolute top-[-28px] text-sm font-medium text-gray-700 transition-all duration-500 ease-linear"
+                        style={{ 
+                          left: `calc(${Math.max(Math.min(uploadProgress, 85) - 15, 0)}% + 12px)`
+                        }}
+                      >
+                        {progressStage === 'uploading' && 'Uploading...'}
+                        {progressStage === 'analyzing' && 'Analyzing...'}
+                        {progressStage === 'fetching' && 'Fetching patterns...'}
+                      </div>
+                    )}
                     {/* Walking dog animation */}
                     {progressStage !== 'done' && (
                       <div 
-                        className="absolute top-[-32px] w-12 h-12 transition-all duration-500 ease-linear"
+                        className="absolute top-[-48px] w-12 h-12 transition-all duration-500 ease-linear"
                         style={{ 
                           left: `calc(${Math.min(uploadProgress, 92)}% - 24px)`
                         }}
@@ -1089,6 +1096,7 @@ export default function FetchPatternsApp() {
                           src={fetchDogGif} 
                           alt="Walking dog"
                           className="w-full h-full object-contain"
+                          style={{ width: '48px', height: '48px' }}
                         />
                       </div>
                     )}
