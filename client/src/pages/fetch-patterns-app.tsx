@@ -379,140 +379,35 @@ export default function FetchPatternsApp() {
         second: '2-digit'
       });
       
-      // Generate word cloud image exactly matching the app's d3-cloud implementation
+      // Capture the actual word cloud from the page (like Opera's Save as PDF)
       let wordCloudDataUrl = '';
       if (completedAnalyses.length > 0 && topWords.length > 0) {
         try {
-          console.log('Generating word cloud image matching app implementation...');
+          console.log('Capturing word cloud from page...');
           
-          // Create a temporary canvas matching the exact dimensions
-          const canvas = document.createElement('canvas');
-          canvas.width = 675; // width * 1.5 from the component (450 * 1.5)
-          canvas.height = 450;
-          const ctx = canvas.getContext('2d');
-          
-          if (ctx) {
-            // Set background
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+          // Find the word cloud element
+          const wordCloudElement = document.getElementById('word-cloud');
+          if (wordCloudElement) {
+            // Import html2canvas dynamically
+            const html2canvas = (await import('html2canvas')).default;
             
-            // Exact color palette from WordCloud.tsx
-            const colors = [
-              '#2563eb', '#059669', '#d97706', '#7c3aed', '#dc2626',
-              '#0891b2', '#65a30d', '#ea580c', '#4338ca', '#be123c',
-              '#0d9488', '#9333ea', '#0369a1', '#db2777', '#6366f1'
-            ];
-            
-            // Exact font scaling from the component (14px to 60px)
-            const maxValue = Math.max(...topWords.map(([, value]) => value));
-            const minValue = Math.min(...topWords.map(([, value]) => value));
-            
-            const centerX = canvas.width / 2;
-            const centerY = canvas.height / 2;
-            
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            
-            // Track placed words to avoid overlap (Archimedean spiral simulation)
-            interface PlacedWord {
-              x: number;
-              y: number;
-              width: number;
-              height: number;
-              word: string;
-              fontSize: number;
-            }
-            const placedWords: PlacedWord[] = [];
-            
-            topWords.slice(0, Math.min(wordCount, topWords.length)).forEach(([word, value], index) => {
-              // Exact font size calculation from component
-              const fontSize = Math.max(14, Math.min(60, 14 + (value - minValue) / (maxValue - minValue) * 46));
-              
-              // Font setting exactly like the component
-              ctx.font = `300 ${fontSize}px Roboto, Arial, sans-serif`;
-              const textMetrics = ctx.measureText(word);
-              const wordWidth = textMetrics.width;
-              const wordHeight = fontSize;
-              
-              // Improved Archimedean spiral positioning with better collision detection
-              let placed = false;
-              let attempts = 0;
-              let x = centerX;
-              let y = centerY;
-              
-              // Start from center and spiral outward
-              while (!placed && attempts < 200) {
-                if (attempts === 0) {
-                  // First word at center
-                  x = centerX;
-                  y = centerY;
-                } else {
-                  // Archimedean spiral: r = a * θ with better spacing
-                  const angle = attempts * 0.3; // Smaller step for denser packing
-                  const radius = Math.sqrt(attempts) * 8; // Better spiral expansion
-                  x = centerX + Math.cos(angle) * radius;
-                  y = centerY + Math.sin(angle) * radius;
-                }
-                
-                // Enhanced collision detection
-                let overlaps = false;
-                for (const placedWord of placedWords) {
-                  // Calculate actual bounding boxes
-                  const thisLeft = x - wordWidth / 2;
-                  const thisRight = x + wordWidth / 2;
-                  const thisTop = y - wordHeight / 2;
-                  const thisBottom = y + wordHeight / 2;
-                  
-                  const otherLeft = placedWord.x - placedWord.width / 2;
-                  const otherRight = placedWord.x + placedWord.width / 2;
-                  const otherTop = placedWord.y - placedWord.height / 2;
-                  const otherBottom = placedWord.y + placedWord.height / 2;
-                  
-                  // Add substantial padding to prevent overlap
-                  const padding = 15;
-                  
-                  // Check if rectangles overlap with padding
-                  if (!(thisRight + padding < otherLeft || 
-                        thisLeft - padding > otherRight || 
-                        thisBottom + padding < otherTop || 
-                        thisTop - padding > otherBottom)) {
-                    overlaps = true;
-                    break;
-                  }
-                }
-                
-                // Check canvas boundaries with margin
-                const margin = 15;
-                if (!overlaps && 
-                    x - wordWidth/2 > margin && x + wordWidth/2 < canvas.width - margin &&
-                    y - wordHeight/2 > margin && y + wordHeight/2 < canvas.height - margin) {
-                  placed = true;
-                } else {
-                  attempts++;
-                }
-              }
-              
-              // If we couldn't place the word after many attempts, skip it
-              if (!placed) {
-                console.log(`Skipping word "${word}" - could not find placement`);
-                return;
-              }
-              
-              // Draw the word (no rotation, matching the component)
-              ctx.fillStyle = colors[index % colors.length];
-              ctx.fillText(word, x, y);
-              
-              // Track placed word
-              placedWords.push({
-                x, y, width: wordWidth, height: wordHeight, word, fontSize
-              });
+            // Capture the word cloud section
+            const canvas = await html2canvas(wordCloudElement, {
+              backgroundColor: '#ffffff',
+              scale: 2, // Higher quality
+              useCORS: true,
+              allowTaint: true,
+              width: wordCloudElement.offsetWidth,
+              height: wordCloudElement.offsetHeight
             });
             
             wordCloudDataUrl = canvas.toDataURL('image/png');
-            console.log('Word cloud image generated matching app implementation, length:', wordCloudDataUrl.length);
+            console.log('Word cloud captured from page, length:', wordCloudDataUrl.length);
           }
         } catch (error) {
-          console.error('Word cloud generation error:', error);
+          console.error('Word cloud capture error:', error);
+          // Fallback to simple text list if capture fails
+          console.log('Using fallback word list...');
         }
       }
 
@@ -752,10 +647,10 @@ export default function FetchPatternsApp() {
           
           <!-- Word Cloud -->
           ${wordCloudDataUrl ? `
-          <div class="section">
-            <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 16px; color: #1f2937;">Word Cloud Visualization</h3>
-            <div style="text-align: center; background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px;">
-              <img src="${wordCloudDataUrl}" style="max-width: 100%; height: auto;" alt="Word Cloud" />
+          <div class="section" style="page-break-inside: avoid; margin-bottom: 32px;">
+            <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 16px; color: #1f2937; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px;">Word Cloud Analysis (${wordCount} words)</h3>
+            <div style="text-align: center; background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 20px; margin: 16px 0;">
+              <img src="${wordCloudDataUrl}" style="max-width: 100%; height: auto; display: block; margin: 0 auto;" alt="Word Cloud Visualization" />
             </div>
           </div>` : ''}
           
