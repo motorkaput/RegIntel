@@ -434,48 +434,68 @@ export default function FetchPatternsApp() {
               const wordWidth = textMetrics.width;
               const wordHeight = fontSize;
               
-              // Archimedean spiral positioning (matching d3-cloud behavior)
+              // Improved Archimedean spiral positioning with better collision detection
               let placed = false;
               let attempts = 0;
               let x = centerX;
               let y = centerY;
               
               // Start from center and spiral outward
-              while (!placed && attempts < 100) {
+              while (!placed && attempts < 200) {
                 if (attempts === 0) {
                   // First word at center
                   x = centerX;
                   y = centerY;
                 } else {
-                  // Archimedean spiral: r = a * θ
-                  const angle = attempts * 0.5; // Spiral step
-                  const radius = angle * 3; // Spiral expansion rate
+                  // Archimedean spiral: r = a * θ with better spacing
+                  const angle = attempts * 0.3; // Smaller step for denser packing
+                  const radius = Math.sqrt(attempts) * 8; // Better spiral expansion
                   x = centerX + Math.cos(angle) * radius;
                   y = centerY + Math.sin(angle) * radius;
                 }
                 
-                // Check for overlaps with existing words
+                // Enhanced collision detection
                 let overlaps = false;
                 for (const placedWord of placedWords) {
-                  const dx = Math.abs(x - placedWord.x);
-                  const dy = Math.abs(y - placedWord.y);
-                  const minDistanceX = (wordWidth + placedWord.width) / 2 + 5; // padding = 1 scaled up
-                  const minDistanceY = (wordHeight + placedWord.height) / 2 + 5;
+                  // Calculate actual bounding boxes
+                  const thisLeft = x - wordWidth / 2;
+                  const thisRight = x + wordWidth / 2;
+                  const thisTop = y - wordHeight / 2;
+                  const thisBottom = y + wordHeight / 2;
                   
-                  if (dx < minDistanceX && dy < minDistanceY) {
+                  const otherLeft = placedWord.x - placedWord.width / 2;
+                  const otherRight = placedWord.x + placedWord.width / 2;
+                  const otherTop = placedWord.y - placedWord.height / 2;
+                  const otherBottom = placedWord.y + placedWord.height / 2;
+                  
+                  // Add substantial padding to prevent overlap
+                  const padding = 15;
+                  
+                  // Check if rectangles overlap with padding
+                  if (!(thisRight + padding < otherLeft || 
+                        thisLeft - padding > otherRight || 
+                        thisBottom + padding < otherTop || 
+                        thisTop - padding > otherBottom)) {
                     overlaps = true;
                     break;
                   }
                 }
                 
-                // Check canvas boundaries
+                // Check canvas boundaries with margin
+                const margin = 15;
                 if (!overlaps && 
-                    x - wordWidth/2 > 0 && x + wordWidth/2 < canvas.width &&
-                    y - wordHeight/2 > 0 && y + wordHeight/2 < canvas.height) {
+                    x - wordWidth/2 > margin && x + wordWidth/2 < canvas.width - margin &&
+                    y - wordHeight/2 > margin && y + wordHeight/2 < canvas.height - margin) {
                   placed = true;
                 } else {
                   attempts++;
                 }
+              }
+              
+              // If we couldn't place the word after many attempts, skip it
+              if (!placed) {
+                console.log(`Skipping word "${word}" - could not find placement`);
+                return;
               }
               
               // Draw the word (no rotation, matching the component)
