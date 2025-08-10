@@ -384,14 +384,23 @@ export default function FetchPatternsApp() {
       try {
         const wordCloudElement = document.getElementById('word-cloud');
         if (wordCloudElement && completedAnalyses.length > 0) {
+          // Wait a moment for the word cloud to fully render
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          
           const canvas = await html2canvas(wordCloudElement, {
             backgroundColor: '#ffffff',
             scale: 2,
             useCORS: true,
             allowTaint: true,
-            foreignObjectRendering: true
+            foreignObjectRendering: true,
+            logging: false,
+            width: wordCloudElement.offsetWidth,
+            height: wordCloudElement.offsetHeight
           });
           wordCloudDataUrl = canvas.toDataURL('image/png');
+          console.log('Word cloud captured successfully, data URL length:', wordCloudDataUrl.length);
+        } else {
+          console.log('Word cloud element not found or no completed analyses');
         }
       } catch (error) {
         console.log('Word cloud capture failed:', error);
@@ -409,17 +418,25 @@ export default function FetchPatternsApp() {
               body { 
                 margin: 0; 
                 padding: 20px; 
-                page-break-inside: auto !important;
               }
               * { 
-                page-break-inside: auto !important; 
-                break-inside: auto !important;
-                page-break-before: auto !important;
-                page-break-after: auto !important;
+                page-break-inside: avoid !important; 
+                break-inside: avoid !important;
+                page-break-before: avoid !important;
+                page-break-after: avoid !important;
+              }
+              .section, .context-item, .qa-item {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
               }
               @page {
                 size: auto;
                 margin: 0.5in;
+              }
+              html, body {
+                height: auto !important;
+                overflow: visible !important;
+                page-break-inside: avoid !important;
               }
             }
             body { 
@@ -641,7 +658,7 @@ export default function FetchPatternsApp() {
                 </div>
                 <div style="margin-bottom: 12px; line-height: 1.5;">
                   <strong style="color: #1f2937; font-size: 14px;">Answer:</strong>
-                  <div style="margin-top: 4px; color: #374151; font-size: 14px; line-height: 1.6;">${qa.data?.answer || qa.answer || 'N/A'}</div>
+                  <div style="margin-top: 4px; color: #374151; font-size: 14px; line-height: 1.6;">${(qa.data?.answer || qa.answer || 'N/A').replace(/\*\*/g, '').replace(/\*/g, '').replace(/—/g, '-').replace(/–/g, '-')}</div>
                 </div>
                 <div style="font-size: 12px; color: #6b7280; border-top: 1px solid #e5e7eb; padding-top: 8px;">
                   <strong>Confidence Score:</strong> ${qa.data?.confidence ? (qa.data.confidence * 100).toFixed(1) : (qa.confidence ? (qa.confidence * 100).toFixed(1) : 'N/A')}%
@@ -665,36 +682,68 @@ export default function FetchPatternsApp() {
                 
                 <div style="margin-bottom: 16px;">
                   <h5 style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600; color: #1f2937;">Analysis Summary:</h5>
-                  <p style="margin: 0; font-size: 14px; color: #374151; line-height: 1.6;">${context.data?.summary || context.summary || 'N/A'}</p>
+                  <p style="margin: 0; font-size: 14px; color: #374151; line-height: 1.6;">${(context.data?.summary || context.summary || 'N/A').replace(/\*\*/g, '').replace(/\*/g, '').replace(/—/g, '-').replace(/–/g, '-')}</p>
                 </div>
                 
                 <div style="margin-bottom: 16px;">
                   <h5 style="margin: 0 0 12px 0; font-size: 14px; font-weight: 600; color: #1f2937;">Sentiment Breakdown:</h5>
-                  <div class="sentiment-grid">
-                    <div class="sentiment-box">
-                      <div class="sentiment-positive">
-                        ${context.data?.sentimentBreakdown?.positive || context.sentimentBreakdown?.positive || 0}%
+                  <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <div style="display: flex; align-items: center; gap: 16px;">
+                      <div style="width: 80px; font-size: 14px; font-weight: 500; color: #374151;">Positive</div>
+                      <div style="flex: 1; background: #e5e7eb; border-radius: 9999px; height: 24px; position: relative;">
+                        <div style="background: #10b981; height: 24px; border-radius: 9999px; display: flex; align-items: center; justify-content: flex-end; padding-right: 8px; width: ${context.data?.sentimentBreakdown?.positive || context.sentimentBreakdown?.positive || 0}%;">
+                          <span style="color: white; font-size: 14px; font-weight: 500;">${context.data?.sentimentBreakdown?.positive || context.sentimentBreakdown?.positive || 0}%</span>
+                        </div>
                       </div>
-                      <div style="font-size: 12px; color: #6b7280; font-weight: 500;">Positive</div>
                     </div>
-                    <div class="sentiment-box">
-                      <div class="sentiment-negative">
-                        ${context.data?.sentimentBreakdown?.negative || context.sentimentBreakdown?.negative || 0}%
+                    <div style="display: flex; align-items: center; gap: 16px;">
+                      <div style="width: 80px; font-size: 14px; font-weight: 500; color: #374151;">Negative</div>
+                      <div style="flex: 1; background: #e5e7eb; border-radius: 9999px; height: 24px; position: relative;">
+                        <div style="background: #a855f7; height: 24px; border-radius: 9999px; display: flex; align-items: center; justify-content: flex-end; padding-right: 8px; width: ${context.data?.sentimentBreakdown?.negative || context.sentimentBreakdown?.negative || 0}%;">
+                          <span style="color: white; font-size: 14px; font-weight: 500;">${context.data?.sentimentBreakdown?.negative || context.sentimentBreakdown?.negative || 0}%</span>
+                        </div>
                       </div>
-                      <div style="font-size: 12px; color: #6b7280; font-weight: 500;">Negative</div>
                     </div>
-                    <div class="sentiment-box">
-                      <div class="sentiment-neutral">
-                        ${context.data?.sentimentBreakdown?.neutral || context.sentimentBreakdown?.neutral || 0}%
+                    <div style="display: flex; align-items: center; gap: 16px;">
+                      <div style="width: 80px; font-size: 14px; font-weight: 500; color: #374151;">Neutral</div>
+                      <div style="flex: 1; background: #e5e7eb; border-radius: 9999px; height: 24px; position: relative;">
+                        <div style="background: #6b7280; height: 24px; border-radius: 9999px; display: flex; align-items: center; justify-content: flex-end; padding-right: 8px; width: ${context.data?.sentimentBreakdown?.neutral || context.sentimentBreakdown?.neutral || 0}%;">
+                          <span style="color: white; font-size: 14px; font-weight: 500;">${context.data?.sentimentBreakdown?.neutral || context.sentimentBreakdown?.neutral || 0}%</span>
+                        </div>
                       </div>
-                      <div style="font-size: 12px; color: #6b7280; font-weight: 500;">Neutral</div>
                     </div>
                   </div>
                 </div>
                 
-                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #6b7280; border-top: 1px solid #e5e7eb; padding-top: 12px;">
-                  <span><strong>Total Mentions:</strong> ${context.data?.mentions || context.mentions || 0}</span>
-                  <span style="max-width: 60%; text-align: right;"><strong>Key Phrases:</strong> ${(context.data?.keyPhrases || context.keyPhrases || []).slice(0, 3).join(', ') || 'None'}</span>
+                <div style="background: #dbeafe; border: 1px solid #bfdbfe; border-left: 4px solid #3b82f6; border-radius: 6px; padding: 16px; margin-top: 16px;">
+                  <div style="margin-bottom: 16px;">
+                    <div style="color: #1f2937; font-weight: 600; margin-bottom: 8px;">Emotional Tone:</div>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                      ${(context.data?.emotionalTone || context.emotionalTone || ['neutral']).map(tone => 
+                        `<span style="background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; padding: 4px 8px; border-radius: 4px; font-size: 12px;">${tone}</span>`
+                      ).join('')}
+                    </div>
+                  </div>
+                  
+                  <div style="margin-bottom: 16px;">
+                    <div style="color: #1f2937; font-weight: 600; margin-bottom: 8px;">Key Phrases:</div>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                      ${(context.data?.keyPhrases || context.keyPhrases || []).slice(0, 5).map(phrase => 
+                        `<span style="background: #fce7f3; color: #be185d; border: 1px solid #f9a8d4; padding: 4px 8px; border-radius: 4px; font-size: 12px;">"${phrase}"</span>`
+                      ).join('')}
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <div style="color: #1f2937; font-weight: 600; margin-bottom: 8px;">Context Summary:</div>
+                    <div style="background: white; padding: 12px; border-radius: 6px; border: 1px solid #bfdbfe; font-size: 14px; color: #374151; line-height: 1.5;">
+                      ${(context.data?.summary || context.summary || 'N/A').replace(/\*\*/g, '').replace(/\*/g, '').replace(/—/g, '-').replace(/–/g, '-')}
+                    </div>
+                  </div>
+                  
+                  <div style="margin-top: 12px; font-size: 12px; color: #6b7280;">
+                    <strong>Total Mentions:</strong> ${context.data?.mentions || context.mentions || 0}
+                  </div>
                 </div>
               </div>
             `).join('')}
