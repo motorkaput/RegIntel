@@ -1,0 +1,118 @@
+perfect. that confirmation is exactly what we needed.
+
+here’s **prompt 2** to paste into replit:
+
+—
+User prompt:
+
+Generate the **database layer** for PerMeaTe Enterprise.
+
+Scope and constraints
+
+* DB: PostgreSQL with **Row Level Security (RLS)**.
+* ORM: **Prisma**.
+* Multi-tenancy: **single schema**, every table except `tenants` has `tenant_id UUID NOT NULL` and is protected by RLS using `current_setting('app.current_tenant_id')`.
+* Roles live on `users.role` (enum: admin, org\_leader, functional\_leader, project\_lead, team\_member).
+* Output **complete files**, not snippets.
+
+Deliverables
+
+1. **prisma/schema.prisma** implementing these models and relations (include all fields and indexes):
+
+   * `Tenant { id, name, domain (unique), subscription_tier, created_at, updated_at; relations: users, goals, projects, tasks, subscriptions, tenant_settings }`
+   * `User { id, tenant_id, email (unique per tenant), password_hash?, role enum, first_name, last_name, avatar_url?, email_verified, magic_link_token?, magic_link_expires?, created_at, updated_at; relations: tenant, owned_goals, led_projects, assigned_tasks }` with `@@unique([tenant_id, email])`
+   * `Goal { id, tenant_id, title, description?, owner_id, status enum(draft,active,completed,cancelled), priority enum(low,medium,high,critical), target_date?, ai_breakdown Json?, created_at, updated_at; relations: tenant, owner, projects }`
+   * `Project { id, tenant_id, goal_id, title, description?, project_lead_id, status enum, priority enum, start_date?, end_date?, created_at, updated_at; relations: tenant, goal, project_lead, tasks }`
+   * `Task { id, tenant_id, project_id, title, description?, assignee_id?, status enum(todo,in_progress,review,done,blocked), priority enum, estimated_hours?, due_date?, created_at, updated_at; relations: tenant, project, assignee }`
+   * `BillingSubscription { id, tenant_id, provider enum(razorpay,stripe), external_id, plan_id, status, current_period_start?, current_period_end?, created_at, updated_at }`
+   * `TenantSettings { id, tenant_id (unique), payment_provider enum(razorpay,stripe) default razorpay, razorpay_key_id?, razorpay_key_secret?, email_from?, data_retention_days?, rate_limit_qph?, created_at, updated_at }`
+   * `Skill { id, tenant_id, name, created_at, updated_at }`
+   * `UserSkill { id, tenant_id, user_id, skill_id, level int, created_at, updated_at }` with `@@unique([tenant_id, user_id, skill_id])`
+   * `Assignment { id, tenant_id, task_id, user_id, role enum(owner,contributor,reviewer), created_at }` with `@@unique([tenant_id, task_id, user_id, role])`
+   * `EffortEstimate { id, tenant_id, task_id, hours numeric(6,2), basis text?, created_at }`
+   * `WorkItem { id, tenant_id, external_system enum(jira,trello,asana), external_id, project_id?, task_id?, payload Json, status, created_at, updated_at }` with `@@unique([tenant_id, external_system, external_id])`
+   * `Score { id, tenant_id, task_id, user_id, value int (1..5), type enum(self,review,final), rationale?, created_at }`
+   * `ScoreIteration { id, tenant_id, task_id, actor_user_id, from_value?, to_value, reason?, created_at }`
+   * `AuditLog { id, tenant_id, actor_user_id?, entity_type, entity_id, action, before Json?, after Json?, created_at }` with composite indexes by tenant/time
+   * `UsageEvent { id, tenant_id, kind enum(ai_tokens,active_seat,task_evaluated), amount int, occurred_at timestamptz, metadata Json? }`
+   * `Invitation { id, tenant_id, email, role, token, expires_at, accepted_at?, created_at }` with `@@unique([tenant_id, email])`
+
+   Include: enums, relations, `onDelete: Cascade` where appropriate, and **composite indexes** for common queries:
+
+   * `@@index([tenant_id, status])` on goals/projects/tasks
+   * `@@index([tenant_id, occurred_at])` on usage\_events
+   * `@@index([tenant_id, created_at])` on audit\_logs
+
+2. **SQL for RLS** in a new file `prisma/rls.sql`:
+
+   * `ALTER TABLE … ENABLE ROW LEVEL SECURITY;` for all tenant-scoped tables and `tenants`.
+   * A read policy on `tenants` allowing `SELECT` only the row whose `id = current_setting('app.current_tenant_id')::uuid`.
+   * A default tenant isolation policy for each tenant-scoped table:
+
+     ```
+     CREATE POLICY tenant_isolation_select ON <table> FOR SELECT
+       USING (tenant_id = current_setting('app.current_tenant_id')::uuid);
+     CREATE POLICY tenant_isolation_mod ON <table> FOR INSERT WITH CHECK
+       (tenant_id = current_setting('app.current_tenant_id')::uuid);
+     CREATE POLICY tenant_isolation_update ON <table> FOR UPDATE
+       USING (tenant_id = current_setting('app.current_tenant_id')::uuid)
+       WITH CHECK (tenant_id = current_setting('app.current_tenant_id')::uuid);
+     CREATE POLICY tenant_isolation_delete ON <table> FOR DELETE
+       USING (tenant_id = current_setting('app.current_tenant_id')::uuid);
+     ```
+   * **Role-aware write limits**:
+
+     * `users`: only `admin` can insert/update/delete.
+     * `goals`: `admin, org_leader, functional_leader` can insert/update; others read.
+     * `projects`: `admin, org_leader, functional_leader, project_lead` can insert/update; team\_member read.
+     * `tasks`: `admin, org_leader, functional_leader, project_lead` can insert/update; `team_member` can update only assigned tasks’ status/self-score fields.
+   * Implement role checks via a security helper view or function using the JWT claims propagated by the app (e.g. `current_setting('app.current_role', true)`), and reference it in policies, e.g.:
+
+     ```
+     USING (tenant_id = current_setting('app.current_tenant_id')::uuid
+        AND current_setting('app.current_role') IN ('admin','org_leader','functional_leader'))
+     ```
+   * Add a note at the top explaining the app middleware must run:
+
+     ```
+     SELECT set_config('app.current_tenant_id', <tenant_uuid>, true);
+     SELECT set_config('app.current_role', <role>, true);
+     SELECT set_config('app.current_user_id', <user_uuid>, true);
+     ```
+
+3. **Seed script** `prisma/seed.ts`:
+
+   * Create two demo tenants (`Acme Corp`, `StartupXYZ`) with `TenantSettings` and an active `BillingSubscription` (provider=`razorpay`).
+   * For each tenant: create admin, org leader, functional leader, 2 project leads, 6 team members with realistic names and emails (`@acme.local`, `@startupxyz.local`).
+   * Create 3 sample `Goal`s per tenant (strategic, operational, personal dev).
+   * For each goal: 2 projects, each with 5–8 tasks with mixed statuses and priorities; assign leads and members.
+   * Populate `Skill` and `UserSkill` (languages, frameworks, cloud, data).
+   * Add `Score` and `ScoreIteration` samples showing self-score and lead review.
+   * Add `AuditLog` and `UsageEvent` examples.
+
+4. **NPM scripts** in `package.json`:
+
+   * `"db:migrate": "prisma migrate dev --name init"`
+   * `"db:push": "prisma db push"`
+   * `"db:seed": "ts-node prisma/seed.ts"`
+   * `"db:rls": "psql \"$DATABASE_URL\" -f prisma/rls.sql"`
+
+5. **README snippet** in `docs/api.md` (append at top):
+
+   * How the app sets `app.current_tenant_id`, `app.current_role`, `app.current_user_id` per request from JWT claims (middleware).
+   * Order of operations for local setup:
+
+     1. `npm run db:migrate`
+     2. `npm run db:rls`
+     3. `npm run db:seed`
+
+Acceptance
+
+* Prisma validates and generates successfully.
+* `prisma/rls.sql` contains **complete** policies for every table listed.
+* `db:seed` creates realistic data across both tenants.
+* All tables include `tenant_id` (except tenants) and appropriate indexes.
+* Comments in `rls.sql` document the `set_config` requirements.
+  —
+
+when this finishes, skim the generated `schema.prisma` and `rls.sql`. if anything’s missing or it skipped policies for some tables, stop and tell me — i’ll tighten the next prompt.

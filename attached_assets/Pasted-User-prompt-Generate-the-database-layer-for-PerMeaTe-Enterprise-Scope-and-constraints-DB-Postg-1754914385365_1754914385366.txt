@@ -1,0 +1,69 @@
+User prompt:
+
+Generate the database layer for PerMeaTe Enterprise.
+
+Scope and constraints
+
+DB: PostgreSQL with Row Level Security (RLS).
+
+ORM: Prisma.
+
+Multi-tenancy: single schema, every table except tenants has tenant_id UUID NOT NULL and is protected by RLS using current_setting('app.current_tenant_id').
+
+Roles live on users.role (enum: admin, org_leader, functional_leader, project_lead, team_member).
+
+Output complete files, not snippets.
+
+Deliverables
+
+prisma/schema.prisma implementing these models and relations (include all fields and indexes):
+
+Tenant { id, name, domain (unique), subscription_tier, created_at, updated_at; relations: users, goals, projects, tasks, subscriptions, tenant_settings }
+
+User { id, tenant_id, email (unique per tenant), password_hash?, role enum, first_name, last_name, avatar_url?, email_verified, magic_link_token?, magic_link_expires?, created_at, updated_at; relations: tenant, owned_goals, led_projects, assigned_tasks } with @@unique([tenant_id, email])
+
+Goal { id, tenant_id, title, description?, owner_id, status enum(draft,active,completed,cancelled), priority enum(low,medium,high,critical), target_date?, ai_breakdown Json?, created_at, updated_at; relations: tenant, owner, projects }
+
+Project { id, tenant_id, goal_id, title, description?, project_lead_id, status enum, priority enum, start_date?, end_date?, created_at, updated_at; relations: tenant, goal, project_lead, tasks }
+
+Task { id, tenant_id, project_id, title, description?, assignee_id?, status enum(todo,in_progress,review,done,blocked), priority enum, estimated_hours?, due_date?, created_at, updated_at; relations: tenant, project, assignee }
+
+BillingSubscription { id, tenant_id, provider enum(razorpay,stripe), external_id, plan_id, status, current_period_start?, current_period_end?, created_at, updated_at }
+
+TenantSettings { id, tenant_id (unique), payment_provider enum(razorpay,stripe) default razorpay, razorpay_key_id?, razorpay_key_secret?, email_from?, data_retention_days?, rate_limit_qph?, created_at, updated_at }
+
+Skill { id, tenant_id, name, created_at, updated_at }
+
+UserSkill { id, tenant_id, user_id, skill_id, level int, created_at, updated_at } with @@unique([tenant_id, user_id, skill_id])
+
+Assignment { id, tenant_id, task_id, user_id, role enum(owner,contributor,reviewer), created_at } with @@unique([tenant_id, task_id, user_id, role])
+
+EffortEstimate { id, tenant_id, task_id, hours numeric(6,2), basis text?, created_at }
+
+WorkItem { id, tenant_id, external_system enum(jira,trello,asana), external_id, project_id?, task_id?, payload Json, status, created_at, updated_at } with @@unique([tenant_id, external_system, external_id])
+
+Score { id, tenant_id, task_id, user_id, value int (1..5), type enum(self,review,final), rationale?, created_at }
+
+ScoreIteration { id, tenant_id, task_id, actor_user_id, from_value?, to_value, reason?, created_at }
+
+AuditLog { id, tenant_id, actor_user_id?, entity_type, entity_id, action, before Json?, after Json?, created_at } with composite indexes by tenant/time
+
+UsageEvent { id, tenant_id, kind enum(ai_tokens,active_seat,task_evaluated), amount int, occurred_at timestamptz, metadata Json? }
+
+Invitation { id, tenant_id, email, role, token, expires_at, accepted_at?, created_at } with @@unique([tenant_id, email])
+
+Include: enums, relations, onDelete: Cascade where appropriate, and composite indexes for common queries:
+
+@@index([tenant_id, status]) on goals/projects/tasks
+
+@@index([tenant_id, occurred_at]) on usage_events
+
+@@index([tenant_id, created_at]) on audit_logs
+
+SQL for RLS in a new file prisma/rls.sql:
+
+ALTER TABLE … ENABLE ROW LEVEL SECURITY; for all tenant-scoped tables and tenants.
+
+A read policy on tenants allowing SELECT only the row whose id = current_setting('app.current_tenant_id')::uuid.
+
+A default tenant isolation policy for each tenant-scoped table:
