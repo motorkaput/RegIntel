@@ -141,8 +141,11 @@ export default function HowToPage() {
                 </div>
               </div>
               <div className="bg-accent-blue-light p-4 rounded-lg" style={{ backgroundColor: 'var(--accent-blue-light)' }}>
-                <p className="text-accent-blue font-medium">
+                <p className="text-accent-blue font-medium mb-3">
                   Perfect for anyone who needs to quickly understand the key themes, sentiment, and insights from business documents without reading everything manually.
+                </p>
+                <p className="text-accent-blue text-sm">
+                  <strong>💻 Fully Responsive:</strong> Fetch Patterns works seamlessly on all devices - desktop, tablet, and mobile. Access your document analysis anywhere, anytime.
                 </p>
               </div>
             </CardContent>
@@ -231,6 +234,37 @@ export default function HowToPage() {
                       <h4 className="font-medium text-gray-900">Total Documents</h4>
                       <p className="text-gray-600 text-sm">
                         The number of documents you've analyzed. Track your usage and productivity over time.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <Separator />
+
+              {/* Word Cloud Visualization */}
+              <div>
+                <h3 className="font-semibold text-gray-900 mb-3">Word Cloud Visualization</h3>
+                <div className="grid gap-4">
+                  <div className="flex items-start gap-3">
+                    <div className="h-5 w-5 rounded bg-pink-500 mt-0.5 flex items-center justify-center">
+                      <span className="text-white text-xs font-bold">W</span>
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-gray-900">Interactive Word Cloud</h4>
+                      <p className="text-gray-600 text-sm">
+                        Visual representation of the most frequent words across all your documents. 
+                        Larger words appear more frequently. You can customize to show 1-100 words maximum.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <Download className="h-5 w-5 text-pink-500 mt-0.5" />
+                    <div>
+                      <h4 className="font-medium text-gray-900">Export Options</h4>
+                      <p className="text-gray-600 text-sm">
+                        Download your word cloud as a PNG image or export the word frequency data as CSV. 
+                        Perfect for presentations and further analysis.
                       </p>
                     </div>
                   </div>
@@ -351,7 +385,7 @@ export default function HowToPage() {
                         Create professional PDF reports with all your analysis results
                       </p>
                       <p className="text-orange-700 text-sm">
-                        Reports include word clouds, analysis summaries, and Q&A results in a clean, shareable format.
+                        Reports include word clouds (up to 100 words), analysis summaries, and Q&A results in a clean, shareable format.
                       </p>
                     </div>
                   </div>
