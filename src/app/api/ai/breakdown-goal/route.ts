@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
       budgetInfo: budget_info,
       teamRoster: teamContext.teamRoster,
       availableSkills: teamContext.availableSkills
-    });
+    }, { tenantId: tenant_id, userId: user_id, role });
 
     // Save as proposal
     const proposal = await withRLS(

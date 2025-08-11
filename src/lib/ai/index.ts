@@ -111,7 +111,8 @@ const MOCK_ASSIGNMENT_RECOMMENDATION: AssignmentRecommendation = {
 export async function analyzeOrganization(
   roster: any[], 
   reporting: any[], 
-  skills: any[]
+  skills: any[],
+  context: { tenantId: string; userId: string; role: string }
 ): Promise<OrgAnalysis> {
   // Use mock data in test environment
   if (isTestEnvironment) {
@@ -132,7 +133,10 @@ export async function analyzeOrganization(
       reporting_structure: reporting,
       skills_matrix: skills
     },
-    schema: OrgAnalysisSchema
+    schema: OrgAnalysisSchema,
+    tenantId: context.tenantId,
+    userId: context.userId,
+    role: context.role
   });
 
   if (!response.success || !response.data) {
@@ -151,7 +155,8 @@ export async function breakDownGoal(
     budgetInfo?: string;
     teamRoster: any[];
     availableSkills: string[];
-  }
+  },
+  authContext: { tenantId: string; userId: string; role: string }
 ): Promise<GoalBreakdown> {
   // Use mock data in test environment
   if (isTestEnvironment) {
@@ -173,7 +178,10 @@ export async function breakDownGoal(
       team_roster: context.teamRoster,
       available_skills: context.availableSkills
     },
-    schema: GoalBreakdownSchema
+    schema: GoalBreakdownSchema,
+    tenantId: authContext.tenantId,
+    userId: authContext.userId,
+    role: authContext.role
   });
 
   if (!response.success || !response.data) {
@@ -191,7 +199,8 @@ export async function recommendAssignments(
     timeline?: string;
     locationPreference?: string;
   },
-  roster: any[]
+  roster: any[],
+  context: { tenantId: string; userId: string; role: string }
 ): Promise<AssignmentRecommendation> {
   // Use mock data in test environment
   if (isTestEnvironment) {
@@ -216,7 +225,10 @@ export async function recommendAssignments(
         current_capacity: 80 // This would come from actual workload data
       }))
     },
-    schema: AssignmentRecommendationSchema
+    schema: AssignmentRecommendationSchema,
+    tenantId: context.tenantId,
+    userId: context.userId,
+    role: context.role
   });
 
   if (!response.success || !response.data) {

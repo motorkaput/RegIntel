@@ -573,6 +573,63 @@ PerMeaTe Enterprise includes deterministic AI services for organizational analys
 - **Safe JSON Parsing**: Protection against malformed AI responses
 - **Schema Validation**: Strict validation ensures data integrity
 
+### Enhanced Proposal Workflow
+
+#### State Machine
+```
+proposed → [accept|modify|reject]
+  ├─ accept → accepted (final)
+  ├─ modify → modified (final) 
+  └─ reject → rejected (final)
+```
+
+#### Human-in-the-Loop UI Features
+- **Diff Viewer**: Side-by-side comparison of original AI output vs user modifications
+- **Monaco Editor**: Advanced JSON editor with syntax highlighting and schema validation
+- **Decision History**: Complete audit trail of all proposal transitions with timestamps and reasons
+- **Status Filtering**: Filter proposals by status (proposed, accepted, modified, rejected)
+- **Required Reasoning**: Mandatory comments for modify/reject actions
+
+#### Prompt Template Versioning
+- **File-based Templates**: Stored in `src/lib/ai/prompts/` with clear constraints and JSON specimens
+- **SHA256 Checksums**: Automatic versioning based on template content changes
+- **Usage Tracking**: First-time template usage logged to `prompt_versions` table
+- **Deterministic Outputs**: Temperature 0.2, JSON mode, retry with exponential backoff
+
+#### API Enhancements
+`PATCH /api/ai/proposals/:id`
+- Validates changes against corresponding Zod schema
+- Enforces role-based permissions and hierarchy
+- Logs all state transitions with before/after values
+- Returns structured validation errors
+
+#### Example CURL Request
+```bash
+curl -X PATCH /api/ai/proposals/123 \
+  -H "Content-Type: application/json" \
+  -H "Cookie: auth-token=<jwt>" \
+  -d '{
+    "action": "modify",
+    "changes": {
+      "projects": [
+        {
+          "title": "Updated Project",
+          "estimated_hours": 120,
+          ...
+        }
+      ]
+    },
+    "reason": "Adjusted timeline based on resource availability"
+  }'
+```
+
+#### Permission Matrix
+Users can modify proposals they created OR proposals from subordinate roles:
+- **Admin**: Can modify all proposals
+- **Org Leader**: Can modify functional_leader and below proposals
+- **Functional Leader**: Can modify project_lead and below proposals
+- **Project Lead**: Can only modify their own proposals
+
 ## Error Handling
 
 All routes return consistent error responses:

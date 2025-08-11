@@ -1,6 +1,6 @@
 import OpenAI from 'openai';
-import { promises as fs } from 'fs';
-import path from 'path';
+import { getPromptTemplate, trackPromptUsage, replaceTemplateVariables } from './promptStore';
+import { createAuditLog } from '@/lib/audit';
 
 if (!process.env.OPENAI_API_KEY) {
   throw new Error('OPENAI_API_KEY environment variable is required');
@@ -15,6 +15,9 @@ interface OpenAIRequest {
   variables: Record<string, any>;
   schema?: any;
   maxRetries?: number;
+  tenantId: string;
+  userId: string;
+  role: string;
 }
 
 interface OpenAIResponse<T> {
@@ -22,27 +25,8 @@ interface OpenAIResponse<T> {
   data?: T;
   error?: string;
   retries?: number;
-}
-
-async function loadPromptTemplate(templateName: string): Promise<string> {
-  const templatePath = path.join(process.cwd(), 'src/lib/ai/prompts', `${templateName}.txt`);
-  try {
-    return await fs.readFile(templatePath, 'utf-8');
-  } catch (error) {
-    throw new Error(`Failed to load prompt template: ${templateName}`);
-  }
-}
-
-function replaceVariables(template: string, variables: Record<string, any>): string {
-  let result = template;
-  
-  for (const [key, value] of Object.entries(variables)) {
-    const placeholder = `{{${key}}}`;
-    const replacement = typeof value === 'object' ? JSON.stringify(value, null, 2) : String(value);
-    result = result.replaceAll(placeholder, replacement);
-  }
-  
-  return result;
+  promptVersion?: string;
+  rawOutput?: string;
 }
 
 function safeJSONParse<T>(jsonString: string, schema?: any): T | null {
@@ -71,14 +55,20 @@ async function sleep(ms: number): Promise<void> {
 }
 
 export async function callOpenAI<T>(request: OpenAIRequest): Promise<OpenAIResponse<T>> {
-  const { promptTemplate, variables, schema, maxRetries = 3 } = request;
+  const { promptTemplate, variables, schema, maxRetries = 3, tenantId, userId, role } = request;
   
   try {
-    // Load and prepare prompt
-    const template = await loadPromptTemplate(promptTemplate);
-    const prompt = replaceVariables(template, variables);
+    // Load versioned prompt template
+    const template = await getPromptTemplate(promptTemplate);
+    
+    // Track prompt usage
+    await trackPromptUsage(tenantId, template, { userId, role });
+    
+    // Prepare prompt with variables
+    const prompt = replaceTemplateVariables(template.content, variables);
     
     let lastError: string = '';
+    let rawOutput: string = '';
     
     for (let attempt = 0; attempt < maxRetries; attempt++) {
       try {
@@ -110,17 +100,49 @@ export async function callOpenAI<T>(request: OpenAIRequest): Promise<OpenAIRespo
           continue;
         }
         
+        rawOutput = content;
+        
         // Parse and validate JSON
         const parsedData = safeJSONParse<T>(content, schema);
         if (parsedData === null) {
           lastError = 'Failed to parse or validate JSON response';
+          
+          // Log invalid AI output for debugging
+          if (schema) {
+            try {
+              await createAuditLog(null, {
+                tenant_id: tenantId,
+                user_id: userId,
+                action: 'CREATE',
+                resource_type: 'ai_output_invalid',
+                resource_id: `${promptTemplate}-${Date.now()}`,
+                old_values: null,
+                new_values: {
+                  prompt_template: promptTemplate,
+                  prompt_version: template.version,
+                  raw_output: content,
+                  validation_error: 'Schema validation failed',
+                  schema_name: schema.constructor.name
+                },
+                metadata: { 
+                  ai_service: promptTemplate,
+                  attempt: attempt + 1
+                }
+              });
+            } catch (auditError) {
+              console.error('Failed to log invalid AI output:', auditError);
+            }
+          }
+          
           continue;
         }
         
         return {
           success: true,
           data: parsedData,
-          retries: attempt
+          retries: attempt,
+          promptVersion: template.version,
+          rawOutput: content
         };
         
       } catch (error: any) {
@@ -131,7 +153,8 @@ export async function callOpenAI<T>(request: OpenAIRequest): Promise<OpenAIRespo
     
     return {
       success: false,
-      error: `Failed after ${maxRetries} attempts. Last error: ${lastError}`
+      error: `Failed after ${maxRetries} attempts. Last error: ${lastError}`,
+      rawOutput
     };
     
   } catch (error: any) {

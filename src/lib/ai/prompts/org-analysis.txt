@@ -1,82 +1,65 @@
-You are an organizational analyst for PerMeaTe Enterprise. Analyze the provided employee roster, reporting structure, and skills data to generate comprehensive organizational insights.
+ORGANIZATIONAL ANALYSIS PROMPT
 
-**Context:**
-- Organization: {{organization_name}}
-- Total employees: {{employee_count}}
-- Analysis date: {{analysis_date}}
+Analyze employee roster, reporting structure, and skills to generate organizational insights.
 
-**Employee Roster:**
-{{employee_roster}}
+CONSTRAINTS:
+- Use only user_ids provided in roster data
+- Return arrays even if empty
+- Keep numeric fields as numbers not strings
+- No invented data or IDs
 
-**Reporting Structure:**
-{{reporting_structure}}
+INPUT VARIABLES:
+{{organization_name}} - Organization name
+{{employee_count}} - Total employees
+{{analysis_date}} - Current date
+{{employee_roster}} - Array of employee objects
+{{reporting_structure}} - Manager-subordinate relationships  
+{{skills_matrix}} - Skills per employee
 
-**Skills Matrix:**
-{{skills_matrix}}
-
-**Analysis Requirements:**
-
-1. **Leadership Analysis**: Identify key leaders, their team sizes, leadership styles, and strengths
-2. **Functional Clusters**: Group employees by functional areas, assess collaboration and efficiency
-3. **Skill Heatmap**: Map skill coverage, depth, gaps, and expertise distribution
-4. **Risk Assessment**: Identify organizational risks, bottlenecks, and vulnerabilities
-5. **Assumptions**: Document key assumptions made during analysis with confidence levels
-
-**Output Format:**
-Respond with valid JSON matching this exact structure:
-
-```json
+REQUIRED JSON OUTPUT:
 {
   "leaders": [
     {
-      "user_id": "string",
-      "name": "string", 
-      "role": "string",
-      "team_size": number,
-      "leadership_style": "string",
-      "key_strengths": ["string"]
+      "user_id": "exact_id_from_roster",
+      "name": "first_name last_name",
+      "role": "exact_role_from_roster", 
+      "team_size": 0,
+      "leadership_style": "Collaborative|Technical|Strategic|Operational",
+      "key_strengths": []
     }
   ],
   "functional_clusters": [
     {
-      "name": "string",
-      "members": ["user_id"],
-      "primary_skills": ["string"],
-      "collaboration_score": number, // 0-10
-      "efficiency_rating": "string"
+      "name": "cluster_name",
+      "members": [],
+      "primary_skills": [],
+      "collaboration_score": 0,
+      "efficiency_rating": "Low|Medium|High"
     }
   ],
   "skill_heatmap": {
     "skill_name": {
-      "coverage": number, // 0-100 percentage
-      "depth": number, // 1-5 scale
-      "gaps": ["string"],
-      "experts": ["user_id"]
+      "coverage": 0,
+      "depth": 1,
+      "gaps": [],
+      "experts": []
     }
   },
   "risk_list": [
     {
-      "category": "string",
-      "description": "string",
+      "category": "Technical|Operational|Strategic|Personnel",
+      "description": "specific_risk_description",
       "severity": "low|medium|high|critical",
-      "affected_areas": ["string"],
-      "mitigation_suggestions": ["string"]
+      "affected_areas": [],
+      "mitigation_suggestions": []
     }
   ],
   "assumptions": [
     {
-      "statement": "string",
-      "confidence": number, // 0-100
-      "impact_if_wrong": "string",
-      "validation_method": "string"
+      "statement": "assumption_text",
+      "confidence": 0,
+      "impact_if_wrong": "impact_description", 
+      "validation_method": "validation_approach"
     }
   ]
 }
-```
-
-**Guidelines:**
-- Be specific and actionable in recommendations
-- Base analysis on actual data provided, not assumptions
-- Consider organizational dynamics and team interactions
-- Identify both strengths and improvement opportunities
-- Ensure all JSON is valid and properly formatted

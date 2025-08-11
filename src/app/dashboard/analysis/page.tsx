@@ -1,9 +1,66 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { BarChart3, Users, AlertTriangle, CheckCircle, Clock, Eye } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { BarChart3, Users, AlertTriangle, CheckCircle, Clock, Eye, Filter } from 'lucide-react';
+import ProposalReviewModal from '@/components/proposals/ProposalReviewModal';
+import { useState } from 'react';
 
 export default function AnalysisPage() {
+  const [selectedProposal, setSelectedProposal] = useState(null);
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const mockProposals = [
+    {
+      id: '1',
+      type: 'org_analysis',
+      status: 'proposed',
+      input: { roster_count: 25 },
+      output: { leaders: [], functional_clusters: [], skill_heatmap: {}, risk_list: [], assumptions: [] },
+      created_by: { first_name: 'John', last_name: 'Doe', email: 'john@company.com' },
+      created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+      updated_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+    },
+    {
+      id: '2', 
+      type: 'org_analysis',
+      status: 'accepted',
+      input: { roster_count: 23 },
+      output: { leaders: [], functional_clusters: [], skill_heatmap: {}, risk_list: [], assumptions: [] },
+      created_by: { first_name: 'Jane', last_name: 'Smith', email: 'jane@company.com' },
+      created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+      updated_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+      review_comment: 'Analysis looks comprehensive and actionable'
+    }
+  ];
+
+  const handleProposalUpdate = async (proposalId: string, action: string, data?: any) => {
+    try {
+      const response = await fetch(`/api/ai/proposals/${proposalId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action, ...data }),
+      });
+      
+      if (response.ok) {
+        // Refresh proposals list
+        console.log('Proposal updated successfully');
+      }
+    } catch (error) {
+      console.error('Failed to update proposal:', error);
+    }
+  };
+
+  const openProposal = (proposal: any) => {
+    setSelectedProposal(proposal);
+    setIsModalOpen(true);
+  };
+
+  const filteredProposals = statusFilter === 'all' 
+    ? mockProposals 
+    : mockProposals.filter(p => p.status === statusFilter);
+
   return (
     <div>
       <div className="mb-8 flex items-center justify-between">
@@ -19,26 +76,52 @@ export default function AnalysisPage() {
         </Button>
       </div>
 
-      {/* Recent Proposals */}
+      {/* Analysis Proposals */}
       <Card className="mb-6">
         <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <Clock className="h-5 w-5" />
-            <span>Recent Analysis Proposals</span>
+          <CardTitle className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Clock className="h-5 w-5" />
+              <span>Analysis Proposals</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Filter className="h-4 w-4" />
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-32">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All</SelectItem>
+                  <SelectItem value="proposed">Proposed</SelectItem>
+                  <SelectItem value="accepted">Accepted</SelectItem>
+                  <SelectItem value="modified">Modified</SelectItem>
+                  <SelectItem value="rejected">Rejected</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {/* Example proposals */}
-            <div className="border rounded-lg p-4">
+            {filteredProposals.map((proposal) => (
+            <div key={proposal.id} className="border rounded-lg p-4">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center space-x-3">
-                  <Badge className="bg-yellow-100 text-yellow-800">
-                    Proposed
+                  <Badge className={
+                    proposal.status === 'proposed' ? 'bg-yellow-100 text-yellow-800' :
+                    proposal.status === 'accepted' ? 'bg-green-100 text-green-800' :
+                    proposal.status === 'modified' ? 'bg-blue-100 text-blue-800' :
+                    'bg-red-100 text-red-800'
+                  }>
+                    {proposal.status}
                   </Badge>
-                  <span className="font-medium">Q4 2024 Organizational Assessment</span>
+                  <span className="font-medium">
+                    {proposal.type === 'org_analysis' ? 'Organizational Assessment' : proposal.type}
+                  </span>
                 </div>
-                <span className="text-sm text-gray-500">2 hours ago</span>
+                <span className="text-sm text-gray-500">
+                  {new Date(proposal.created_at).toLocaleString()}
+                </span>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
@@ -56,53 +139,37 @@ export default function AnalysisPage() {
                 </div>
               </div>
 
-              <div className="flex items-center space-x-2">
-                <Button size="sm" data-testid="button-review-proposal">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">
+                  Created by {proposal.created_by.first_name} {proposal.created_by.last_name}
+                </span>
+                <Button 
+                  size="sm" 
+                  onClick={() => openProposal(proposal)}
+                  data-testid="button-review-proposal"
+                >
                   <Eye className="h-4 w-4 mr-2" />
-                  Review Details
-                </Button>
-                <Button size="sm" variant="outline">
-                  Accept
-                </Button>
-                <Button size="sm" variant="outline">
-                  Modify
-                </Button>
-                <Button size="sm" variant="outline">
-                  Reject
+                  Review
                 </Button>
               </div>
             </div>
+            ))}
 
-            <div className="border rounded-lg p-4">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center space-x-3">
-                  <Badge className="bg-green-100 text-green-800">
-                    Accepted
-                  </Badge>
-                  <span className="font-medium">Q3 2024 Skills Assessment</span>
-                </div>
-                <span className="text-sm text-gray-500">1 week ago</span>
+            {filteredProposals.length === 0 && (
+              <div className="text-center py-8">
+                <p className="text-gray-500">No proposals found for the selected filter.</p>
               </div>
-              
-              <p className="text-sm text-gray-600 mb-4">
-                Comprehensive analysis revealing strong frontend capabilities and backend skill gaps.
-                Identified 3 critical areas for team development.
-              </p>
-
-              <div className="flex items-center space-x-2">
-                <Button size="sm" variant="outline" data-testid="button-view-accepted">
-                  <Eye className="h-4 w-4 mr-2" />
-                  View Analysis
-                </Button>
-                <Badge variant="outline" className="text-green-600">
-                  <CheckCircle className="h-3 w-3 mr-1" />
-                  Implemented
-                </Badge>
-              </div>
-            </div>
+            )}
           </div>
         </CardContent>
       </Card>
+
+      <ProposalReviewModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        proposal={selectedProposal}
+        onUpdate={handleProposalUpdate}
+      />
 
       {/* Analysis Insights */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

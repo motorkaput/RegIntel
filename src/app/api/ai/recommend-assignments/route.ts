@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
       estimatedHours: estimated_hours,
       timeline,
       locationPreference: location_preference
-    }, formattedRoster);
+    }, formattedRoster, { tenantId: tenant_id, userId: user_id, role });
 
     // Save as proposal
     const proposal = await withRLS(

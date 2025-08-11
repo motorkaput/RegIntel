@@ -82,7 +82,8 @@ export async function POST(request: NextRequest) {
     const aiResult = await analyzeOrganization(
       analysisData.roster,
       analysisData.reporting,
-      analysisData.skills
+      analysisData.skills,
+      { tenantId: tenant_id, userId: user_id, role }
     );
 
     // Save as proposal
