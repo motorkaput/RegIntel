@@ -16,7 +16,8 @@ import {
   Download,
   User,
   LogOut,
-  RefreshCw
+  RefreshCw,
+  HelpCircle
 } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -984,6 +985,17 @@ export default function FetchPatternsApp() {
             
             {/* Header Controls */}
             <div className="flex items-center gap-3">
+              {/* How to Use Button */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => window.open('/x7k9p/how-to', '_blank')}
+                className="text-gray-600 hover:text-gray-900 hover:bg-gray-100 h-8"
+                title="How to Use Guide"
+              >
+                <HelpCircle className="h-4 w-4" />
+              </Button>
+              
               {/* PDF Download Button */}
               {sessionAnalyses.length > 0 && (
                 <Button
@@ -991,6 +1003,7 @@ export default function FetchPatternsApp() {
                   size="sm"
                   onClick={exportToPDF}
                   className="text-gray-600 hover:text-gray-900 hover:bg-gray-100 h-8"
+                  title="Download PDF Report"
                 >
                   <Download className="h-4 w-4" />
                 </Button>
@@ -1002,6 +1015,7 @@ export default function FetchPatternsApp() {
                 size="sm"
                 onClick={() => window.location.reload()}
                 className="text-gray-600 hover:text-gray-900 hover:bg-gray-100 h-8"
+                title="Refresh Session"
               >
                 <RefreshCw className="h-4 w-4" />
               </Button>

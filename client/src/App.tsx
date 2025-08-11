@@ -24,6 +24,7 @@ import Contact from "@/pages/contact";
 import Security from "@/pages/security";
 import PerMeaTeEnterprise from "@/pages/permeate-enterprise";
 import Next from "@/pages/next";
+import HowToPage from "@/pages/how-to-page";
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
 
@@ -50,6 +51,7 @@ function Router() {
       {/* SaaS Application routes - beta protected */}
       <Route path="/beta-login" component={BetaLogin} />
       <Route path="/x7k9p/fp-analyzer" component={FetchPatternsApp} />
+      <Route path="/x7k9p/how-to" component={HowToPage} />
       <Route path="/z9m3k/pe-beta-login" component={PerMeateBetaLogin} />
       
 
