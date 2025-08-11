@@ -1,133 +1,138 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
-import bcrypt from 'bcrypt';
 import { z } from 'zod';
-import { signJWT, setTokenCookie } from '@/lib/auth/jwt';
-
-const prisma = new PrismaClient();
+import bcrypt from 'bcrypt';
+import { prisma } from '@/lib/db';
+import { withRLS } from '@/lib/db/rls';
+import { signJWT } from '@/lib/auth/jwt';
 
 const registerSchema = z.object({
-  tenant_name: z.string().min(1).max(100),
-  domain: z.string().min(1).max(50).regex(/^[a-z0-9-]+$/),
+  tenant_name: z.string().min(1),
+  domain: z.string().min(1),
   admin_email: z.string().email(),
   password: z.string().min(8),
-  first_name: z.string().min(1).max(50),
-  last_name: z.string().min(1).max(50),
-  bootstrap_token: z.string().min(1), // For security validation
+  first_name: z.string().min(1),
+  last_name: z.string().min(1),
+  bootstrap_token: z.string(),
 });
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const validatedData = registerSchema.parse(body);
+    const data = registerSchema.parse(body);
 
-    // Validate bootstrap token (simple check - in production use proper validation)
-    if (validatedData.bootstrap_token !== process.env.BOOTSTRAP_TOKEN) {
-      return NextResponse.json(
-        { error: 'Invalid bootstrap token' },
-        { status: 403 }
-      );
+    // Verify bootstrap token
+    if (data.bootstrap_token !== process.env.BOOTSTRAP_TOKEN) {
+      return NextResponse.json({ error: 'Invalid bootstrap token' }, { status: 403 });
     }
 
-    // Check if domain already exists
+    // Check if tenant domain already exists
     const existingTenant = await prisma.tenant.findUnique({
-      where: { domain: validatedData.domain },
+      where: { domain: data.domain }
     });
 
     if (existingTenant) {
-      return NextResponse.json(
-        { error: 'Domain already exists' },
-        { status: 409 }
-      );
+      return NextResponse.json({ error: 'Domain already exists' }, { status: 409 });
     }
 
-    // Check if admin email already exists
-    const existingUser = await prisma.user.findFirst({
-      where: { email: validatedData.admin_email },
+    // Check if user email already exists
+    const existingUser = await prisma.user.findUnique({
+      where: { email: data.admin_email }
     });
 
     if (existingUser) {
-      return NextResponse.json(
-        { error: 'Email already registered' },
-        { status: 409 }
-      );
+      return NextResponse.json({ error: 'Email already registered' }, { status: 409 });
     }
 
     // Hash password
-    const hashedPassword = await bcrypt.hash(validatedData.password, 12);
+    const hashedPassword = await bcrypt.hash(data.password, 12);
 
-    // Create tenant and admin user in a transaction
+    // Create tenant and admin user in transaction
     const result = await prisma.$transaction(async (tx) => {
       // Create tenant
       const tenant = await tx.tenant.create({
         data: {
-          name: validatedData.tenant_name,
-          domain: validatedData.domain,
-          subscription_tier: 'starter',
+          name: data.tenant_name,
+          domain: data.domain,
+          settings: {},
         },
       });
 
-      // Create tenant settings
-      await tx.tenantSettings.create({
-        data: {
-          tenant_id: tenant.id,
-          payment_provider: 'razorpay',
-          email_from: `noreply@${validatedData.domain}.local`,
-          data_retention_days: 365,
-          rate_limit_qph: 100,
-        },
-      });
+      // Create admin user (using withRLS for consistency, though not required for initial setup)
+      const user = await withRLS(
+        tx as any,
+        { tenantId: tenant.id, role: 'admin', userId: 'system' },
+        async (client) => {
+          return await client.user.create({
+            data: {
+              tenant_id: tenant.id,
+              email: data.admin_email,
+              password_hash: hashedPassword,
+              role: 'admin',
+              first_name: data.first_name,
+              last_name: data.last_name,
+              email_verified: true,
+            },
+          });
+        }
+      );
 
-      // Create admin user
-      const adminUser = await tx.user.create({
-        data: {
-          tenant_id: tenant.id,
-          email: validatedData.admin_email,
-          password_hash: hashedPassword,
-          role: 'admin',
-          first_name: validatedData.first_name,
-          last_name: validatedData.last_name,
-          email_verified: true,
-        },
-      });
+      // Create billing subscription
+      await withRLS(
+        tx as any,
+        { tenantId: tenant.id, role: 'admin', userId: user.id },
+        async (client) => {
+          await client.billingSubscription.create({
+            data: {
+              tenant_id: tenant.id,
+              plan_name: 'starter',
+              status: 'active',
+              provider: 'razorpay',
+              starts_at: new Date(),
+              ends_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+            },
+          });
+        }
+      );
 
-      // Create audit log
-      await tx.auditLog.create({
-        data: {
-          tenant_id: tenant.id,
-          actor_user_id: adminUser.id,
-          entity_type: 'User',
-          entity_id: adminUser.id,
-          action: 'REGISTER_ADMIN',
-          before: {} as any,
-          after: {
-            email: adminUser.email,
-            role: adminUser.role,
-            tenant_domain: tenant.domain,
-          },
-        },
-      });
+      // Audit log
+      await withRLS(
+        tx as any,
+        { tenantId: tenant.id, role: 'admin', userId: user.id },
+        async (client) => {
+          await client.auditLog.create({
+            data: {
+              tenant_id: tenant.id,
+              actor_user_id: user.id,
+              entity_type: 'Tenant',
+              entity_id: tenant.id,
+              action: 'REGISTER_ADMIN',
+              before: {} as any,
+              after: { tenant_name: data.tenant_name, admin_email: data.admin_email, role: 'admin' },
+            },
+          });
+        }
+      );
 
-      return { tenant, adminUser };
+      return { user, tenant };
     });
 
     // Generate JWT
-    const token = await signJWT({
-      sub: result.adminUser.id,
+    const jwtToken = await signJWT({
+      sub: result.user.id,
       tenant_id: result.tenant.id,
-      role: result.adminUser.role,
-      email: result.adminUser.email,
+      role: result.user.role,
+      email: result.user.email,
     });
 
-    // Set cookie
+    // Create response with cookie
     const response = NextResponse.json({
       success: true,
       user: {
-        id: result.adminUser.id,
-        email: result.adminUser.email,
-        role: result.adminUser.role,
-        first_name: result.adminUser.first_name,
-        last_name: result.adminUser.last_name,
+        id: result.user.id,
+        email: result.user.email,
+        role: result.user.role,
+        first_name: result.user.first_name,
+        last_name: result.user.last_name,
       },
       tenant: {
         id: result.tenant.id,
@@ -136,30 +141,18 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    response.cookies.set('auth-token', token, {
+    // Set httpOnly cookie
+    response.cookies.set('auth-token', jwtToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60,
+      maxAge: 7 * 24 * 60 * 60, // 7 days
       path: '/',
     });
 
     return response;
   } catch (error) {
-    console.error('Registration error:', error);
-    
-    if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: 'Validation error', details: error.errors },
-        { status: 400 }
-      );
-    }
-
-    return NextResponse.json(
-      { error: 'Registration failed' },
-      { status: 500 }
-    );
-  } finally {
-    await prisma.$disconnect();
+    console.error('PerMeaTe registration error:', error);
+    return NextResponse.json({ error: 'Registration failed' }, { status: 500 });
   }
 }
