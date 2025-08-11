@@ -1,6 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
 import { 
   FileText, 
   Upload, 
@@ -12,25 +13,101 @@ import {
   Users,
   TrendingUp,
   Eye,
-  Search
+  Search,
+  User,
+  LogOut,
+  RefreshCw,
+  ArrowLeft
 } from "lucide-react";
+import fetchPatternsIcon from "@assets/FetchPatterns_Icon_1752663550310_1753148786989.png";
+import Navbar from "@/components/navbar";
+import Footer from "@/components/footer";
 
 export default function HowToPage() {
+  const handleLogout = () => {
+    sessionStorage.removeItem("betaAuth");
+    window.location.href = "/beta-login";
+  };
+
+  const handleBackToApp = () => {
+    window.close();
+    // Fallback if window.close() doesn't work
+    window.location.href = "/x7k9p/fp-analyzer";
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="text-center">
-            <h1 className="text-3xl font-bold text-gray-900 mb-4">
-              How to Use Fetch Patterns
-            </h1>
-            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              A comprehensive guide to understanding and effectively using our AI-powered document analysis platform
-            </p>
+    <div className="min-h-screen bg-surface-white">
+      <Navbar />
+      
+      <main className="pt-0 pb-6">
+        {/* FetchPatterns specific header - sticky and compact */}
+        <div className="bg-gray-50 border-b border-gray-200 py-3 sticky z-20" style={{top: '64px'}}>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <img src={fetchPatternsIcon} alt="FetchPatterns" className="h-10 w-auto" />
+              <div>
+                <h1 className="text-xl font-bold text-gray-900">FetchPatterns - How to Use</h1>
+                <p className="text-gray-600 text-xs">Complete guide to document analysis features</p>
+              </div>
+            </div>
+            
+            {/* Header Controls */}
+            <div className="flex items-center gap-3">
+              {/* Back to App Button */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleBackToApp}
+                className="text-gray-600 hover:text-gray-900 hover:bg-gray-100 h-8"
+                title="Back to Fetch Patterns"
+              >
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
+              
+              {/* Refresh Page Button */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => window.location.reload()}
+                className="text-gray-600 hover:text-gray-900 hover:bg-gray-100 h-8"
+                title="Refresh Page"
+              >
+                <RefreshCw className="h-4 w-4" />
+              </Button>
+              
+              {/* User Display */}
+              <div className="flex items-center space-x-2 text-sm text-gray-600">
+                <User className="h-4 w-4" />
+                <span>Beta User</span>
+              </div>
+              
+              {/* Logout Button */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleLogout}
+                className="text-gray-600 hover:text-gray-900 hover:bg-gray-100 h-8"
+                title="Logout"
+              >
+                <LogOut className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         </div>
-      </div>
+
+        {/* Page Header */}
+        <div className="bg-white border-b">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="text-center">
+              <h1 className="text-3xl font-bold text-gray-900 mb-4">
+                How to Use Fetch Patterns
+              </h1>
+              <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+                A comprehensive guide to understanding and effectively using our AI-powered document analysis platform
+              </p>
+            </div>
+          </div>
+        </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Who This App Is For */}
@@ -357,7 +434,10 @@ export default function HowToPage() {
             </CardContent>
           </Card>
         </section>
-      </div>
+        </div>
+      </main>
+      
+      <Footer />
     </div>
   );
 }
