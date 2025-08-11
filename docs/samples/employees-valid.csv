@@ -1,0 +1,13 @@
+email,first_name,last_name,role,function_name,skills
+alice.admin@democo.com,Alice,Administrator,admin,,Leadership;Strategic Planning;Team Management
+bob.ceo@democo.com,Bob,CEO,org_leader,,Business Strategy;Leadership;Strategic Planning
+carol.engineer@democo.com,Carol,Engineer,functional_leader,Engineering,JavaScript;TypeScript;System Design;Team Management
+david.product@democo.com,David,Product,functional_leader,Product,Product Strategy;Roadmap Planning;User Research;Stakeholder Management
+eve.manager@democo.com,Eve,Manager,project_lead,Engineering,Project Management;JavaScript;React;Team Leadership
+frank.leader@democo.com,Frank,Leader,project_lead,Product,Product Management;Analytics;User Research;Cross-functional Collaboration
+grace.developer@democo.com,Grace,Developer,team_member,Engineering,JavaScript;React;Node.js;PostgreSQL;Testing
+henry.coder@democo.com,Henry,Coder,team_member,Engineering,TypeScript;React;System Architecture;Performance Optimization
+ivy.designer@democo.com,Ivy,Designer,team_member,Design,UI Design;UX Research;Figma;Prototyping;Design Systems
+jack.marketer@democo.com,Jack,Marketer,team_member,Marketing,Digital Marketing;Content Strategy;SEO;Analytics;Brand Management
+kate.sales@democo.com,Kate,Sales,team_member,Sales,Sales Strategy;CRM Management;Negotiation;Customer Success
+liam.tester@democo.com,Liam,Tester,team_member,Engineering,Quality Assurance;Test Automation;Bug Tracking;Performance Testing
