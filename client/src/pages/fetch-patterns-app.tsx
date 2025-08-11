@@ -990,8 +990,9 @@ export default function FetchPatternsApp() {
                 variant="ghost"
                 size="sm"
                 onClick={() => window.open('/x7k9p/how-to', '_blank')}
-                className="text-gray-600 hover:text-gray-900 hover:bg-gray-100 h-8"
-                title="How to Use Guide"
+                className="text-accent-blue hover:text-accent-blue hover:bg-accent-blue-light h-8"
+                title="Open How to Use Guide in new tab"
+                data-testid="button-help"
               >
                 <HelpCircle className="h-4 w-4" />
               </Button>
@@ -1002,8 +1003,9 @@ export default function FetchPatternsApp() {
                   variant="ghost"
                   size="sm"
                   onClick={exportToPDF}
-                  className="text-gray-600 hover:text-gray-900 hover:bg-gray-100 h-8"
-                  title="Download PDF Report"
+                  className="text-accent-green hover:text-accent-green hover:bg-accent-green-light h-8"
+                  title="Download comprehensive PDF report with all analyses"
+                  data-testid="button-download-pdf"
                 >
                   <Download className="h-4 w-4" />
                 </Button>
@@ -1014,8 +1016,9 @@ export default function FetchPatternsApp() {
                 variant="ghost"
                 size="sm"
                 onClick={() => window.location.reload()}
-                className="text-gray-600 hover:text-gray-900 hover:bg-gray-100 h-8"
-                title="Refresh Session"
+                className="text-accent-purple hover:text-accent-purple hover:bg-accent-purple-light h-8"
+                title="Refresh page and start a new analysis session"
+                data-testid="button-refresh"
               >
                 <RefreshCw className="h-4 w-4" />
               </Button>
@@ -1031,7 +1034,9 @@ export default function FetchPatternsApp() {
                 variant="ghost"
                 size="sm"
                 onClick={handleLogout}
-                className="text-gray-600 hover:text-gray-900 hover:bg-gray-100 h-8"
+                className="text-accent-orange hover:text-accent-orange hover:bg-accent-orange-light h-8"
+                title="Log out of Fetch Patterns"
+                data-testid="button-logout"
               >
                 <LogOut className="h-4 w-4" />
               </Button>
@@ -1043,26 +1048,30 @@ export default function FetchPatternsApp() {
 
 
         {/* Upload Section */}
-        <Card className="bg-white">
+        <Card className="bg-white border-l-4 border-l-accent-cyan">
           <CardHeader>
-            <CardTitle className="text-gray-900">
+            <CardTitle className="text-accent-cyan">
               Upload Documents
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <div className="flex items-center justify-center w-full">
-                <label className="flex flex-col items-center justify-center w-full h-48 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
+                <label 
+                  className="flex flex-col items-center justify-center w-full h-48 border-2 border-accent-cyan border-dashed rounded-lg cursor-pointer bg-accent-cyan-light hover:bg-accent-cyan-light transition-colors"
+                  title="Click to select files for analysis"
+                  data-testid="upload-area"
+                >
                   <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                    <Upload className="w-10 h-10 mb-3 text-gray-400" />
-                    <p className="mb-2 text-sm text-gray-500">
+                    <Upload className="w-10 h-10 mb-3 text-accent-cyan" />
+                    <p className="mb-2 text-sm text-accent-cyan">
                       {selectedFiles ? (
                         <span className="font-semibold">{selectedFiles.length} files selected</span>
                       ) : (
                         <span className="font-semibold">Choose files</span>
                       )}
                     </p>
-                    <p className="text-xs text-gray-400">Select multiple files (PDF, DOCX, PPTX, XLSX, TXT, Images)</p>
+                    <p className="text-xs text-gray-500">Select multiple files (PDF, DOCX, PPTX, XLSX, TXT, Images)</p>
                   </div>
                   <input
                     type="file"
@@ -1070,6 +1079,7 @@ export default function FetchPatternsApp() {
                     className="hidden"
                     accept=".pdf,.docx,.pptx,.xlsx,.txt,.png,.jpg,.jpeg"
                     onChange={handleFileSelect}
+                    data-testid="input-file-upload"
                   />
                 </label>
               </div>
@@ -1134,6 +1144,8 @@ export default function FetchPatternsApp() {
                 onClick={handleUpload}
                 disabled={!selectedFiles || uploadMutation.isPending || !!progressStage}
                 className="w-full bg-accent-blue hover:bg-accent-blue-dark text-white transition-colors"
+                title="Start document analysis process"
+                data-testid="button-upload-analyze"
               >
                 {uploadMutation.isPending ? "Uploading..." : "Upload & Analyze"}
               </Button>
@@ -1246,6 +1258,8 @@ export default function FetchPatternsApp() {
                     exportCSV(csvContent, `Fetch_Patterns_Q&A_${new Date().toISOString().slice(0,10)}.csv`);
                   }}
                   className="text-gray-600 border-gray-300"
+                  title="Export Q&A history as CSV file"
+                  data-testid="button-export-qa-csv"
                 >
                   CSV
                 </Button>
@@ -1260,6 +1274,8 @@ export default function FetchPatternsApp() {
                 placeholder="Type in a question about the documents uploaded"
                 className="flex-1"
                 onKeyPress={(e) => e.key === 'Enter' && handleAskQuestion()}
+                title="Ask any question about your uploaded documents"
+                data-testid="input-question"
               />
               <Button 
                 onClick={() => {
@@ -1269,6 +1285,8 @@ export default function FetchPatternsApp() {
                 disabled={!question.trim() || questionMutation.isPending}
                 className="bg-accent-green hover:bg-accent-green text-white transition-colors"
                 style={{ backgroundColor: 'var(--accent-green)' }}
+                title="Get AI-powered answers about your uploaded documents"
+                data-testid="button-ask-question"
               >
                 Ask Question
               </Button>
@@ -1326,6 +1344,8 @@ export default function FetchPatternsApp() {
                   exportCSV(csvContent, `Fetch_Patterns_Context_Analysis_${new Date().toISOString().slice(0,10)}.csv`);
                 }}
                 className="text-gray-600 border-gray-300"
+                title="Export context analysis results as CSV file"
+                data-testid="button-export-context-csv"
               >
                 CSV
               </Button>
@@ -1339,6 +1359,8 @@ export default function FetchPatternsApp() {
                 placeholder="Enter a context to analyze (e.g., 'customer satisfaction', 'product quality', 'financial performance')"
                 className="flex-1"
                 onKeyPress={(e) => e.key === 'Enter' && handleContextAnalysis()}
+                title="Enter a specific topic or theme to analyze across all documents"
+                data-testid="input-context-query"
               />
               <Button 
                 onClick={() => {
@@ -1348,6 +1370,8 @@ export default function FetchPatternsApp() {
                 disabled={!contextQuery.trim() || contextMutation.isPending}
                 className="bg-accent-purple hover:bg-accent-purple text-white transition-colors"
                 style={{ backgroundColor: 'var(--accent-purple)' }}
+                title="Analyze sentiment and mentions for specific topics across all documents"
+                data-testid="button-analyze-context"
               >
                 Analyze Context
               </Button>
@@ -1476,6 +1500,8 @@ export default function FetchPatternsApp() {
                     className="w-20 h-8"
                     min="1"
                     max="100"
+                    title="Set number of words to display in word cloud (1-100)"
+                    data-testid="input-word-count"
                   />
                 </div>
                 <div className="flex gap-2">
@@ -1484,6 +1510,8 @@ export default function FetchPatternsApp() {
                     size="sm"
                     onClick={() => exportPNG('word-cloud', `Fetch_Patterns_WordCloud_${new Date().toISOString().slice(0,10)}.png`)}
                     className="text-gray-600 border-gray-300"
+                    title="Export word cloud as PNG image"
+                    data-testid="button-export-wordcloud-png"
                   >
                     PNG
                   </Button>
@@ -1495,6 +1523,8 @@ export default function FetchPatternsApp() {
                       `Fetch_Patterns_WordCloud_${new Date().toISOString().slice(0,10)}.csv`
                     )}
                     className="text-gray-600 border-gray-300"
+                    title="Export word frequency data as CSV file"
+                    data-testid="button-export-wordcloud-csv"
                   >
                     CSV
                   </Button>
