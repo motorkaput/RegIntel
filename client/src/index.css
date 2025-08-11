@@ -41,6 +41,18 @@
   --accent-blue: hsl(220, 91%, 54%);
   --accent-blue-light: hsl(220, 91%, 97%);
   --accent-blue-dark: hsl(220, 91%, 45%);
+  
+  /* Inviting colorful accents */
+  --accent-green: hsl(142, 71%, 45%);
+  --accent-green-light: hsl(142, 71%, 95%);
+  --accent-purple: hsl(262, 83%, 58%);
+  --accent-purple-light: hsl(262, 83%, 95%);
+  --accent-orange: hsl(25, 95%, 53%);
+  --accent-orange-light: hsl(25, 95%, 95%);
+  --accent-cyan: hsl(187, 85%, 46%);
+  --accent-cyan-light: hsl(187, 85%, 95%);
+  --accent-pink: hsl(330, 81%, 60%);
+  --accent-pink-light: hsl(330, 81%, 95%);
 }
 
 .dark {
@@ -103,6 +115,66 @@
 
   .text-accent-blue {
     color: var(--accent-blue);
+  }
+  
+  .text-accent-green {
+    color: var(--accent-green);
+  }
+  
+  .text-accent-purple {
+    color: var(--accent-purple);
+  }
+  
+  .text-accent-orange {
+    color: var(--accent-orange);
+  }
+  
+  .text-accent-cyan {
+    color: var(--accent-cyan);
+  }
+  
+  .text-accent-pink {
+    color: var(--accent-pink);
+  }
+  
+  .bg-accent-green-light {
+    background-color: var(--accent-green-light);
+  }
+  
+  .bg-accent-purple-light {
+    background-color: var(--accent-purple-light);
+  }
+  
+  .bg-accent-orange-light {
+    background-color: var(--accent-orange-light);
+  }
+  
+  .bg-accent-cyan-light {
+    background-color: var(--accent-cyan-light);
+  }
+  
+  .bg-accent-pink-light {
+    background-color: var(--accent-pink-light);
+  }
+  
+  .border-accent-green {
+    border-color: var(--accent-green);
+  }
+  
+  .border-accent-purple {
+    border-color: var(--accent-purple);
+  }
+  
+  .border-accent-orange {
+    border-color: var(--accent-orange);
+  }
+  
+  .border-accent-cyan {
+    border-color: var(--accent-cyan);
+  }
+  
+  .border-accent-pink {
+    border-color: var(--accent-pink);
   }
 
   .bg-surface-white {

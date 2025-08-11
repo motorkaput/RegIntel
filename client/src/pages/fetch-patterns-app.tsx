@@ -1123,7 +1123,7 @@ export default function FetchPatternsApp() {
                   </div>
                   <div className="relative w-full bg-gray-200 rounded-full h-2">
                     <div 
-                      className="bg-blue-600 h-2 rounded-full transition-all duration-500"
+                      className="bg-accent-blue h-2 rounded-full transition-all duration-500"
                       style={{ width: `${uploadProgress}%` }}
                     />
                   </div>
@@ -1133,7 +1133,7 @@ export default function FetchPatternsApp() {
               <Button 
                 onClick={handleUpload}
                 disabled={!selectedFiles || uploadMutation.isPending || !!progressStage}
-                className="w-full bg-gray-700 hover:bg-gray-800 text-white"
+                className="w-full bg-accent-blue hover:bg-accent-blue-dark text-white transition-colors"
               >
                 {uploadMutation.isPending ? "Uploading..." : "Upload & Analyze"}
               </Button>
@@ -1143,21 +1143,21 @@ export default function FetchPatternsApp() {
 
         {/* Statistics Cards */}
         <div id="session-metrics" className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card className="bg-white text-center p-6">
-            <div className="text-4xl font-bold text-gray-700 mb-2">{completedAnalyses.length}</div>
+          <Card className="bg-white text-center p-6 border-l-4 border-accent-blue">
+            <div className="text-4xl font-bold text-accent-blue mb-2">{completedAnalyses.length}</div>
             <div className="text-sm text-gray-500">Documents Processed</div>
           </Card>
-          <Card className="bg-white text-center p-6">
-            <div className="text-4xl font-bold text-gray-700 mb-2">{uniqueKeywords}</div>
+          <Card className="bg-white text-center p-6 border-l-4 border-accent-purple">
+            <div className="text-4xl font-bold text-accent-purple mb-2">{uniqueKeywords}</div>
             <div className="text-sm text-gray-500">Unique Keywords</div>
           </Card>
-          <Card className="bg-white text-center p-6">
-            <div className="text-4xl font-bold text-gray-700 mb-2">{positiveSentimentDocs.length}</div>
+          <Card className="bg-white text-center p-6 border-l-4 border-accent-green">
+            <div className="text-4xl font-bold text-accent-green mb-2">{positiveSentimentDocs.length}</div>
             <div className="text-sm text-gray-500">Positive Sentiment Documents</div>
             <div className="text-xs text-gray-400">{positivePercentage}% of all documents</div>
           </Card>
-          <Card className="bg-white text-center p-6">
-            <div className="text-4xl font-bold text-gray-700 mb-2">{negativeSentimentDocs.length}</div>
+          <Card className="bg-white text-center p-6 border-l-4 border-accent-orange">
+            <div className="text-4xl font-bold text-accent-orange mb-2">{negativeSentimentDocs.length}</div>
             <div className="text-sm text-gray-500">Negative Sentiment Documents</div>
             <div className="text-xs text-gray-400">{negativePercentage}% of all documents</div>
           </Card>
@@ -1186,20 +1186,27 @@ export default function FetchPatternsApp() {
                         {analysis.classification && (
                           <Badge 
                             variant="outline" 
-                            className="bg-blue-50 text-blue-700 border-blue-300 text-xs px-2 py-1"
+                            className="bg-accent-blue-light text-accent-blue border-accent-blue text-xs px-2 py-1"
                           >
                             {analysis.classification}
                           </Badge>
                         )}
-                        {analysis.keywords && analysis.keywords.slice(0, 3).map((keyword, idx) => (
-                          <Badge 
-                            key={idx}
-                            variant="outline" 
-                            className="bg-purple-50 text-purple-700 border-purple-300 text-xs px-2 py-1"
-                          >
-                            {keyword}
-                          </Badge>
-                        ))}
+                        {analysis.keywords && analysis.keywords.slice(0, 3).map((keyword, idx) => {
+                          const colors = [
+                            "bg-accent-purple-light text-accent-purple border-accent-purple",
+                            "bg-accent-green-light text-accent-green border-accent-green", 
+                            "bg-accent-orange-light text-accent-orange border-accent-orange"
+                          ];
+                          return (
+                            <Badge 
+                              key={idx}
+                              variant="outline" 
+                              className={`${colors[idx % 3]} text-xs px-2 py-1`}
+                            >
+                              {keyword}
+                            </Badge>
+                          );
+                        })}
                       </div>
                     </div>
                     
@@ -1260,7 +1267,8 @@ export default function FetchPatternsApp() {
                   handleAskQuestion();
                 }}
                 disabled={!question.trim() || questionMutation.isPending}
-                className="bg-gray-600 hover:bg-gray-700"
+                className="bg-accent-green hover:bg-accent-green text-white transition-colors"
+                style={{ backgroundColor: 'var(--accent-green)' }}
               >
                 Ask Question
               </Button>
@@ -1338,7 +1346,8 @@ export default function FetchPatternsApp() {
                   handleContextAnalysis();
                 }}
                 disabled={!contextQuery.trim() || contextMutation.isPending}
-                className="bg-gray-600 hover:bg-gray-700"
+                className="bg-accent-purple hover:bg-accent-purple text-white transition-colors"
+                style={{ backgroundColor: 'var(--accent-purple)' }}
               >
                 Analyze Context
               </Button>
@@ -1365,8 +1374,8 @@ export default function FetchPatternsApp() {
                           <div className="w-20 text-sm font-medium text-gray-700">Positive</div>
                           <div className="flex-1 bg-gray-200 rounded-full h-6 relative">
                             <div 
-                              className="bg-blue-500 h-6 rounded-full flex items-center justify-end pr-2"
-                              style={{ width: `${item.data.sentimentBreakdown.positive}%` }}
+                              className="bg-accent-green h-6 rounded-full flex items-center justify-end pr-2"
+                              style={{ width: `${item.data.sentimentBreakdown.positive}%`, backgroundColor: 'var(--accent-green)' }}
                             >
                               <span className="text-white text-sm font-medium">
                                 {item.data.sentimentBreakdown.positive}%
@@ -1378,8 +1387,8 @@ export default function FetchPatternsApp() {
                           <div className="w-20 text-sm font-medium text-gray-700">Negative</div>
                           <div className="flex-1 bg-gray-200 rounded-full h-6 relative">
                             <div 
-                              className="bg-purple-500 h-6 rounded-full flex items-center justify-end pr-2"
-                              style={{ width: `${item.data.sentimentBreakdown.negative}%` }}
+                              className="bg-accent-orange h-6 rounded-full flex items-center justify-end pr-2"
+                              style={{ width: `${item.data.sentimentBreakdown.negative}%`, backgroundColor: 'var(--accent-orange)' }}
                             >
                               <span className="text-white text-sm font-medium">
                                 {item.data.sentimentBreakdown.negative}%
@@ -1391,8 +1400,8 @@ export default function FetchPatternsApp() {
                           <div className="w-20 text-sm font-medium text-gray-700">Neutral</div>
                           <div className="flex-1 bg-gray-200 rounded-full h-6 relative">
                             <div 
-                              className="bg-gray-500 h-6 rounded-full flex items-center justify-end pr-2"
-                              style={{ width: `${item.data.sentimentBreakdown.neutral}%` }}
+                              className="bg-accent-cyan h-6 rounded-full flex items-center justify-end pr-2"
+                              style={{ width: `${item.data.sentimentBreakdown.neutral}%`, backgroundColor: 'var(--accent-cyan)' }}
                             >
                               <span className="text-white text-sm font-medium">
                                 {item.data.sentimentBreakdown.neutral}%
@@ -1403,7 +1412,8 @@ export default function FetchPatternsApp() {
                       </div>
 
                       {/* Details in blue box */}
-                      <Card className="bg-blue-50 border-blue-200 border-l-4 border-l-blue-500">
+                      <Card className="bg-accent-blue-light border-accent-blue border-l-4 border-l-accent-blue"
+                            style={{ backgroundColor: 'var(--accent-blue-light)', borderColor: 'var(--accent-blue)', borderLeftColor: 'var(--accent-blue)' }}>
                         <CardContent className="p-4 space-y-4">
                           {item.data.emotionalTone && (
                             <div>
@@ -1423,7 +1433,7 @@ export default function FetchPatternsApp() {
                               <div className="text-gray-900 font-semibold mb-2">Key Phrases:</div>
                               <div className="flex flex-wrap gap-2">
                                 {item.data.keyPhrases.map((phrase: string, phraseIndex: number) => (
-                                  <Badge key={phraseIndex} className="bg-pink-100 text-pink-800 border-pink-200">
+                                  <Badge key={phraseIndex} className="bg-accent-pink-light text-accent-pink border-accent-pink">
                                     "{phrase}"
                                   </Badge>
                                 ))}
@@ -1450,10 +1460,10 @@ export default function FetchPatternsApp() {
         </Card>
 
         {/* Word Cloud */}
-        <Card className="bg-white" id="word-cloud">
+        <Card className="bg-white border-l-4 border-l-accent-pink" id="word-cloud">
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle className="text-gray-900">
+              <CardTitle className="text-accent-pink">
                 Word Cloud
               </CardTitle>
               <div className="flex items-center gap-4">

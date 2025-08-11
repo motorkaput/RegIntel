@@ -112,10 +112,10 @@ export default function HowToPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Who This App Is For */}
         <section className="mb-12">
-          <Card>
+          <Card className="border-l-4 border-l-accent-blue">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Users className="h-5 w-5 text-blue-600" />
+              <CardTitle className="flex items-center gap-2 text-accent-blue">
+                <Users className="h-5 w-5 text-accent-blue" />
                 Who This App Is For
               </CardTitle>
             </CardHeader>
@@ -140,8 +140,8 @@ export default function HowToPage() {
                   </ul>
                 </div>
               </div>
-              <div className="bg-blue-50 p-4 rounded-lg">
-                <p className="text-blue-800 font-medium">
+              <div className="bg-accent-blue-light p-4 rounded-lg" style={{ backgroundColor: 'var(--accent-blue-light)' }}>
+                <p className="text-accent-blue font-medium">
                   Perfect for anyone who needs to quickly understand the key themes, sentiment, and insights from business documents without reading everything manually.
                 </p>
               </div>
@@ -151,10 +151,10 @@ export default function HowToPage() {
 
         {/* Understanding Key Terms */}
         <section className="mb-12">
-          <Card>
+          <Card className="border-l-4 border-l-accent-green">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Search className="h-5 w-5 text-green-600" />
+              <CardTitle className="flex items-center gap-2 text-accent-green">
+                <Search className="h-5 w-5 text-accent-green" />
                 Understanding Key Terms & Functions
               </CardTitle>
               <CardDescription>
@@ -242,10 +242,10 @@ export default function HowToPage() {
 
         {/* How to Use Effectively */}
         <section className="mb-12">
-          <Card>
+          <Card className="border-l-4 border-l-accent-purple">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <CheckCircle className="h-5 w-5 text-purple-600" />
+              <CardTitle className="flex items-center gap-2 text-accent-purple">
+                <CheckCircle className="h-5 w-5 text-accent-purple" />
                 How to Use Fetch Patterns Most Effectively
               </CardTitle>
               <CardDescription>
