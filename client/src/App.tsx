@@ -21,6 +21,9 @@ import Contact from "@/pages/contact";
 import Security from "@/pages/security";
 import Next from "@/pages/next";
 import HowToPage from "@/pages/how-to-page";
+import PerMeaTeLogin from "@/pages/permeate-login";
+import PerMeaTeRegister from "@/pages/permeate-register";
+import PerMeaTeDashboard from "@/pages/permeate-dashboard";
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
 
@@ -48,6 +51,11 @@ function Router() {
       <Route path="/x7k9p/fp-analyzer" component={FetchPatternsApp} />
       <Route path="/x7k9p/how-to" component={HowToPage} />
 
+      
+      {/* PerMeaTe Enterprise routes */}
+      <Route path="/permeate-login" component={PerMeaTeLogin} />
+      <Route path="/permeate-register" component={PerMeaTeRegister} />
+      <Route path="/permeate-dashboard" component={PerMeaTeDashboard} />
       
       {/* Legal and info pages */}
       <Route path="/privacy" component={Privacy} />
