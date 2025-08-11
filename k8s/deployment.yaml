@@ -1,0 +1,136 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: permeate-enterprise
+  labels:
+    app: permeate-enterprise
+    version: v1
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: permeate-enterprise
+  template:
+    metadata:
+      labels:
+        app: permeate-enterprise
+        version: v1
+    spec:
+      containers:
+      - name: permeate-enterprise
+        image: ghcr.io/your-org/permeate-enterprise:latest
+        ports:
+        - containerPort: 3000
+          name: http
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: PORT
+          value: "3000"
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: permeate-secrets
+              key: database-url
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: permeate-secrets
+              key: jwt-secret
+        - name: SESSION_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: permeate-secrets
+              key: session-secret
+        - name: BOOTSTRAP_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: permeate-secrets
+              key: bootstrap-token
+        - name: POSTMARK_API_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: permeate-secrets
+              key: postmark-token
+        - name: RAZORPAY_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: permeate-secrets
+              key: razorpay-key-id
+        - name: RAZORPAY_KEY_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: permeate-secrets
+              key: razorpay-key-secret
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: permeate-secrets
+              key: openai-api-key
+        - name: APP_URL
+          valueFrom:
+            configMapKeyRef:
+              name: permeate-config
+              key: app-url
+        - name: EMAIL_FROM
+          valueFrom:
+            configMapKeyRef:
+              name: permeate-config
+              key: email-from
+        - name: PAYMENT_PROVIDER
+          valueFrom:
+            configMapKeyRef:
+              name: permeate-config
+              key: payment-provider
+        - name: DEV_EMAIL_MODE
+          valueFrom:
+            configMapKeyRef:
+              name: permeate-config
+              key: email-mode
+        - name: DEV_STORAGE_MODE
+          valueFrom:
+            configMapKeyRef:
+              name: permeate-config
+              key: storage-mode
+        - name: LOG_LEVEL
+          valueFrom:
+            configMapKeyRef:
+              name: permeate-config
+              key: log-level
+        - name: REDIS_URL
+          valueFrom:
+            configMapKeyRef:
+              name: permeate-config
+              key: redis-url
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /api/health/liveness
+            port: 3000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /api/health/readiness
+            port: 3000
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        securityContext:
+          allowPrivilegeEscalation: false
+          runAsNonRoot: true
+          runAsUser: 1001
+          capabilities:
+            drop:
+            - ALL
+      securityContext:
+        fsGroup: 1001

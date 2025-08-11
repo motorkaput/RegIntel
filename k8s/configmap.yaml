@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: permeate-config
+data:
+  app-url: "https://your-domain.com"
+  email-from: "noreply@your-domain.com"
+  email-mode: "postmark"
+  payment-provider: "razorpay"
+  storage-mode: "s3"
+  log-level: "info"
+  redis-url: "redis://redis-service:6379"
+  rate-limit-qph: "5000"
+  retention-days: "365"
+  next-telemetry-disabled: "1"

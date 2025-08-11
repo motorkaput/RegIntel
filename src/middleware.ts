@@ -1,60 +1,73 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
-import { verifyJWT } from '@/lib/auth/jwt';
+import { NextRequest, NextResponse } from 'next/server';
+import { generateRequestId, logger } from '@/lib/logging/logger';
+import { createWAFMiddleware } from '@/lib/security/waf';
+import { createRateLimitMiddleware } from '@/lib/security/rateLimit';
 
 export async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+  const startTime = Date.now();
+  
+  // Generate request ID
+  const requestId = generateRequestId();
+  
+  try {
+    // Early WAF checks
+    const wafMiddleware = createWAFMiddleware();
+    const wafResult = await wafMiddleware(request);
+    if (wafResult) {
+      return wafResult; // Request was blocked
+    }
 
-  // Skip middleware for public routes and auth routes
-  if (
-    pathname.startsWith('/_next') ||
-    pathname.startsWith('/api/auth') ||
-    pathname.startsWith('/api/invitations/accept') ||
-    pathname.startsWith('/login') ||
-    pathname.startsWith('/register') ||
-    pathname.startsWith('/accept-invitation') ||
-    pathname.startsWith('/invitation-expired') ||
-    pathname.includes('.')
-  ) {
-    return NextResponse.next();
-  }
-
-  // Check for authentication on protected routes
-  if (pathname.startsWith('/dashboard') || pathname.startsWith('/api')) {
-    const token = request.cookies.get('auth-token')?.value;
-
-    if (!token) {
-      if (pathname.startsWith('/api')) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    // Rate limiting for API routes
+    if (request.nextUrl.pathname.startsWith('/api/')) {
+      const rateLimitMiddleware = createRateLimitMiddleware();
+      const rateLimitResult = await rateLimitMiddleware(request);
+      if (rateLimitResult) {
+        return rateLimitResult; // Rate limited
       }
-      return NextResponse.redirect(new URL('/login', request.url));
     }
 
-    const payload = await verifyJWT(token);
-    if (!payload) {
-      if (pathname.startsWith('/api')) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    // Continue to the next middleware/handler
+    const response = NextResponse.next();
+
+    // Add security headers
+    response.headers.set('X-Request-ID', requestId);
+    response.headers.set('X-Content-Type-Options', 'nosniff');
+    response.headers.set('X-Frame-Options', 'DENY');
+    response.headers.set('X-XSS-Protection', '1; mode=block');
+    response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+    
+    // HSTS for production
+    if (process.env.NODE_ENV === 'production') {
+      response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+    }
+
+    // Log the request
+    const duration = Date.now() - startTime;
+    logger.info('Request processed', {
+      requestId,
+      method: request.method,
+      url: request.nextUrl.pathname,
+      userAgent: request.headers.get('user-agent'),
+      duration,
+      status: response.status
+    });
+
+    return response;
+
+  } catch (error) {
+    logger.error('Middleware error', error as Error, { requestId });
+    
+    // Return a generic error response
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { 
+        status: 500,
+        headers: {
+          'X-Request-ID': requestId
+        }
       }
-      return NextResponse.redirect(new URL('/login', request.url));
-    }
-
-    // Add user info to headers for API routes
-    if (pathname.startsWith('/api')) {
-      const requestHeaders = new Headers(request.headers);
-      requestHeaders.set('x-user-id', payload.sub);
-      requestHeaders.set('x-tenant-id', payload.tenant_id);
-      requestHeaders.set('x-user-role', payload.role);
-      requestHeaders.set('x-user-email', payload.email);
-
-      return NextResponse.next({
-        request: {
-          headers: requestHeaders,
-        },
-      });
-    }
+    );
   }
-
-  return NextResponse.next();
 }
 
 export const config = {
@@ -64,7 +77,8 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
+     * - public folder
      */
-    '/((?!_next/static|_next/image|favicon.ico).*)',
+    '/((?!_next/static|_next/image|favicon.ico|public/).*)',
   ],
-};
+}
