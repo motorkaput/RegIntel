@@ -161,11 +161,36 @@ The Next.js middleware protects:
 
 Unauthenticated requests are redirected to `/login` or return 401 for API routes.
 
-## Email Templates
+## Email Configuration
 
-Postmark integration provides:
+### Development Mode
+
+Set `DEV_EMAIL_MODE=console` to log emails to console instead of sending via Postmark:
+
+```bash
+DEV_EMAIL_MODE=console  # Logs to console (default for development)
+DEV_EMAIL_MODE=postmark # Sends via Postmark (production)
+```
+
+In console mode, API responses include `devUrl` field with the action URL for easy clicking during development.
+
+### Required Environment Variables
+
+```bash
+# Required for all modes
+APP_URL=http://localhost:3000              # Used to build magic link URLs
+EMAIL_FROM="no-reply@permeate.local"       # From address for emails
+DEV_EMAIL_MODE=console                     # console | postmark
+
+# Required for Postmark mode only  
+POSTMARK_TOKEN=your_postmark_server_token  # Get from postmarkapp.com
+```
+
+### Email Templates
+
+The system provides:
 - Magic link authentication emails
-- User invitation emails
+- User invitation emails with role information
 - Password reset emails (future)
 
 ## Audit Logging
@@ -176,6 +201,38 @@ All authentication events are logged to the `audit_logs` table:
 - Magic link generation/usage
 - Invitation creation/acceptance
 - Password changes
+
+## Development Features
+
+### Console Email Mode
+
+When `DEV_EMAIL_MODE=console`, authentication endpoints include development URLs:
+
+**Magic Link Response (Dev Mode):**
+```json
+{
+  "success": true,
+  "message": "Magic link generated (check console for URL)",
+  "devUrl": "http://localhost:3000/api/auth/magic-link/verify?token=abc123"
+}
+```
+
+**Invitation Response (Dev Mode):**
+```json
+{
+  "success": true,
+  "invitation": { ... },
+  "message": "Invitation created (check console for URL)", 
+  "devUrl": "http://localhost:3000/api/invitations/accept?token=def456"
+}
+```
+
+### Architecture Compliance
+
+✅ **No Express remnants** - All routes are Next.js route handlers  
+✅ **RLS on all DB calls** - Every database operation uses `withRLS` wrapper  
+✅ **Console email fallback** - Authentication works without Postmark setup  
+✅ **JWT cookies** - HttpOnly cookies for secure token management  
 
 ## Error Handling
 

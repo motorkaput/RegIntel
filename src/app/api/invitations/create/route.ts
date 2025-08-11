@@ -4,7 +4,7 @@ import { nanoid } from 'nanoid';
 import { getJWTFromCookies } from '@/lib/auth/jwt';
 import { prisma } from '@/lib/db';
 import { withRLS } from '@/lib/db/rls';
-import { sendEmail, generateInvitationEmail } from '@/lib/email';
+import { sendInvitation } from '@/lib/email/postmark';
 
 const createInvitationSchema = z.object({
   email: z.string().email(),
@@ -88,24 +88,23 @@ export async function POST(request: NextRequest) {
     );
 
     // Generate invitation link
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-    const inviteLink = `${baseUrl}/api/invitations/accept?token=${invitation.invitation.token}`;
+    const baseUrl = process.env.APP_URL || 'http://localhost:3000';
+    const inviteUrl = `${baseUrl}/api/invitations/accept?token=${invitation.invitation.token}`;
 
     // Send invitation email
-    const emailTemplate = generateInvitationEmail(
+    const emailResult = await sendInvitation(
+      data.email,
+      inviteUrl,
+      data.role,
       `${invitation.inviter?.first_name} ${invitation.inviter?.last_name}`,
-      invitation.inviter?.tenant.name || 'Organization',
-      inviteLink
+      invitation.inviter?.tenant.name || 'Organization'
     );
-    emailTemplate.to = data.email;
 
-    const emailSent = await sendEmail(emailTemplate);
-
-    if (!emailSent) {
-      return NextResponse.json({ error: 'Failed to send invitation email' }, { status: 500 });
+    if (!emailResult.success) {
+      return NextResponse.json({ error: emailResult.error || 'Failed to send invitation email' }, { status: 500 });
     }
 
-    return NextResponse.json({
+    const response: any = {
       success: true,
       invitation: {
         id: invitation.invitation.id,
@@ -114,7 +113,15 @@ export async function POST(request: NextRequest) {
         status: invitation.invitation.status,
         expires_at: invitation.invitation.expires_at,
       },
-    });
+    };
+
+    // Include dev URL in console mode for easy clicking
+    if (emailResult.devUrl) {
+      response.devUrl = emailResult.devUrl;
+      response.message = 'Invitation created (check console for URL)';
+    }
+
+    return NextResponse.json(response);
   } catch (error) {
     console.error('Invitation creation error:', error);
     return NextResponse.json({ error: 'Failed to create invitation' }, { status: 500 });

@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { nanoid } from 'nanoid';
 import { prisma } from '@/lib/db';
 import { withRLS } from '@/lib/db/rls';
-import { sendEmail, generateMagicLinkEmail } from '@/lib/email';
+import { sendMagicLink } from '@/lib/email/postmark';
 
 const magicLinkSchema = z.object({
   email: z.string().email(),
@@ -58,21 +58,28 @@ export async function POST(request: NextRequest) {
     );
 
     // Generate magic link URL
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-    const magicLink = `${baseUrl}/api/auth/magic-link/verify?token=${token}`;
+    const baseUrl = process.env.APP_URL || 'http://localhost:3000';
+    const magicLinkUrl = `${baseUrl}/api/auth/magic-link/verify?token=${token}`;
 
     // Send magic link email
-    const emailTemplate = generateMagicLinkEmail(data.email, magicLink);
-    const emailSent = await sendEmail(emailTemplate);
+    const emailResult = await sendMagicLink(data.email, magicLinkUrl);
 
-    if (!emailSent) {
-      return NextResponse.json({ error: 'Failed to send magic link email' }, { status: 500 });
+    if (!emailResult.success) {
+      return NextResponse.json({ error: emailResult.error || 'Failed to send magic link email' }, { status: 500 });
     }
 
-    return NextResponse.json({ 
+    const response: any = { 
       success: true, 
       message: 'Magic link sent to your email' 
-    });
+    };
+
+    // Include dev URL in console mode for easy clicking
+    if (emailResult.devUrl) {
+      response.devUrl = emailResult.devUrl;
+      response.message = 'Magic link generated (check console for URL)';
+    }
+
+    return NextResponse.json(response);
   } catch (error) {
     console.error('Magic link generation error:', error);
     return NextResponse.json({ error: 'Failed to generate magic link' }, { status: 500 });
