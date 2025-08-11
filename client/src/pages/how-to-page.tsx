@@ -58,10 +58,10 @@ export default function HowToPage() {
                 variant="ghost"
                 size="sm"
                 onClick={handleBackToApp}
-                className="text-gray-600 hover:text-gray-900 hover:bg-gray-100 h-8"
+                className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 h-8"
                 title="Back to Fetch Patterns"
               >
-                <ArrowLeft className="h-4 w-4" />
+                <ArrowLeft className="h-4 w-4 flex-shrink-0" />
               </Button>
               
               {/* Refresh Page Button */}
@@ -69,15 +69,15 @@ export default function HowToPage() {
                 variant="ghost"
                 size="sm"
                 onClick={() => window.location.reload()}
-                className="text-gray-600 hover:text-gray-900 hover:bg-gray-100 h-8"
+                className="text-purple-600 hover:text-purple-700 hover:bg-purple-50 h-8"
                 title="Refresh Page"
               >
-                <RefreshCw className="h-4 w-4" />
+                <RefreshCw className="h-4 w-4 flex-shrink-0" />
               </Button>
               
               {/* User Display */}
               <div className="flex items-center space-x-2 text-sm text-gray-600">
-                <User className="h-4 w-4" />
+                <User className="h-4 w-4 flex-shrink-0" />
                 <span>Beta User</span>
               </div>
               
@@ -86,10 +86,10 @@ export default function HowToPage() {
                 variant="ghost"
                 size="sm"
                 onClick={handleLogout}
-                className="text-gray-600 hover:text-gray-900 hover:bg-gray-100 h-8"
+                className="text-orange-600 hover:text-orange-700 hover:bg-orange-50 h-8"
                 title="Logout"
               >
-                <LogOut className="h-4 w-4" />
+                <LogOut className="h-4 w-4 flex-shrink-0" />
               </Button>
             </div>
           </div>
@@ -98,11 +98,11 @@ export default function HowToPage() {
         {/* Page Header */}
         <div className="bg-white border-b">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div className="text-center">
+            <div className="text-left">
               <h1 className="text-3xl font-bold text-gray-900 mb-4">
                 How to Use Fetch Patterns
               </h1>
-              <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+              <p className="text-lg text-gray-600 max-w-3xl">
                 A comprehensive guide to understanding and effectively using our AI-powered document analysis platform
               </p>
             </div>
