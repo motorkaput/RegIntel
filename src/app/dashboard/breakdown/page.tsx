@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Target, Plus, ArrowRight } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Target, Plus, ArrowRight, Clock, Eye, CheckCircle } from 'lucide-react';
 
 export default function BreakdownPage() {
   return (
@@ -9,14 +10,103 @@ export default function BreakdownPage() {
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Goal Breakdown</h1>
           <p className="text-gray-600 mt-2">
-            Transform strategic goals into actionable tasks using AI-powered breakdown
+            Transform strategic goals into actionable projects using AI-powered analysis
           </p>
         </div>
         <Button data-testid="button-new-goal">
           <Plus className="h-4 w-4 mr-2" />
-          New Goal
+          Break Down Goal
         </Button>
       </div>
+
+      {/* Goal Breakdown Proposals */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <Clock className="h-5 w-5" />
+            <span>Goal Breakdown Proposals</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {/* Active Proposal */}
+            <div className="border rounded-lg p-4">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center space-x-3">
+                  <Badge className="bg-yellow-100 text-yellow-800">
+                    Proposed
+                  </Badge>
+                  <span className="font-medium">Increase Customer Satisfaction to 95%</span>
+                </div>
+                <span className="text-sm text-gray-500">1 hour ago</span>
+              </div>
+              
+              <p className="text-sm text-gray-600 mb-4">
+                Strategic goal to achieve 95% customer satisfaction score by Q4 2025 through systematic improvements
+              </p>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <div className="bg-blue-50 p-3 rounded">
+                  <div className="text-sm text-blue-600 font-medium">Projects Generated</div>
+                  <div className="text-2xl font-bold text-blue-900">4</div>
+                </div>
+                <div className="bg-green-50 p-3 rounded">
+                  <div className="text-sm text-green-600 font-medium">Total Hours</div>
+                  <div className="text-2xl font-bold text-green-900">520</div>
+                </div>
+                <div className="bg-purple-50 p-3 rounded">
+                  <div className="text-sm text-purple-600 font-medium">Assignees Suggested</div>
+                  <div className="text-2xl font-bold text-purple-900">8</div>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <Button size="sm" data-testid="button-review-breakdown">
+                  <Eye className="h-4 w-4 mr-2" />
+                  Review Projects
+                </Button>
+                <Button size="sm" variant="outline">
+                  Accept All
+                </Button>
+                <Button size="sm" variant="outline">
+                  Modify
+                </Button>
+                <Button size="sm" variant="outline">
+                  Reject
+                </Button>
+              </div>
+            </div>
+
+            {/* Accepted Proposal */}
+            <div className="border rounded-lg p-4">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center space-x-3">
+                  <Badge className="bg-green-100 text-green-800">
+                    Accepted
+                  </Badge>
+                  <span className="font-medium">Launch Mobile App by Q2 2025</span>
+                </div>
+                <span className="text-sm text-gray-500">2 weeks ago</span>
+              </div>
+              
+              <p className="text-sm text-gray-600 mb-4">
+                Comprehensive mobile application development project broken into 5 phases
+              </p>
+
+              <div className="flex items-center space-x-2">
+                <Button size="sm" variant="outline" data-testid="button-view-projects">
+                  <Eye className="h-4 w-4 mr-2" />
+                  View Projects
+                </Button>
+                <Badge variant="outline" className="text-green-600">
+                  <CheckCircle className="h-3 w-3 mr-1" />
+                  In Progress
+                </Badge>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>

@@ -373,6 +373,206 @@ Dev,Patel,dev@acme.local,team_member,unknown@acme.local,react,Bengaluru,
 - **Tenant Isolation**: All data scoped to authenticated user's tenant
 - **Audit Logging**: All create/update operations logged with before/after values
 
+## AI Services & Proposal Management
+
+### Overview
+PerMeaTe Enterprise includes deterministic AI services for organizational analysis, goal breakdown, and assignment recommendations. All AI outputs are stored as proposals requiring human review and approval.
+
+### Proposal Workflow
+1. **AI Generation**: AI service creates output matching defined schema
+2. **Proposal Storage**: Output saved with status = 'proposed'
+3. **Human Review**: Authorized users can accept, modify, or reject
+4. **Audit Trail**: All status changes logged with before/after values
+5. **Implementation**: Only accepted proposals affect system state
+
+### AI Service Endpoints
+
+#### Organization Analysis
+`POST /api/ai/analyze-org`
+
+**Permissions**: Admin, Org Leader only
+
+**Description**: Analyzes current employee roster, reporting structure, and skills to provide organizational insights.
+
+**Response Schema**:
+```json
+{
+  "proposal_id": "string",
+  "output": {
+    "leaders": [
+      {
+        "user_id": "string",
+        "name": "string",
+        "role": "string", 
+        "team_size": number,
+        "leadership_style": "string",
+        "key_strengths": ["string"]
+      }
+    ],
+    "functional_clusters": [
+      {
+        "name": "string",
+        "members": ["user_id"],
+        "primary_skills": ["string"],
+        "collaboration_score": number, // 0-10
+        "efficiency_rating": "string"
+      }
+    ],
+    "skill_heatmap": {
+      "skill_name": {
+        "coverage": number, // 0-100 percentage
+        "depth": number, // 1-5 scale
+        "gaps": ["string"],
+        "experts": ["user_id"]
+      }
+    },
+    "risk_list": [
+      {
+        "category": "string",
+        "description": "string", 
+        "severity": "low|medium|high|critical",
+        "affected_areas": ["string"],
+        "mitigation_suggestions": ["string"]
+      }
+    ],
+    "assumptions": [
+      {
+        "statement": "string",
+        "confidence": number, // 0-100
+        "impact_if_wrong": "string",
+        "validation_method": "string"
+      }
+    ]
+  }
+}
+```
+
+#### Goal Breakdown
+`POST /api/ai/breakdown-goal`
+
+**Permissions**: Admin, Org Leader, Functional Leader
+
+**Request Body**:
+```json
+{
+  "goal_text": "string",
+  "timeline": "string (optional)",
+  "budget_info": "string (optional)"
+}
+```
+
+**Response Schema**:
+```json
+{
+  "proposal_id": "string",
+  "output": {
+    "projects": [
+      {
+        "title": "string",
+        "description": "string",
+        "estimated_hours": number,
+        "dependencies": ["string"],
+        "acceptance_criteria": ["string"],
+        "required_skills": ["string"],
+        "suggested_assignees": [
+          {
+            "user_id": "string",
+            "reason": "string",
+            "confidence": number // 0-100
+          }
+        ],
+        "location_pref": "string (optional)",
+        "priority": "low|medium|high|critical",
+        "risk_factors": ["string"]
+      }
+    ]
+  }
+}
+```
+
+#### Assignment Recommendations
+`POST /api/ai/recommend-assignments`
+
+**Permissions**: Admin, Org Leader, Functional Leader, Project Lead
+
+**Request Body**:
+```json
+{
+  "task_description": "string",
+  "required_skills": ["string"],
+  "estimated_hours": number,
+  "timeline": "string (optional)",
+  "location_preference": "string (optional)"
+}
+```
+
+**Response Schema**:
+```json
+{
+  "proposal_id": "string", 
+  "output": {
+    "candidates": [
+      {
+        "user_id": "string",
+        "rank": number, // 1 = best candidate
+        "confidence": number, // 0-100
+        "reason": "string",
+        "skill_match": number, // 0-100 percentage
+        "availability_score": number, // 0-100 percentage  
+        "location_match": boolean,
+        "workload_impact": "low|medium|high"
+      }
+    ]
+  }
+}
+```
+
+#### Proposal Management
+`PATCH /api/ai/proposals/:id`
+
+**Description**: Accept, modify, or reject an AI proposal
+
+**Request Body**:
+```json
+{
+  "status": "accepted|modified|rejected",
+  "reason": "string (required for modify/reject)",
+  "modified_output": "any (required for modified status)"
+}
+```
+
+`GET /api/ai/proposals/:id`
+
+**Description**: Retrieve proposal details with creator information
+
+### Role-Based Permissions
+
+| AI Service | Admin | Org Leader | Functional Leader | Project Lead | Team Member |
+|------------|-------|------------|-------------------|--------------|-------------|
+| Organization Analysis | ✅ | ✅ | ❌ | ❌ | ❌ |
+| Goal Breakdown | ✅ | ✅ | ✅ | ❌ | ❌ |
+| Assignment Recommendations | ✅ | ✅ | ✅ | ✅ | ❌ |
+| Proposal Review | ✅ | ✅ | ✅ | ✅* | ❌ |
+
+*Project Leads can only review assignment recommendation proposals
+
+### AI Implementation Details
+
+- **Model**: GPT-4o-mini for cost efficiency with fallback to GPT-4o
+- **Temperature**: 0.2 for deterministic outputs
+- **JSON Mode**: Enforced response format matching schemas
+- **Retries**: Exponential backoff with 3 retry attempts
+- **Validation**: Zod schema validation on all AI outputs
+- **Testing**: Mock responses available for development/testing
+
+### Security & Audit
+
+- **RLS Compliance**: All database operations wrapped with `withRLS`
+- **Tenant Isolation**: Proposals scoped to authenticated user's tenant
+- **Audit Logging**: All proposal creation and status changes logged
+- **Safe JSON Parsing**: Protection against malformed AI responses
+- **Schema Validation**: Strict validation ensures data integrity
+
 ## Error Handling
 
 All routes return consistent error responses:
