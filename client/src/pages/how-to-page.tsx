@@ -254,7 +254,7 @@ export default function HowToPage() {
                       <h4 className="font-medium text-gray-900">Interactive Word Cloud</h4>
                       <p className="text-gray-600 text-sm">
                         Visual representation of the most frequent words across all your documents. 
-                        Larger words appear more frequently. You can customize to show 1-100 words maximum.
+                        Larger words appear more frequently. You can customize the display to show anywhere from 1-100 words.
                       </p>
                     </div>
                   </div>
@@ -385,7 +385,7 @@ export default function HowToPage() {
                         Create professional PDF reports with all your analysis results
                       </p>
                       <p className="text-orange-700 text-sm">
-                        Reports include word clouds (up to 100 words), analysis summaries, and Q&A results in a clean, shareable format.
+                        Reports include word clouds, analysis summaries, and Q&A results in a clean, shareable format.
                       </p>
                     </div>
                   </div>
