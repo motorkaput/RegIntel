@@ -630,6 +630,173 @@ Users can modify proposals they created OR proposals from subordinate roles:
 - **Functional Leader**: Can modify project_lead and below proposals
 - **Project Lead**: Can only modify their own proposals
 
+---
+
+## Native Task Tracking & Third-Party Integrations
+
+### Task Management APIs
+
+#### Comments
+```bash
+# Get task comments
+GET /api/tasks/:id/comments
+
+# Add comment to task
+POST /api/tasks/:id/comments
+{
+  "content": "string",
+  "parent_id": "uuid?" // Optional for replies
+}
+```
+
+#### Attachments
+```bash
+# Get task attachments
+GET /api/tasks/:id/attachments
+
+# Upload attachment (multipart)
+POST /api/tasks/:id/attachments
+Content-Type: multipart/form-data
+file: [File]
+
+# Delete attachment
+DELETE /api/tasks/:id/attachments?attachment_id=uuid
+```
+
+### Integration Provider Interface
+
+All providers implement the `IssueProvider` interface:
+
+```typescript
+interface IssueProvider {
+  authorizeUrl(state: string): string;
+  exchangeCode(code: string): Promise<OAuthToken>;
+  getProjects(token: OAuthToken): Promise<ExternalProject[]>;
+  listIssues(token: OAuthToken, projectKey: string, since?: Date): Promise<ExternalIssue[]>;
+  getIssue(token: OAuthToken, issueId: string): Promise<ExternalIssue>;
+  toWorkItem(issue: ExternalIssue): WorkItemInput;
+}
+```
+
+### Required Environment Variables
+
+#### Jira Integration
+```bash
+JIRA_CLIENT_ID=your_jira_app_client_id
+JIRA_CLIENT_SECRET=your_jira_app_client_secret
+JIRA_BASE_URL=https://api.atlassian.com
+```
+
+#### Trello Integration
+```bash
+TRELLO_API_KEY=your_trello_api_key
+TRELLO_API_SECRET=your_trello_api_secret
+```
+
+#### Asana Integration
+```bash
+ASANA_CLIENT_ID=your_asana_app_client_id
+ASANA_CLIENT_SECRET=your_asana_app_client_secret
+```
+
+### Integration APIs
+
+#### OAuth Flow
+```bash
+# Start OAuth flow
+GET /api/integrations/:provider/authorize
+# Returns: { authorize_url, state, provider }
+
+# OAuth callback
+GET /api/integrations/:provider/callback?code=...&state=...
+# Redirects to /dashboard/settings/integrations with success/error
+```
+
+#### Webhook Endpoints
+```bash
+# Receive webhooks from external providers
+POST /api/integrations/:provider/webhook
+# Verifies signature and processes issue updates
+```
+
+### Webhook Payload Examples
+
+#### Jira Webhook
+```json
+{
+  "webhookEvent": "jira:issue_updated",
+  "issue": {
+    "id": "10001",
+    "key": "PROJ-123",
+    "fields": {
+      "summary": "Task title",
+      "description": {...},
+      "status": { "name": "In Progress" },
+      "assignee": { "emailAddress": "user@example.com" }
+    }
+  }
+}
+```
+
+#### Trello Webhook
+```json
+{
+  "action": {
+    "type": "updateCard",
+    "data": {
+      "card": {
+        "id": "card123",
+        "name": "Task title",
+        "desc": "Description"
+      },
+      "list": { "name": "In Progress" }
+    }
+  }
+}
+```
+
+### Sync Process
+
+- **Frequency**: Configurable (5-60 minutes)
+- **Idempotency**: Uses (tenant_id, external_system, external_id) unique constraint
+- **Linking Strategy**: 
+  1. Direct match by external_key
+  2. Fuzzy match by title + assignee
+  3. Manual linking via UI
+- **Background Jobs**: Automated sync with error handling and retry logic
+
+### Development with MockProvider
+
+For testing without real OAuth credentials:
+
+1. Use MockProvider which reads from `docs/samples/mock/*.json`
+2. Provides realistic sample data for development
+3. No external API calls required
+4. Supports all integration features for testing
+
+### Storage Configuration
+
+#### Development (Local Files)
+```bash
+DEV_STORAGE_MODE=local
+# Files stored in: /tmp/permeate-storage/tenants/{tenant}/attachments/
+```
+
+#### Production (S3)
+```bash
+S3_BUCKET=your-bucket-name
+AWS_ACCESS_KEY_ID=your-access-key
+AWS_SECRET_ACCESS_KEY=your-secret-key
+```
+
+### Access Control
+
+- **Integration Setup**: Admin, Org Leader only
+- **Task Comments**: All users (with task access)
+- **File Attachments**: Upload by all users, delete by uploader or leads
+- **Sync Operations**: Background jobs run with admin privileges
+- **Webhook Processing**: Authenticated via signature verification
+
 ## Error Handling
 
 All routes return consistent error responses:
