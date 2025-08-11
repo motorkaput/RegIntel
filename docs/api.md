@@ -234,6 +234,145 @@ When `DEV_EMAIL_MODE=console`, authentication endpoints include development URLs
 ✅ **Console email fallback** - Authentication works without Postmark setup  
 ✅ **JWT cookies** - HttpOnly cookies for secure token management  
 
+## CSV Organization Upload
+
+### Endpoint
+`POST /api/org-upload`
+
+### Description
+Bulk upload employee data via CSV file. Admin-only endpoint that validates, processes, and stores organizational structure data.
+
+### Required Headers
+```
+Content-Type: application/json
+Cookie: auth-token=<jwt_token>
+```
+
+### Request Body
+```json
+{
+  "data": [
+    {
+      "first_name": "Asha",
+      "last_name": "Menon", 
+      "email": "asha@acme.local",
+      "role": "org_leader",
+      "manager_email": "",
+      "skills": "product strategy|design leadership",
+      "location": "Bengaluru",
+      "aliases": "asham|asha.m"
+    }
+  ]
+}
+```
+
+### CSV Field Specifications
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `first_name` | string | Yes | Employee first name |
+| `last_name` | string | Yes | Employee last name |
+| `email` | string | Yes | Valid email address (unique per tenant) |
+| `role` | enum | Yes | One of: admin, org_leader, functional_leader, project_lead, team_member |
+| `manager_email` | string | No | Email of reporting manager (must exist in same upload) |
+| `skills` | string | No | Comma or pipe-separated list of skills |
+| `location` | string | No | Employee work location |
+| `aliases` | string | No | Comma or pipe-separated list of name aliases |
+
+### Sample CSV (Valid)
+```csv
+first_name,last_name,email,role,manager_email,skills,location,aliases
+Asha,Menon,asha@acme.local,org_leader,,product strategy|design leadership,Bengaluru,asham|asha.m
+Ravi,Kapoor,ravi@acme.local,functional_leader,asha@acme.local,backend,Delhi,r.kapoor
+Nina,Sharma,nina@acme.local,project_lead,ravi@acme.local,frontend,Remote,nina.s
+Dev,Patel,dev@acme.local,team_member,nina@acme.local,react|javascript,Bengaluru,dev.p
+Meera,Iyer,meera@acme.local,team_member,nina@acme.local,testing|qa,Bengaluru,meera
+```
+
+### Sample CSV (With Errors)
+```csv
+first_name,last_name,email,role,manager_email,skills,location,aliases
+,Menon,asha@acme.local,org_leader,,strategy,Bengaluru,
+Ravi,Kapoor,ravi-at-acme.local,functional_leader,asha@acme.local,backend,Delhi,
+Nina,Sharma,nina@acme.local,cto,ravi@acme.local,frontend,Remote,
+Dev,Patel,dev@acme.local,team_member,unknown@acme.local,react,Bengaluru,
+```
+
+### Response Format
+
+**Success Response (200)**
+```json
+{
+  "ok": true,
+  "created": 4,
+  "updated": 1,
+  "skills_added": 8,
+  "upload_url": "file:///tmp/permeate-storage/tenants/123/uploads/2024-01-15T10-30-00.csv"
+}
+```
+
+**Validation Error Response (400)**
+```json
+{
+  "errors": [
+    {
+      "row": 1,
+      "field": "first_name", 
+      "message": "First name is required"
+    },
+    {
+      "row": 2,
+      "field": "email",
+      "message": "Valid email is required"
+    },
+    {
+      "row": 3,
+      "field": "role",
+      "message": "Invalid role"
+    }
+  ]
+}
+```
+
+### Processing Flow
+
+1. **Authentication**: Verify admin role via JWT token
+2. **Validation**: Validate each CSV row against Zod schema
+3. **Error Reporting**: Return all validation errors without committing
+4. **Storage**: Save original CSV to tenant storage directory
+5. **Transaction**: Process all valid rows in single database transaction:
+   - Upsert users by (tenant_id, email)
+   - Create/update skills and user_skill relationships
+   - Set up reporting relationships via manager_email
+   - Create audit log entries for all changes
+6. **Response**: Return counts of created/updated records
+
+### Common Validation Errors
+
+- **Missing required fields**: first_name, last_name, email
+- **Invalid email format**: Must contain @ symbol and be valid email
+- **Invalid role**: Must be one of the 5 predefined roles
+- **Unknown manager**: manager_email references non-existent user (warning only)
+- **Duplicate emails**: Same email appears multiple times in CSV
+- **Self-reporting**: User lists themselves as manager
+
+### Storage Configuration
+
+**Development Mode** (`DEV_STORAGE_MODE=local`):
+- Files saved to `/tmp/permeate-storage/tenants/{tenant_id}/uploads/`
+- Returns `file://` URLs for local access
+
+**Production Mode**:
+- Files saved to S3-compatible storage
+- Returns `https://` URLs
+
+### Security & Permissions
+
+- **Admin Only**: Only users with `role=admin` can upload organization data
+- **Row Level Security**: All database operations wrapped with `withRLS`
+- **Tenant Isolation**: All data scoped to authenticated user's tenant
+- **Audit Logging**: All create/update operations logged with before/after values
+
 ## Error Handling
 
 All routes return consistent error responses:
