@@ -5,11 +5,6 @@ import {
   documents,
   performanceMetrics,
   documentAnalyses,
-  permeateCompanies,
-  permeateEmployees,
-  permeateGoals,
-  permeateProjects,
-  permeateTasks,
   type User,
   type UpsertUser,
   type SubscriptionPlan,
@@ -22,16 +17,6 @@ import {
   type InsertPerformanceMetric,
   type DocumentAnalysis,
   type InsertDocumentAnalysis,
-  type PermeateCompany,
-  type InsertPermeateCompany,
-  type PermeateEmployee,
-  type InsertPermeateEmployee,
-  type PermeateGoal,
-  type InsertPermeateGoal,
-  type PermeateProject,
-  type InsertPermeateProject,
-  type PermeateTask,
-  type InsertPermeateTask,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, gte, lte, count } from "drizzle-orm";
@@ -73,29 +58,7 @@ export interface IStorage {
 
 
 
-  // PerMeaTe Enterprise operations
-  getPermeateCompany(companyId: string): Promise<PermeateCompany | undefined>;
-  upsertPermeateCompany(company: InsertPermeateCompany): Promise<PermeateCompany>;
-  
-  // Employee operations
-  getPermeateEmployees(companyId: string): Promise<PermeateEmployee[]>;
-  getPermeateEmployeeByUsername(username: string): Promise<PermeateEmployee | undefined>;
-  upsertPermeateEmployees(employees: InsertPermeateEmployee[]): Promise<void>;
-  updateEmployeeLastLogin(employeeId: string): Promise<void>;
-  
-  // Goal operations
-  getPermeateGoals(companyId: string): Promise<PermeateGoal[]>;
-  createPermeateGoal(goal: InsertPermeateGoal): Promise<PermeateGoal>;
-  updatePermeateGoal(goalId: string, updates: Partial<PermeateGoal>): Promise<PermeateGoal>;
-  
-  // Project operations
-  getPermeateProjects(companyId: string): Promise<PermeateProject[]>;
-  createPermeateProject(project: InsertPermeateProject): Promise<PermeateProject>;
-  
-  // Task operations
-  getPermeateTasks(companyId: string): Promise<PermeateTask[]>;
-  createPermeateTask(task: InsertPermeateTask): Promise<PermeateTask>;
-  updatePermeateTask(taskId: string, updates: Partial<PermeateTask>): Promise<PermeateTask>;
+
 }
 
 export class DatabaseStorage implements IStorage {
@@ -317,14 +280,6 @@ export class DatabaseStorage implements IStorage {
     return result.count;
   }
 
-  // PerMeaTe Enterprise operations - Database implementation
-  async getPermeateCompany(companyId: string): Promise<PermeateCompany | undefined> {
-    const [company] = await db
-      .select()
-      .from(permeateCompanies)
-      .where(eq(permeateCompanies.id, companyId));
-    return company;
-  }
 
   async upsertPermeateCompany(company: InsertPermeateCompany): Promise<PermeateCompany> {
     const [upserted] = await db

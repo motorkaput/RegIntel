@@ -14,15 +14,11 @@ import Subscription from "@/pages/subscription";
 import FetchPatterns from "@/pages/fetch-patterns";
 import FetchPatternsApp from "@/pages/fetch-patterns-app";
 import BetaLogin from "@/pages/beta-login";
-import PerMeateBetaLogin from "@/pages/permeate-beta-login";
-import PerMeaTeEnterpriseApp from "@/pages/permeate-enterprise-app";
-import PerMeaTeEnhanced from "@/pages/permeate-enhanced";
 import Privacy from "@/pages/privacy";
 import Terms from "@/pages/terms";
 import AboutPage from "@/pages/about";
 import Contact from "@/pages/contact";
 import Security from "@/pages/security";
-import PerMeaTeEnterprise from "@/pages/permeate-enterprise";
 import Next from "@/pages/next";
 import HowToPage from "@/pages/how-to-page";
 function Router() {
@@ -33,7 +29,6 @@ function Router() {
       {/* Public routes - accessible without authentication */}
       <Route path="/" component={Landing} />
       <Route path="/fetch-patterns" component={FetchPatterns} />
-      <Route path="/permeate-enterprise" component={PerMeaTeEnterprise} />
       <Route path="/next" component={Next} />
       <Route path="/about" component={AboutPage} />
       <Route path="/pricing" component={Pricing} />
@@ -52,16 +47,7 @@ function Router() {
       <Route path="/beta-login" component={BetaLogin} />
       <Route path="/x7k9p/fp-analyzer" component={FetchPatternsApp} />
       <Route path="/x7k9p/how-to" component={HowToPage} />
-      <Route path="/z9m3k/pe-beta-login" component={PerMeateBetaLogin} />
-      
 
-      
-      {/* PerMeaTe Enterprise routes - accessible with or without authentication */}
-      <Route path="/pe-workspace" component={PerMeaTeEnhanced} />
-      <Route path="/z9m3k/pe-workspace" component={PerMeaTeEnhanced} />
-      <Route path="/enhanced-pe" component={PerMeaTeEnhanced} />
-      <Route path="/permeate-enhanced" component={PerMeaTeEnhanced} />
-      <Route path="/m8x3r/pe-system" component={PerMeaTeEnhanced} />
       
       {/* Legal and info pages */}
       <Route path="/privacy" component={Privacy} />
