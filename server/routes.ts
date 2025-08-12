@@ -53,33 +53,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware for existing Replit Auth
   await setupAuth(app);
 
-  // Simple development registration endpoint
-  app.post('/api/permeate/auth/register', async (req, res) => {
-    // For development - bypass complex registration and create demo account
-    // Set auth cookie for automatic login
-    res.cookie('permeate-auth-token', 'demo-jwt-token', {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      path: '/',
-    });
+  // Public tenant registration endpoint
+  app.post('/api/tenants/register', async (req, res) => {
+    try {
+      const { company_name, domain, admin_email, password, first_name, last_name, bootstrap_token } = req.body;
 
-    res.json({
-      success: true,
-      user: {
-        id: 'demo-admin',
-        email: 'admin@democo.com',
-        role: 'admin',
-        first_name: 'Admin',
-        last_name: 'User',
-      },
-      tenant: {
-        id: 'demo-tenant',
-        name: 'DemoCo Enterprise',
-        domain: 'democo',
-      },
-    });
+      // For development - allow bootstrap token or bypass in dev mode
+      const validTokens = ['bootstrap-dev-token-2024', 'demo-token'];
+      const isDev = process.env.NODE_ENV === 'development';
+      
+      if (!isDev && !validTokens.includes(bootstrap_token)) {
+        return res.status(403).json({ error: 'Invalid bootstrap token' });
+      }
+
+      // Basic validation
+      if (!company_name || !domain || !admin_email || !password || !first_name || !last_name) {
+        return res.status(400).json({ error: 'Missing required fields' });
+      }
+
+      // Validate domain format
+      const domainRegex = /^[a-z0-9-]+$/;
+      if (!domainRegex.test(domain)) {
+        return res.status(400).json({ error: 'Invalid domain format' });
+      }
+
+      // For development mode - create simplified tenant
+      if (isDev || bootstrap_token === 'bootstrap-dev-token-2024') {
+        // Set auth cookie for automatic login
+        res.cookie('permeate-auth-token', 'demo-jwt-token', {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+          path: '/',
+        });
+
+        res.json({
+          success: true,
+          user: {
+            id: `admin-${domain}`,
+            email: admin_email,
+            role: 'admin',
+            first_name,
+            last_name,
+          },
+          tenant: {
+            id: `tenant-${domain}`,
+            name: company_name,
+            domain,
+          },
+        });
+        return;
+      }
+
+      // Production registration would go here
+      res.status(500).json({ error: 'Production registration not yet implemented' });
+    } catch (error) {
+      console.error('Tenant registration error:', error);
+      res.status(500).json({ error: 'Registration failed' });
+    }
   });
 
   // Simple development login endpoint

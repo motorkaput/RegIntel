@@ -24,13 +24,20 @@ import HowToPage from "@/pages/how-to-page";
 import PerMeaTeLogin from "@/pages/permeate-login";
 import PerMeaTeRegister from "@/pages/permeate-register";
 import PerMeaTeDashboard from "@/pages/permeate-dashboard";
+import PublicLanding from "@/pages/public-landing";
+import PublicRegister from "@/pages/public-register";
+import OnboardingWizard from "@/pages/onboarding-wizard";
+import UsersManagement from "@/pages/users-management";
+import SetPassword from "@/pages/set-password";
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
 
   return (
     <Switch>
       {/* Public routes - accessible without authentication */}
-      <Route path="/" component={Landing} />
+      <Route path="/" component={PublicLanding} />
+      <Route path="/register" component={PublicRegister} />
+      <Route path="/set-password" component={SetPassword} />
       <Route path="/fetch-patterns" component={FetchPatterns} />
       <Route path="/next" component={Next} />
       <Route path="/about" component={AboutPage} />
@@ -43,6 +50,9 @@ function Router() {
           <Route path="/document-analyzer" component={DocumentAnalyzer} />
           <Route path="/performance-dashboard" component={PerformanceDashboard} />
           <Route path="/subscription" component={Subscription} />
+          <Route path="/dashboard" component={PerMeaTeDashboard} />
+          <Route path="/start" component={OnboardingWizard} />
+          <Route path="/settings/users" component={UsersManagement} />
         </>
       )}
       
@@ -52,10 +62,13 @@ function Router() {
       <Route path="/x7k9p/how-to" component={HowToPage} />
 
       
-      {/* PerMeaTe Enterprise routes */}
+      {/* PerMeaTe Enterprise routes - legacy */}
       <Route path="/permeate-login" component={PerMeaTeLogin} />
       <Route path="/permeate-register" component={PerMeaTeRegister} />
       <Route path="/permeate-dashboard" component={PerMeaTeDashboard} />
+      
+      {/* Legacy Dark Street Tech routes */}
+      <Route path="/dark-street" component={Landing} />
       
       {/* Legal and info pages */}
       <Route path="/privacy" component={Privacy} />
