@@ -14,31 +14,26 @@ import Subscription from "@/pages/subscription";
 import FetchPatterns from "@/pages/fetch-patterns";
 import FetchPatternsApp from "@/pages/fetch-patterns-app";
 import BetaLogin from "@/pages/beta-login";
+import PerMeateBetaLogin from "@/pages/permeate-beta-login";
+import PerMeaTeEnterpriseApp from "@/pages/permeate-enterprise-app";
+import PerMeaTeEnhanced from "@/pages/permeate-enhanced";
 import Privacy from "@/pages/privacy";
 import Terms from "@/pages/terms";
 import AboutPage from "@/pages/about";
 import Contact from "@/pages/contact";
 import Security from "@/pages/security";
+import PerMeaTeEnterprise from "@/pages/permeate-enterprise";
 import Next from "@/pages/next";
 import HowToPage from "@/pages/how-to-page";
-import PerMeaTeLogin from "@/pages/permeate-login";
-import PerMeaTeRegister from "@/pages/permeate-register";
-import PerMeaTeDashboard from "@/pages/permeate-dashboard";
-import PublicLanding from "@/pages/public-landing";
-import PublicRegister from "@/pages/public-register";
-import OnboardingWizard from "@/pages/onboarding-wizard";
-import UsersManagement from "@/pages/users-management";
-import SetPassword from "@/pages/set-password";
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
 
   return (
     <Switch>
       {/* Public routes - accessible without authentication */}
-      <Route path="/" component={PublicLanding} />
-      <Route path="/register" component={PublicRegister} />
-      <Route path="/set-password" component={SetPassword} />
+      <Route path="/" component={Landing} />
       <Route path="/fetch-patterns" component={FetchPatterns} />
+      <Route path="/permeate-enterprise" component={PerMeaTeEnterprise} />
       <Route path="/next" component={Next} />
       <Route path="/about" component={AboutPage} />
       <Route path="/pricing" component={Pricing} />
@@ -50,9 +45,6 @@ function Router() {
           <Route path="/document-analyzer" component={DocumentAnalyzer} />
           <Route path="/performance-dashboard" component={PerformanceDashboard} />
           <Route path="/subscription" component={Subscription} />
-          <Route path="/dashboard" component={PerMeaTeDashboard} />
-          <Route path="/start" component={OnboardingWizard} />
-          <Route path="/settings/users" component={UsersManagement} />
         </>
       )}
       
@@ -60,15 +52,16 @@ function Router() {
       <Route path="/beta-login" component={BetaLogin} />
       <Route path="/x7k9p/fp-analyzer" component={FetchPatternsApp} />
       <Route path="/x7k9p/how-to" component={HowToPage} />
+      <Route path="/z9m3k/pe-beta-login" component={PerMeateBetaLogin} />
+      
 
       
-      {/* PerMeaTe Enterprise routes - legacy */}
-      <Route path="/permeate-login" component={PerMeaTeLogin} />
-      <Route path="/permeate-register" component={PerMeaTeRegister} />
-      <Route path="/permeate-dashboard" component={PerMeaTeDashboard} />
-      
-      {/* Legacy Dark Street Tech routes */}
-      <Route path="/dark-street" component={Landing} />
+      {/* PerMeaTe Enterprise routes - accessible with or without authentication */}
+      <Route path="/pe-workspace" component={PerMeaTeEnhanced} />
+      <Route path="/z9m3k/pe-workspace" component={PerMeaTeEnhanced} />
+      <Route path="/enhanced-pe" component={PerMeaTeEnhanced} />
+      <Route path="/permeate-enhanced" component={PerMeaTeEnhanced} />
+      <Route path="/m8x3r/pe-system" component={PerMeaTeEnhanced} />
       
       {/* Legal and info pages */}
       <Route path="/privacy" component={Privacy} />

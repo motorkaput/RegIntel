@@ -7,51 +7,7 @@ Dark Street Tech is a full-stack AI-powered SaaS platform providing document ana
 Preferred communication style: Simple, everyday language.
 Design preference: Mature, professional look inspired by Palantir.com instead of quirky/neon design.
 
-## Recent Changes (August 11, 2025)
-✓ **PerMeaTe Enterprise Next.js Migration - COMPLETED**
-✓ Migrated from Express.js to Next.js 14 app router architecture
-✓ Created Next.js API route handlers with RLS integration on all database calls
-✓ Implemented JWT authentication with HttpOnly cookies
-✓ Built magic link authentication system with Postmark email integration
-✓ Created invitation system with email templates and token-based acceptance
-✓ Added middleware for route protection and authentication validation
-✓ All API endpoints now use withRLS wrapper for Row Level Security compliance
-✓ Comprehensive API documentation updated for Next.js route handlers
-✓ Email templates for magic links and invitations implemented
-✓ Bootstrap token system for initial organization setup
-✓ Development email fallback system with DEV_EMAIL_MODE=console
-✓ Authentication pages created (login, register, dashboard) with proper Next.js app structure
-✓ Environment configuration completed with all required variables and development fallbacks
-✓ Two-tier sticky shell implemented with HeaderCompany, HeaderApp, and FooterCompany components
-✓ Route-aware navigation with active state indicators and mobile responsive design
-✓ Skip-to-content accessibility features and proper scroll shadow effects
-✓ Dashboard layout with shared authentication state and proper user management
-✓ Comprehensive CSV onboarding system implemented with file upload, validation, processing, audit logging, and local storage
-✓ Drag-and-drop interface with sample CSV download, error preview, and progress tracking
-✓ Zod validation with row-level error reporting for organization data uploads
-✓ Transactional database operations with reporting relationship inference and skills management
-✓ Local file storage system for development with S3-compatible production architecture
-✓ Complete AI services layer with OpenAI integration for organization analysis, goal breakdown, and assignment recommendations
-✓ Deterministic AI outputs with Zod schema validation and proposal-based review workflow
-✓ Role-based permissions for AI services with comprehensive audit logging
-✓ Mock responses for testing and development without OpenAI dependency
-✓ Exponential backoff retry logic and safe JSON parsing for robust AI interactions
-✓ Enhanced proposal workflow completed with human-in-the-loop UI, Monaco editor integration, diff viewer, prompt templates with versioning, and comprehensive auditability features
-✓ Native task tracking system delivered with third-party integrations for Jira, Trello, and Asana, including kanban board and list views
-✓ Interactive UI components completed including TaskScorePanel with real-time score submission and comprehensive export functionality (CSV/JSON)
-✓ Complete integration provider interface with OAuth placeholders, webhook receivers, and background sync jobs
-✓ MockProvider implementation for testing without external API dependencies using sample JSON data
-✓ Task comments and attachments system with local development storage and S3-compatible production architecture
-✓ Comprehensive API documentation for integrations including webhook payload examples and environment variables
-✓ Provider-agnostic billing system with Razorpay integration, usage metering for AI tokens/seats/evaluations, automated billing runs, webhook verification
-✓ Role-specific analytics dashboards with drill-down capabilities, trend/distribution charts, export functionality, and performance-optimized queries delivered
-✓ Complete admin, settings, and compliance system with tenant configuration, rate limiting, data export/deletion, audit logs browser, and GDPR/CCPA compliance features
-✓ Comprehensive end-to-end test suite with Playwright covering signup/login, CSV onboarding, AI proposals, scoring, tracking integrations, dashboards, and billing flows
-✓ Demo seed script creating realistic DemoCo tenant with complete organizational data, users, projects, tasks, scores, proposals, and usage events for testing
-✓ Test utilities and helpers for authentication, file uploads, drag-and-drop, chart interaction, and mobile responsive testing with proper accessibility checks
-✓ Production deployment infrastructure with Docker, Kubernetes manifests, CI/CD pipeline, health checks, structured logging, security middleware, and comprehensive operations documentation
-
-## Previous Changes (August 9, 2025)
+## Recent Changes (August 9, 2025)
 ✓ Completely removed entire open beta system from codebase per user request
 ✓ Cleaned up schema definitions by removing openBetaUsers and openBetaDocumentAnalyses tables
 ✓ Removed all open beta storage functions and API routes from server
@@ -75,13 +31,12 @@ Design preference: Mature, professional look inspired by Palantir.com instead of
 - **Routing**: Wouter
 - **Styling**: Professional dark theme with a sophisticated blue color palette and enterprise-focused design. All elements use `max-w-7xl` for alignment, consistent `px-4 sm:px-6 lg:px-8` padding, and `h-12` (48px) uniform header heights with `h-6` (24px) logo sizing, ensuring zero gap positioning and seamless scrolling.
 
-### Backend  
-- **Framework**: Next.js 14 with TypeScript and App Router
+### Backend
+- **Framework**: Express.js with TypeScript
 - **Runtime**: Node.js with ES modules
-- **Database ORM**: Prisma with PostgreSQL
-- **Authentication**: JWT with HttpOnly cookies, magic links, and invitations
-- **Email**: Postmark for transactional emails
-- **Security**: Row Level Security (RLS) on all database operations
+- **Database ORM**: Drizzle ORM
+- **Authentication**: Replit Auth with OpenID Connect, managing sessions via PostgreSQL.
+- **File Processing**: Multer for file uploads (in-memory storage, 10MB limit).
 
 ### Data Storage
 - **Database**: PostgreSQL (Neon serverless)
@@ -98,8 +53,6 @@ Design preference: Mature, professional look inspired by Palantir.com instead of
 ## External Dependencies
 - **@neondatabase/serverless**: PostgreSQL connection management
 - **drizzle-orm**: Type-safe database operations
-- **@prisma/client**: PerMeaTe Enterprise ORM for multi-tenant data access
-- **prisma**: Database schema management and migrations
 - **@tanstack/react-query**: Server state management
 - **passport**: Authentication middleware
 - **razorpay**: Payment processing
