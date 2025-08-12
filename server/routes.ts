@@ -56,6 +56,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Simple development registration endpoint
   app.post('/api/permeate/auth/register', async (req, res) => {
     // For development - bypass complex registration and create demo account
+    // Set auth cookie for automatic login
+    res.cookie('permeate-auth-token', 'demo-jwt-token', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      path: '/',
+    });
+
     res.json({
       success: true,
       user: {
@@ -79,6 +88,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     // For development - accept demo credentials
     if (email === 'admin@democo.com' && password === 'admin123') {
+      // Set auth cookie
+      res.cookie('permeate-auth-token', 'demo-jwt-token', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+        path: '/',
+      });
+
       res.json({
         success: true,
         user: {
@@ -113,6 +131,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ error: 'No token provided' });
       }
 
+      // For development - accept demo token
+      if (token === 'demo-jwt-token') {
+        res.json({
+          id: 'demo-admin',
+          email: 'admin@democo.com',
+          role: 'admin',
+          first_name: 'Admin',
+          last_name: 'User',
+          tenant: {
+            id: 'demo-tenant',
+            name: 'DemoCo Enterprise',
+            domain: 'democo',
+          },
+        });
+        return;
+      }
+
+      // For production - verify JWT
       const payload = await verifyJWT(token);
       if (!payload) {
         return res.status(401).json({ error: 'Invalid token' });
