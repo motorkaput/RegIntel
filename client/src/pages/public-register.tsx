@@ -141,8 +141,9 @@ export default function PublicRegister() {
                       value={formData.company_name}
                       onChange={(e) => handleInputChange("company_name", e.target.value)}
                       placeholder="Acme Corporation"
-                      className="bg-slate-800 border-slate-600 text-white"
+                      className="bg-slate-800 border-slate-600 text-white placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                       data-testid="input-company-name"
+                      autoComplete="organization"
                       required
                     />
                   </div>
@@ -155,8 +156,9 @@ export default function PublicRegister() {
                       value={formData.domain}
                       onChange={(e) => handleInputChange("domain", e.target.value.toLowerCase())}
                       placeholder="acme"
-                      className="bg-slate-800 border-slate-600 text-white"
+                      className="bg-slate-800 border-slate-600 text-white placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                       data-testid="input-domain"
+                      autoComplete="organization"
                       required
                     />
                     <p className="text-xs text-slate-500">This will be your unique identifier</p>
@@ -179,8 +181,9 @@ export default function PublicRegister() {
                       value={formData.first_name}
                       onChange={(e) => handleInputChange("first_name", e.target.value)}
                       placeholder="John"
-                      className="bg-slate-800 border-slate-600 text-white"
+                      className="bg-slate-800 border-slate-600 text-white placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                       data-testid="input-first-name"
+                      autoComplete="given-name"
                       required
                     />
                   </div>
@@ -193,8 +196,9 @@ export default function PublicRegister() {
                       value={formData.last_name}
                       onChange={(e) => handleInputChange("last_name", e.target.value)}
                       placeholder="Doe"
-                      className="bg-slate-800 border-slate-600 text-white"
+                      className="bg-slate-800 border-slate-600 text-white placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                       data-testid="input-last-name"
+                      autoComplete="family-name"
                       required
                     />
                   </div>
@@ -208,8 +212,9 @@ export default function PublicRegister() {
                     value={formData.admin_email}
                     onChange={(e) => handleInputChange("admin_email", e.target.value)}
                     placeholder="john@acme.com"
-                    className="bg-slate-800 border-slate-600 text-white"
+                    className="bg-slate-800 border-slate-600 text-white placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                     data-testid="input-email"
+                    autoComplete="email"
                     required
                   />
                 </div>
@@ -222,8 +227,9 @@ export default function PublicRegister() {
                     value={formData.password}
                     onChange={(e) => handleInputChange("password", e.target.value)}
                     placeholder="••••••••"
-                    className="bg-slate-800 border-slate-600 text-white"
+                    className="bg-slate-800 border-slate-600 text-white placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                     data-testid="input-password"
+                    autoComplete="new-password"
                     required
                   />
                   <p className="text-xs text-slate-500">Minimum 6 characters</p>
@@ -244,8 +250,9 @@ export default function PublicRegister() {
                     value={formData.bootstrap_token}
                     onChange={(e) => handleInputChange("bootstrap_token", e.target.value)}
                     placeholder="Enter your bootstrap token"
-                    className="bg-slate-800 border-slate-600 text-white"
+                    className="bg-slate-800 border-slate-600 text-white placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                     data-testid="input-bootstrap-token"
+                    autoComplete="off"
                   />
                   <p className="text-xs text-slate-500">
                     For development: use "bootstrap-dev-token-2024"
