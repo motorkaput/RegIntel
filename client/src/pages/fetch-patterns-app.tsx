@@ -990,7 +990,7 @@ export default function FetchPatternsApp() {
                 variant="ghost"
                 size="sm"
                 onClick={() => window.open('/x7k9p/how-to', '_blank')}
-                className="text-accent-blue hover:text-accent-blue hover:bg-accent-blue-light h-8"
+                className="text-black hover:text-accent-blue hover:bg-accent-blue-light h-8"
                 title="Open How to Use Guide in new tab"
                 data-testid="button-help"
               >
@@ -1003,7 +1003,7 @@ export default function FetchPatternsApp() {
                   variant="ghost"
                   size="sm"
                   onClick={exportToPDF}
-                  className="text-accent-green hover:text-accent-green hover:bg-accent-green-light h-8"
+                  className="text-black hover:text-accent-green hover:bg-accent-green-light h-8"
                   title="Download comprehensive PDF report with all analyses"
                   data-testid="button-download-pdf"
                 >
@@ -1016,7 +1016,7 @@ export default function FetchPatternsApp() {
                 variant="ghost"
                 size="sm"
                 onClick={() => window.location.reload()}
-                className="text-accent-purple hover:text-accent-purple hover:bg-accent-purple-light h-8"
+                className="text-black hover:text-accent-purple hover:bg-accent-purple-light h-8"
                 title="Refresh page and start a new analysis session"
                 data-testid="button-refresh"
               >
@@ -1034,7 +1034,7 @@ export default function FetchPatternsApp() {
                 variant="ghost"
                 size="sm"
                 onClick={handleLogout}
-                className="text-accent-orange hover:text-accent-orange hover:bg-accent-orange-light h-8"
+                className="text-black hover:text-accent-orange hover:bg-accent-orange-light h-8"
                 title="Log out of Fetch Patterns"
                 data-testid="button-logout"
               >
@@ -1050,7 +1050,7 @@ export default function FetchPatternsApp() {
         {/* Upload Section */}
         <Card className="bg-white border-l-4 border-l-accent-cyan">
           <CardHeader>
-            <CardTitle className="text-accent-cyan">
+            <CardTitle className="text-black">
               Upload Documents
             </CardTitle>
           </CardHeader>
@@ -1058,13 +1058,13 @@ export default function FetchPatternsApp() {
             <div className="space-y-4">
               <div className="flex items-center justify-center w-full">
                 <label 
-                  className="flex flex-col items-center justify-center w-full h-48 border-2 border-accent-cyan border-dashed rounded-lg cursor-pointer bg-accent-cyan-light hover:bg-accent-cyan-light transition-colors"
+                  className="flex flex-col items-center justify-center w-full h-48 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors"
                   title="Click to select files for analysis"
                   data-testid="upload-area"
                 >
                   <div className="flex flex-col items-center justify-center pt-5 pb-6">
                     <Upload className="w-10 h-10 mb-3 text-accent-cyan" />
-                    <p className="mb-2 text-sm text-accent-cyan">
+                    <p className="mb-2 text-sm text-black">
                       {selectedFiles ? (
                         <span className="font-semibold">{selectedFiles.length} files selected</span>
                       ) : (
@@ -1155,20 +1155,20 @@ export default function FetchPatternsApp() {
 
         {/* Statistics Cards */}
         <div id="session-metrics" className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card className="bg-white text-center p-6 border-l-4 border-accent-blue">
+          <Card className="bg-white text-center p-6 border border-gray-300">
             <div className="text-4xl font-bold text-accent-blue mb-2">{completedAnalyses.length}</div>
             <div className="text-sm text-gray-500">Documents Processed</div>
           </Card>
-          <Card className="bg-white text-center p-6 border-l-4 border-accent-purple">
+          <Card className="bg-white text-center p-6 border border-gray-300">
             <div className="text-4xl font-bold text-accent-purple mb-2">{uniqueKeywords}</div>
             <div className="text-sm text-gray-500">Unique Keywords</div>
           </Card>
-          <Card className="bg-white text-center p-6 border-l-4 border-accent-green">
+          <Card className="bg-white text-center p-6 border border-gray-300">
             <div className="text-4xl font-bold text-accent-green mb-2">{positiveSentimentDocs.length}</div>
             <div className="text-sm text-gray-500">Positive Sentiment Documents</div>
             <div className="text-xs text-gray-400">{positivePercentage}% of all documents</div>
           </Card>
-          <Card className="bg-white text-center p-6 border-l-4 border-accent-orange">
+          <Card className="bg-white text-center p-6 border border-gray-300">
             <div className="text-4xl font-bold text-accent-orange mb-2">{negativeSentimentDocs.length}</div>
             <div className="text-sm text-gray-500">Negative Sentiment Documents</div>
             <div className="text-xs text-gray-400">{negativePercentage}% of all documents</div>
