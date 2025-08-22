@@ -22,7 +22,7 @@ import {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import fetchPatternsIcon from "@assets/FetchPatterns_Icon_1752663550310_1753148786989.png";
-import fetchDogGif from "@assets/fetch_dog_1754824417165.gif";
+import fetchDogGif from "@assets/fpdog_1755853087353.gif";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import html2canvas from 'html2canvas';
