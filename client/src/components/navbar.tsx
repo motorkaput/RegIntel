@@ -17,22 +17,8 @@ export default function Navbar() {
   const { isAuthenticated, user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
 
-  const navigationItems = [
-    { name: "Home", href: "/" },
-    { name: "Fetch Patterns", href: "/fetch-patterns" },
-    { name: "PerMeaTe Enterprise", href: "/permeate-enterprise" },
-    { name: "Next", href: "/next" },
-    { name: "About", href: "/about" },
-  ];
-
-  const authenticatedItems = [
-    { name: "Home", href: "/" },
-    { name: "Fetch Patterns", href: "/fetch-patterns" },
-    { name: "PerMeaTe Enterprise", href: "/permeate-enterprise" },
-    { name: "Next", href: "/next" },
-    { name: "About", href: "/about" },
-  ];
-
+  const navigationItems: any[] = [];
+  const authenticatedItems: any[] = [];
   const items = isAuthenticated ? authenticatedItems : navigationItems;
 
   return (
@@ -49,21 +35,8 @@ export default function Navbar() {
             />
           </Link>
 
-          {/* Desktop Navigation */}
+          {/* Desktop Navigation - Removed */}
           <div className="hidden md:flex items-center space-x-6 ml-auto">
-            {items.map((item) => (
-              <a
-                key={item.name}
-                href={item.href}
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleNavigation(item.href, location);
-                }}
-                className={`nav-item ${location === item.href ? 'active' : ''}`}
-              >
-                {item.name}
-              </a>
-            ))}
           </div>
 
           {/* Mobile menu button */}
@@ -96,29 +69,10 @@ export default function Navbar() {
           </div>
         )}
 
-        {/* Mobile Navigation */}
+        {/* Mobile Navigation - Removed */}
         {isOpen && (
           <div className="md:hidden py-4 border-t border-light">
             <div className="flex flex-col space-y-1">
-              {items.map((item) => (
-                <a
-                  key={item.name}
-                  href={item.href}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setIsOpen(false);
-                    handleNavigation(item.href, location);
-                  }}
-                  className={`px-3 py-2 rounded-sm text-sm transition-colors ${
-                    location === item.href
-                      ? "text-primary bg-surface-grey"
-                      : "text-secondary hover:text-primary hover:bg-surface-grey"
-                  }`}
-                >
-                  {item.name}
-                </a>
-              ))}
-              
               {/* Mobile Auth */}
               {isAuthenticated && (
                 <div className="pt-3 border-t border-light mt-3">
