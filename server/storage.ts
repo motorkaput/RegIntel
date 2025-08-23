@@ -77,6 +77,10 @@ export interface IStorage {
   getPermeateCompany(companyId: string): Promise<PermeateCompany | undefined>;
   upsertPermeateCompany(company: InsertPermeateCompany): Promise<PermeateCompany>;
   
+  // Open Beta User operations  
+  getOpenBetaUserByEmail(email: string): Promise<User | undefined>;
+  createOpenBetaUser(user: UpsertUser): Promise<User>;
+  
   // Employee operations
   getPermeateEmployees(companyId: string): Promise<PermeateEmployee[]>;
   getPermeateEmployeeByUsername(username: string): Promise<PermeateEmployee | undefined>;
@@ -461,7 +465,14 @@ export class DatabaseStorage implements IStorage {
     return updated;
   }
 
+  // Open Beta User operations implementation
+  async getOpenBetaUserByEmail(email: string): Promise<User | undefined> {
+    return await this.getUserByEmail(email);
+  }
 
+  async createOpenBetaUser(userData: UpsertUser): Promise<User> {
+    return await this.upsertUser(userData);
+  }
 }
 
 export const storage = new DatabaseStorage();

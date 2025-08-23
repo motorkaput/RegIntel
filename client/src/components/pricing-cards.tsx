@@ -5,10 +5,19 @@ import { CheckCircle } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 
+interface Plan {
+  id: string;
+  name: string;
+  price: string;
+  description: string;
+  features: string[];
+  popular: boolean;
+}
+
 export default function PricingCards() {
   const { isAuthenticated } = useAuth();
   
-  const { data: plans } = useQuery({
+  const { data: plans } = useQuery<Plan[]>({
     queryKey: ['/api/subscription-plans'],
     retry: false,
   });
@@ -66,7 +75,7 @@ export default function PricingCards() {
     },
   ];
 
-  const displayPlans = plans || defaultPlans;
+  const displayPlans: Plan[] = plans || defaultPlans;
 
   return (
     <section className="py-24 bg-surface-dark">

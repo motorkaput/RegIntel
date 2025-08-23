@@ -376,6 +376,8 @@ export type PermeateProject = typeof permeateProjects.$inferSelect;
 export type InsertPermeateProject = typeof permeateProjects.$inferInsert;
 export type PermeateTask = typeof permeateTasks.$inferSelect;
 export type InsertPermeateTask = typeof permeateTasks.$inferInsert;
+export type PermeateTaskUpdate = typeof permeateTaskUpdates.$inferSelect;
+export type InsertPermeateTaskUpdate = typeof permeateTaskUpdates.$inferInsert;
 
 // PerMeaTe Zod schemas
 export const insertPermeateCompanySchema = createInsertSchema(permeateCompanies);

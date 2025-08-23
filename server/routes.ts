@@ -615,13 +615,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Create user
       const user = await storage.createOpenBetaUser({
+        id: crypto.randomUUID(),
         email,
-        passwordHash,
-        displayName,
+        firstName: displayName,
       });
 
-      // Return user data without password hash
-      const { passwordHash: _, ...userResponse } = user;
+      // Return user data
+      const userResponse = user;
       res.status(201).json(userResponse);
     } catch (error) {
       console.error('Registration error:', error);

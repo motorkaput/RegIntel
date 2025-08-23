@@ -15,7 +15,7 @@ export async function createSubscription(plan: SubscriptionPlan) {
   try {
     const subscriptionData = {
       plan_id: plan.id,
-      customer_notify: 1,
+      customer_notify: 1 as 0 | 1,
       quantity: 1,
       total_count: 12, // 12 months
       start_at: Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60, // Start after 30-day trial

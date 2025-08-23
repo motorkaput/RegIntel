@@ -163,7 +163,7 @@ export default function DocumentAnalyzer() {
   };
 
   if (isLoading || documentsLoading) {
-    return <LoadingSpinner variant="branded" text="Loading document analyzer..." />;
+    return <LoadingSpinner variant="default" text="Loading document analyzer..." />;
   }
 
   return (
@@ -214,7 +214,6 @@ export default function DocumentAnalyzer() {
                     />
                     <label htmlFor="file-upload">
                       <LoadingButton
-                        as="div"
                         className="bg-neon-green text-black hover:bg-neon-cyan cursor-pointer"
                         isLoading={uploadMutation.isPending}
                         loadingText="Uploading..."

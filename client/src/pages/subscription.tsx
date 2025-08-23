@@ -11,7 +11,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { CreditCard, Calendar, Shield, Star, CheckCircle, XCircle } from "lucide-react";
-import LoadingSpinner from "@/components/loading-spinner";
+import LoadingSpinner from "@/components/ui/loading-spinner";
+
+// Extend window interface for Razorpay
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
 
 interface Subscription {
   id: string;
@@ -50,7 +57,16 @@ export default function Subscription() {
     retry: false,
   });
 
-  const { data: plans } = useQuery({
+  interface Plan {
+    id: string;
+    name: string;
+    price: string;
+    description: string;
+    features: string[];
+    popular: boolean;
+  }
+
+  const { data: plans } = useQuery<Plan[]>({
     queryKey: ['/api/subscription-plans'],
     retry: false,
   });

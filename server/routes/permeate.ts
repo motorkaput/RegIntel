@@ -33,6 +33,7 @@ export function registerPermeateRoutes(app: Express) {
       const { name, businessAreas, employeeCount, locations } = req.body;
       
       const [company] = await db.insert(permeateCompanies).values({
+        id: crypto.randomUUID(),
         name,
         businessAreas,
         employeeCount: parseInt(employeeCount),
@@ -67,16 +68,18 @@ export function registerPermeateRoutes(app: Express) {
       const processedEmployees = await Promise.all(
         csvData.map(async (row: any) => {
           const employee: InsertPermeateEmployee = {
+            id: crypto.randomUUID(),
             companyId,
+            employeeId: row.employee_id || crypto.randomUUID().slice(0, 8),
             name: row.name || row.Name || row.employee_name || "",
             email: row.email || row.Email || row.employee_email || "",
+            username: row.username || (row.email || row.Email || row.employee_email || "").split('@')[0],
             role: row.role || row.Role || row.position || row.Position || "",
             department: row.department || row.Department || "",
-            skills: row.skills ? row.skills.split(',').map((s: string) => s.trim()) : [],
+            keySkills: row.skills ? row.skills.split(',').map((s: string) => s.trim()) : [],
             location: row.location || row.Location || "",
-            managerEmail: row.manager_email || row.managerEmail || row.manager || "",
-            permeateRole: await determinePermeateRole(row),
-            hasPassword: false
+            reportingTo: row.manager_email || row.managerEmail || row.manager || "",
+            userType: row.user_type || row.userType || 'employee'
           };
           return employee;
         })
@@ -115,7 +118,6 @@ export function registerPermeateRoutes(app: Express) {
           await db.update(permeateEmployees)
             .set({ 
               passwordHash,
-              hasPassword: true,
               updatedAt: new Date()
             })
             .where(eq(permeateEmployees.id, employee.id));
@@ -126,7 +128,7 @@ export function registerPermeateRoutes(app: Express) {
             email: employee.email,
             username: employee.email.split('@')[0], // email alias
             password,
-            permeateRole: employee.permeateRole
+            role: employee.role
           };
         })
       );
@@ -212,11 +214,11 @@ export function registerPermeateRoutes(app: Express) {
       
       // Create projects from AI breakdown
       const projects = aiBreakdown.projects?.map((project: any) => ({
+        id: crypto.randomUUID(),
         goalId: goal.id,
         companyId: goal.companyId,
         title: project.title,
         description: project.description,
-        createdBy: goal.createdBy,
         priority: project.priority || 'medium'
       })) || [];
       
@@ -398,12 +400,12 @@ function buildOrganizationChart(employees: PermeateEmployee[]) {
   
   // Find root employees (no manager or manager not in system)
   const roots = employees.filter(emp => 
-    !emp.managerEmail || !employeeMap.has(emp.managerEmail)
+    !emp.reportingTo || !employeeMap.has(emp.reportingTo)
   );
   
   // Build tree structure recursively
   function buildTree(employee: PermeateEmployee): any {
-    const children = employees.filter(emp => emp.managerEmail === employee.email);
+    const children = employees.filter(emp => emp.reportingTo === employee.email);
     return {
       ...employee,
       children: children.map(child => buildTree(child))
@@ -421,20 +423,20 @@ async function findBestEmployeeForTask(task: any, employees: PermeateEmployee[])
   let bestScore = -1;
   
   for (const employee of employees) {
-    if (employee.permeateRole === 'team_member' || employee.permeateRole === 'project_leader') {
+    if (employee.role === 'team_member' || employee.role === 'project_leader') {
       let score = 0;
       
       // Skill matching
-      const employeeSkills = employee.skills || [];
+      const employeeSkills = Array.isArray(employee.keySkills) ? employee.keySkills : [];
       const matchingSkills = taskSkills.filter((skill: string) => 
-        employeeSkills.some(empSkill => 
-          empSkill.toLowerCase().includes(skill.toLowerCase())
+        employeeSkills.some((empSkill: any) => 
+          empSkill.toString().toLowerCase().includes(skill.toLowerCase())
         )
       );
       score += matchingSkills.length * 10;
       
       // Role preference
-      if (task.preferredRole && employee.permeateRole === task.preferredRole) {
+      if (task.preferredRole && employee.role === task.preferredRole) {
         score += 20;
       }
       
