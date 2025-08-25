@@ -52,44 +52,17 @@ export default function HowToPage() {
             </div>
             
             {/* Header Controls */}
-            <div className="flex items-center gap-3">
-              {/* Back to App Button */}
+            <div className="flex items-center">
+              {/* Close Tab Button */}
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={handleBackToApp}
-                className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 h-8"
-                title="Back to Fetch Patterns"
+                className="text-gray-600 hover:text-gray-700 hover:bg-gray-100 h-8 px-3"
+                title="Close and Return to Fetch Patterns"
               >
+                <span className="text-sm mr-1">Close</span>
                 <ArrowLeft className="h-4 w-4 flex-shrink-0" />
-              </Button>
-              
-              {/* Refresh Page Button */}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => window.location.reload()}
-                className="text-purple-600 hover:text-purple-700 hover:bg-purple-50 h-8"
-                title="Refresh Page"
-              >
-                <RefreshCw className="h-4 w-4 flex-shrink-0" />
-              </Button>
-              
-              {/* User Display */}
-              <div className="flex items-center space-x-2 text-sm text-gray-600">
-                <User className="h-4 w-4 flex-shrink-0" />
-                <span>Beta User</span>
-              </div>
-              
-              {/* Logout Button */}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleLogout}
-                className="text-orange-600 hover:text-orange-700 hover:bg-orange-50 h-8"
-                title="Logout"
-              >
-                <LogOut className="h-4 w-4 flex-shrink-0" />
               </Button>
             </div>
           </div>
