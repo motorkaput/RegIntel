@@ -20,10 +20,19 @@ export default function Footer() {
             </a>
           </div>
           
-          {/* Copyright */}
-          <p className="text-secondary text-sm">
-            Copyright Dark Street. All rights reserved.
-          </p>
+          {/* Copyright and Strategy Consulting Link */}
+          <div className="flex items-center space-x-4 text-secondary text-sm">
+            <p>Copyright Dark Street. All rights reserved.</p>
+            <a 
+              href="https://darkstreet.consulting" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="flex items-center space-x-1 hover:text-accent-blue transition-colors"
+            >
+              <span>Strategy Consulting</span>
+              <ExternalLink className="w-3 h-3" />
+            </a>
+          </div>
         </div>
       </div>
     </footer>
