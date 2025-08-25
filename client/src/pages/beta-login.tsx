@@ -24,7 +24,7 @@ export default function BetaLogin() {
     if (username === "BetaUser" && password === ORIGINAL_PASSWORD) {
       // Set session storage to remember auth
       sessionStorage.setItem("betaAuth", "true");
-      setLocation("/x7k9p/fp-analyzer");
+      setLocation("/fetchpatterns");
     } else {
       toast({
         title: "Access Denied",

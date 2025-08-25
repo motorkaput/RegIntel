@@ -51,8 +51,8 @@ function Router() {
       
       {/* === FETCH PATTERNS - ONLY ACTIVE ROUTES === */}
       <Route path="/beta-login" component={BetaLogin} />
-      <Route path="/x7k9p/fp-analyzer" component={FetchPatternsApp} />
-      <Route path="/x7k9p/how-to" component={HowToPage} />
+      <Route path="/fetchpatterns" component={FetchPatternsApp} />
+      <Route path="/fetchpatterns/howto" component={HowToPage} />
       
       {/* === ARCHIVED ROUTES (Dark Street Tech Company Pages) === */}
       {/* All other company pages are archived and no longer accessible */}

@@ -989,7 +989,7 @@ export default function FetchPatternsApp() {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => window.open('/x7k9p/how-to', '_blank')}
+                onClick={() => window.open('/fetchpatterns/howto', '_blank')}
                 className="text-black hover:text-accent-blue hover:bg-accent-blue-light h-8"
                 title="Open How to Use Guide in new tab"
                 data-testid="button-help"

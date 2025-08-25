@@ -32,7 +32,7 @@ export default function HowToPage() {
   const handleBackToApp = () => {
     window.close();
     // Fallback if window.close() doesn't work
-    window.location.href = "/x7k9p/fp-analyzer";
+    window.location.href = "/fetchpatterns";
   };
 
   return (
