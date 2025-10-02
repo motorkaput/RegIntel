@@ -72,21 +72,21 @@ FetchPatterns is an AI-powered document analysis platform that transforms hours 
 
 ## Competitive Advantages
 
-✅ **State-of-the-Art AI**: Powered by GPT-4 for superior document understanding  
-✅ **Purpose-Built UX**: Professional interface designed specifically for business documents  
-✅ **Multi-Document Intelligence**: Cross-document pattern recognition and insights  
-✅ **Persistent Knowledge Base**: All analyses saved, searchable, and accessible  
-✅ **Enterprise Security**: Your data never used for training, compliance-ready architecture  
-✅ **Zero Learning Curve**: Intuitive workflow, start analyzing in minutes  
-✅ **Professional Outputs**: Stakeholder-ready reports with one click  
+- **State-of-the-Art AI**: Powered by GPT-4 for superior document understanding  
+- **Purpose-Built UX**: Professional interface designed specifically for business documents  
+- **Multi-Document Intelligence**: Cross-document pattern recognition and insights  
+- **Persistent Knowledge Base**: All analyses saved, searchable, and accessible  
+- **Enterprise Security**: Your data never used for training, compliance-ready architecture  
+- **Zero Learning Curve**: Intuitive workflow, start analyzing in minutes  
+- **Professional Outputs**: Stakeholder-ready reports with one click  
 
 ## Implementation
 
 **Getting Started**: 
-- ✅ No installation or setup required (browser-based)
-- ✅ Secure login with enterprise authentication
-- ✅ Upload documents and get insights in under 5 minutes
-- ✅ Built-in "How to Use" guide for self-service help
+- No installation or setup required (browser-based)
+- Secure login with enterprise authentication
+- Upload documents and get insights in under 5 minutes
+- Built-in "How to Use" guide for self-service help
 
 **User Adoption**: 
 - Minimal training needed—interface is intuitive
