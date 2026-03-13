@@ -1,13 +1,23 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { registerRegTechRoutes } from "./routes/regtech";
+import { storage } from "./storage";
+import { initializeRazorpay, createSubscription, verifyPayment } from "./services/razorpay";
+import { processDocument } from "./services/documentProcessor";
+import { generatePerformanceAnalytics } from "./services/performanceAnalytics";
+import { processDocumentWithAI, answerQuestion, analyzeContext } from "./services/fetchPatternsAI";
+import multer from "multer";
+import { regtechUsers } from "@shared/schema";
+import { nanoid } from "nanoid";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
+import OpenAI from "openai";
+import bcrypt from "bcrypt";
+import { initializeAdminUser } from "./initAdmin";
 
-// Helper function to build org chart
 function buildOrgChart(employees: any[]): any[] {
   const employeeMap = new Map();
   const roots: any[] = [];
-
-  // First pass: create employee nodes
   employees.forEach(emp => {
     employeeMap.set(emp.id, {
       id: emp.id,
@@ -17,8 +27,6 @@ function buildOrgChart(employees: any[]): any[] {
       children: []
     });
   });
-
-  // Second pass: build hierarchy
   employees.forEach(emp => {
     const node = employeeMap.get(emp.id);
     if (emp.reportingTo && employeeMap.has(emp.reportingTo)) {
@@ -28,24 +36,8 @@ function buildOrgChart(employees: any[]): any[] {
       roots.push(node);
     }
   });
-
   return roots;
 }
-import { storage } from "./storage";
-// No external authentication - PerMeaTe Enterprise has its own authentication
-import { initializeRazorpay, createSubscription, verifyPayment } from "./services/razorpay";
-import { processDocument } from "./services/documentProcessor";
-import { generatePerformanceAnalytics } from "./services/performanceAnalytics";
-import { processDocumentWithAI, answerQuestion, analyzeContext } from "./services/fetchPatternsAI";
-// PerMeaTe AI services are handled inline
-import multer from "multer";
-import { insertDocumentSchema, insertSubscriptionSchema, regtechUsers } from "@shared/schema";
-import { nanoid } from "nanoid";
-import { db } from "./db";
-import { eq } from "drizzle-orm";
-import OpenAI from "openai";
-import bcrypt from "bcrypt";
-import { initializeAdminUser } from "./initAdmin";
 
 // Initialize OpenAI for PerMeaTe Enterprise
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY_PE });
@@ -231,50 +223,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // PerMeaTe Enterprise Authentication - separate from Dark Street Tech
-  app.post('/api/permeate/login', async (req, res) => {
-    try {
-      const { username, password } = req.body;
-      
-      // Handle OnboardingExpertUser special login
-      if (username === 'OnboardingExpertUser' && password === '7c2f5a1d8b4e9c6f3a0d2b5e8c1f4a7b') {
-        const onboardingUser = {
-          id: 'onboarding_expert',
-          name: 'OnboardingExpertUser',
-          email: 'onboarding@permeate.enterprise',
-          role: 'Onboarding Expert',
-          department: 'System Administration',
-          skills: ['System Setup', 'CSV Processing', 'User Management'],
-          permeateRole: 'onboarding_expert',
-          isActive: true,
-          hasPassword: true,
-          lastLogin: new Date(),
-          companyId: 'onboarding_company'
-        };
-        return res.json(onboardingUser);
-      }
-
-      // Check if user exists in employee database
-      const employee = await storage.getPermeateEmployeeByUsername(username);
-      if (!employee || !employee.passwordHash) {
-        return res.status(401).json({ message: 'Invalid credentials' });
-      }
-
-      // Verify password hash (simplified for demo)
-      if (!employee.passwordHash || !password.startsWith('PE_')) {
-        return res.status(401).json({ message: 'Invalid credentials' });
-      }
-
-      // Update last login
-      await storage.updateEmployeeLastLogin(employee.id);
-      
-      res.json(employee);
-    } catch (error) {
-      console.error('Login error:', error);
-      res.status(500).json({ message: 'Login failed' });
-    }
-  });
-
   // Subscription routes
   app.get('/api/subscription-plans', async (req, res) => {
     try {
@@ -288,7 +236,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/subscription', async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.session.userId;
+      if (!userId) return res.status(401).json({ message: 'Unauthorized' });
       const subscription = await storage.getUserSubscription(userId);
       res.json(subscription);
     } catch (error) {
@@ -299,7 +248,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/subscription/create', async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.session.userId;
+      if (!userId) return res.status(401).json({ message: 'Unauthorized' });
       const { planId } = req.body;
       
       const plan = await storage.getSubscriptionPlan(planId);
@@ -334,7 +284,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (isValid) {
         // Update subscription status
-        const subscription = await storage.getUserSubscription(req.user.id);
+        const subscription = await storage.getUserSubscription(req.session.userId);
         if (subscription) {
           await storage.updateSubscription(subscription.id, { status: 'active' });
         }
@@ -351,7 +301,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Document routes
   app.get('/api/documents', async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.session.userId;
+      if (!userId) return res.status(401).json({ message: 'Unauthorized' });
       const documents = await storage.getUserDocuments(userId);
       res.json(documents);
     } catch (error) {
@@ -362,7 +313,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/documents/upload', upload.single('file'), async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.session.userId;
+      if (!userId) return res.status(401).json({ message: 'Unauthorized' });
       const file = req.file;
       
       if (!file) {
@@ -428,7 +380,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/documents/:id', async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.session.userId;
       const documentId = parseInt(req.params.id);
       
       const document = await storage.getDocument(documentId);
@@ -445,7 +397,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete('/api/documents/:id', async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.session.userId;
       const documentId = parseInt(req.params.id);
       
       const document = await storage.getDocument(documentId);
@@ -646,7 +598,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Performance analytics routes
   app.get('/api/analytics/dashboard', async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.session.userId;
       const analytics = await generatePerformanceAnalytics(userId);
       res.json(analytics);
     } catch (error) {
@@ -657,7 +609,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/analytics/metrics', async (req: any, res) => {
     try {
-      const userId = req.user.id;
+      const userId = req.session.userId;
       const { type, startDate, endDate } = req.query;
       
       let metrics;
@@ -675,57 +627,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching metrics:", error);
       res.status(500).json({ message: "Failed to fetch metrics" });
-    }
-  });
-
-  // PerMeaTe Enterprise routes
-  app.post('/api/permeate/analyze-csv', async (req, res) => {
-    try {
-      const { csvContent } = req.body;
-      
-      if (!csvContent) {
-        return res.status(400).json({ message: 'CSV content is required' });
-      }
-
-      const { analyzeCSVData } = await import('./services/permeateAI');
-      const result = await analyzeCSVData(csvContent);
-      
-      res.json(result);
-    } catch (error) {
-      console.error('CSV analysis error:', error);
-      res.status(500).json({ message: 'Failed to analyze CSV data' });
-    }
-  });
-
-  app.post('/api/permeate/generate-breakdown', async (req, res) => {
-    try {
-      const { goalTitle, goalDescription, companyContext } = req.body;
-      
-      if (!goalTitle || !goalDescription) {
-        return res.status(400).json({ message: 'Goal title and description are required' });
-      }
-
-      const { generateGoalBreakdown } = await import('./services/permeateAI');
-      const result = await generateGoalBreakdown(goalTitle, goalDescription, companyContext || '');
-      
-      res.json(result);
-    } catch (error) {
-      console.error('Goal breakdown error:', error);
-      res.status(500).json({ message: 'Failed to generate goal breakdown' });
-    }
-  });
-
-  app.post('/api/permeate/analyze-performance', async (req, res) => {
-    try {
-      const { goalsData, projectsData, tasksData } = req.body;
-      
-      const { analyzePerformanceData } = await import('./services/permeateAI');
-      const result = await analyzePerformanceData(goalsData || [], projectsData || [], tasksData || []);
-      
-      res.json(result);
-    } catch (error) {
-      console.error('Performance analysis error:', error);
-      res.status(500).json({ message: 'Failed to analyze performance data' });
     }
   });
 
@@ -773,47 +674,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   };
 
   initializePlans();
-
-  // Test OpenAI API endpoint
-  app.post('/api/test-openai', async (req, res) => {
-    try {
-      const OpenAI = require('openai');
-      const openai = new OpenAI({
-        apiKey: process.env.OPENAI_API_KEY,
-      });
-
-      const response = await openai.chat.completions.create({
-        model: "gpt-4o",
-        messages: [
-          {
-            role: "system",
-            content: "You are a helpful assistant."
-          },
-          {
-            role: "user",
-            content: "Say 'OpenAI API is working correctly' if you receive this message."
-          }
-        ],
-        temperature: 0.1,
-      });
-
-      res.json({
-        success: true,
-        message: "OpenAI API is working",
-        response: response.choices[0].message.content,
-        apiKeyExists: !!process.env.OPENAI_API_KEY,
-        apiKeyPrefix: process.env.OPENAI_API_KEY ? process.env.OPENAI_API_KEY.substring(0, 10) + "..." : "Not found"
-      });
-    } catch (error) {
-      console.error("OpenAI API Test Error:", error);
-      res.json({
-        success: false,
-        error: (error as Error).message,
-        apiKeyExists: !!process.env.OPENAI_API_KEY,
-        apiKeyPrefix: process.env.OPENAI_API_KEY ? process.env.OPENAI_API_KEY.substring(0, 10) + "..." : "Not found"
-      });
-    }
-  });
 
   // Register PerMeaTe Enterprise routes
   registerPermeateRoutes(app);
