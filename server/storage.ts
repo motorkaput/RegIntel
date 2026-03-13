@@ -7,11 +7,6 @@ import {
   performanceMetrics,
   documentAnalyses,
   sessionArchives,
-  permeateCompanies,
-  permeateEmployees,
-  permeateGoals,
-  permeateProjects,
-  permeateTasks,
   regulatoryDocuments,
   documentChunks,
   obligations,
@@ -41,16 +36,6 @@ import {
   type InsertDocumentAnalysis,
   type SessionArchive,
   type InsertSessionArchive,
-  type PermeateCompany,
-  type InsertPermeateCompany,
-  type PermeateEmployee,
-  type InsertPermeateEmployee,
-  type PermeateGoal,
-  type InsertPermeateGoal,
-  type PermeateProject,
-  type InsertPermeateProject,
-  type PermeateTask,
-  type InsertPermeateTask,
   type RegulatoryDocument,
   type InsertRegulatoryDocument,
   type DocumentChunk,
@@ -127,34 +112,10 @@ export interface IStorage {
 
 
 
-  // PerMeaTe Enterprise operations
-  getPermeateCompany(companyId: string): Promise<PermeateCompany | undefined>;
-  upsertPermeateCompany(company: InsertPermeateCompany): Promise<PermeateCompany>;
-  
-  // Open Beta User operations  
+  // Open Beta User operations
   getOpenBetaUserByEmail(email: string): Promise<User | undefined>;
   createOpenBetaUser(user: UpsertUser): Promise<User>;
-  
-  // Employee operations
-  getPermeateEmployees(companyId: string): Promise<PermeateEmployee[]>;
-  getPermeateEmployeeByUsername(username: string): Promise<PermeateEmployee | undefined>;
-  upsertPermeateEmployees(employees: InsertPermeateEmployee[]): Promise<void>;
-  updateEmployeeLastLogin(employeeId: string): Promise<void>;
-  
-  // Goal operations
-  getPermeateGoals(companyId: string): Promise<PermeateGoal[]>;
-  createPermeateGoal(goal: InsertPermeateGoal): Promise<PermeateGoal>;
-  updatePermeateGoal(goalId: string, updates: Partial<PermeateGoal>): Promise<PermeateGoal>;
-  
-  // Project operations
-  getPermeateProjects(companyId: string): Promise<PermeateProject[]>;
-  createPermeateProject(project: InsertPermeateProject): Promise<PermeateProject>;
-  
-  // Task operations
-  getPermeateTasks(companyId: string): Promise<PermeateTask[]>;
-  createPermeateTask(task: InsertPermeateTask): Promise<PermeateTask>;
-  updatePermeateTask(taskId: string, updates: Partial<PermeateTask>): Promise<PermeateTask>;
-  
+
   // Session Archive operations
   createSessionArchive(archive: InsertSessionArchive): Promise<SessionArchive>;
   getSessionArchives(userId: string): Promise<SessionArchive[]>;
@@ -569,150 +530,6 @@ export class DatabaseStorage implements IStorage {
       .from(documentAnalyses)
       .where(eq(documentAnalyses.userId, userId));
     return result.count;
-  }
-
-  // PerMeaTe Enterprise operations - Database implementation
-  async getPermeateCompany(companyId: string): Promise<PermeateCompany | undefined> {
-    const [company] = await db
-      .select()
-      .from(permeateCompanies)
-      .where(eq(permeateCompanies.id, companyId));
-    return company;
-  }
-
-  async upsertPermeateCompany(company: InsertPermeateCompany): Promise<PermeateCompany> {
-    const [upserted] = await db
-      .insert(permeateCompanies)
-      .values(company)
-      .onConflictDoUpdate({
-        target: permeateCompanies.id,
-        set: {
-          ...company,
-          updatedAt: new Date(),
-        },
-      })
-      .returning();
-    return upserted;
-  }
-
-  async getPermeateEmployees(companyId: string): Promise<PermeateEmployee[]> {
-    return await db
-      .select()
-      .from(permeateEmployees)
-      .where(eq(permeateEmployees.companyId, companyId))
-      .orderBy(permeateEmployees.name);
-  }
-
-  async getPermeateEmployeeByUsername(username: string): Promise<PermeateEmployee | undefined> {
-    const [employee] = await db
-      .select()
-      .from(permeateEmployees)
-      .where(eq(permeateEmployees.email, username));
-    return employee;
-  }
-
-  async getPermeateEmployeeByEmail(email: string): Promise<PermeateEmployee | undefined> {
-    const [employee] = await db
-      .select()
-      .from(permeateEmployees)
-      .where(eq(permeateEmployees.email, email));
-    return employee;
-  }
-
-  async upsertPermeateEmployees(employees: InsertPermeateEmployee[]): Promise<void> {
-    if (employees.length === 0) return;
-    
-    // Use a transaction to insert/update all employees
-    await db.transaction(async (tx) => {
-      for (const employee of employees) {
-        await tx
-          .insert(permeateEmployees)
-          .values(employee)
-          .onConflictDoUpdate({
-            target: permeateEmployees.id,
-            set: {
-              ...employee,
-              updatedAt: new Date(),
-            },
-          });
-      }
-    });
-  }
-
-  async updateEmployeeLastLogin(employeeId: string): Promise<void> {
-    await db
-      .update(permeateEmployees)
-      .set({ 
-        lastLogin: new Date(),
-        updatedAt: new Date(),
-      })
-      .where(eq(permeateEmployees.id, employeeId));
-  }
-
-  async getPermeateGoals(companyId: string): Promise<PermeateGoal[]> {
-    return await db
-      .select()
-      .from(permeateGoals)
-      .where(eq(permeateGoals.companyId, companyId))
-      .orderBy(desc(permeateGoals.createdAt));
-  }
-
-  async createPermeateGoal(goal: InsertPermeateGoal): Promise<PermeateGoal> {
-    const [created] = await db
-      .insert(permeateGoals)
-      .values(goal)
-      .returning();
-    return created;
-  }
-
-  async updatePermeateGoal(goalId: string, updates: Partial<PermeateGoal>): Promise<PermeateGoal> {
-    const [updated] = await db
-      .update(permeateGoals)
-      .set({ ...updates, updatedAt: new Date() })
-      .where(eq(permeateGoals.id, goalId))
-      .returning();
-    return updated;
-  }
-
-  async getPermeateProjects(companyId: string): Promise<PermeateProject[]> {
-    return await db
-      .select()
-      .from(permeateProjects)
-      .where(eq(permeateProjects.companyId, companyId))
-      .orderBy(desc(permeateProjects.createdAt));
-  }
-
-  async createPermeateProject(project: InsertPermeateProject): Promise<PermeateProject> {
-    const [created] = await db
-      .insert(permeateProjects)
-      .values(project)
-      .returning();
-    return created;
-  }
-
-  async getPermeateTasks(companyId: string): Promise<PermeateTask[]> {
-    return await db
-      .select()
-      .from(permeateTasks)
-      .where(eq(permeateTasks.companyId, companyId))
-      .orderBy(desc(permeateTasks.createdAt));
-  }
-
-  async createPermeateTask(task: InsertPermeateTask): Promise<PermeateTask> {
-    const [created] = await db
-      .insert(permeateTasks)
-      .values(task)
-      .returning();
-    return created;
-  }
-
-  async updatePermeateTask(taskId: string, updates: Partial<PermeateTask>): Promise<PermeateTask> {
-    const [updated] = await db
-      .update(permeateTasks)
-      .set({ ...updates, updatedAt: new Date() })
-      .where(eq(permeateTasks.id, taskId))
-      .returning();
-    return updated;
   }
 
   // Open Beta User operations implementation

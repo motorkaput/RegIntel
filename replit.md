@@ -46,7 +46,6 @@ Design preference: Mature, professional look inspired by Palantir.com.
 - **Obligation Extraction**: GPT-4o/4.1 powered extraction of regulatory obligations with confidence scoring
 - **Vector Search**: pgvector embeddings (text-embedding-3-large) for semantic document retrieval
 - **Session Archives**: Word document export of analysis sessions
-- **PerMeaTe Enterprise Module**: Separate module still present in codebase (administrator onboarding, multi-user system, OpenAI integration)
 
 ### Authentication
 - Login: POST `/api/auth/login` (email + password)
