@@ -49,6 +49,32 @@ function isAuthenticated(req: any, res: any, next: any) {
   next();
 }
 
+// Rate limiter for AI endpoints (10 requests per minute per user)
+const aiRateLimitMap = new Map<string, { count: number; resetAt: number }>();
+function aiRateLimit(req: any, res: any, next: any) {
+  const key = `${req.session?.userId || req.ip}:${req.path}`;
+  const now = Date.now();
+  const windowMs = 60 * 1000;
+  const maxRequests = 10;
+  const entry = aiRateLimitMap.get(key);
+  if (!entry || now > entry.resetAt) {
+    aiRateLimitMap.set(key, { count: 1, resetAt: now + windowMs });
+    return next();
+  }
+  if (entry.count >= maxRequests) {
+    return res.status(429).json({ message: 'Rate limit exceeded. Please wait before making another AI request.' });
+  }
+  entry.count++;
+  next();
+}
+
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, entry] of aiRateLimitMap) {
+    if (now > entry.resetAt) aiRateLimitMap.delete(key);
+  }
+}, 5 * 60 * 1000);
+
 function sanitizeLLMResponse(text: string): string {
   return text
     .replace(/^#+\s+/gm, '')
@@ -287,14 +313,22 @@ export function registerRegTechRoutes(app: Express) {
     }
   });
 
-  app.post('/api/regtech/query', isAuthenticated, async (req: any, res) => {
+  app.post('/api/regtech/query', isAuthenticated, aiRateLimit, async (req: any, res) => {
     try {
-      const { query, jurisdiction, regulator, docId, docIds: requestDocIds, includeOrganization } = req.body;
-      const userId = req.session.userId;
-
-      if (!query) {
-        return res.status(400).json({ message: 'Query is required' });
+      const querySchema = z.object({
+        query: z.string().min(1, 'Query is required').max(2000),
+        jurisdiction: z.string().optional(),
+        regulator: z.string().optional(),
+        docId: z.union([z.string(), z.number()]).optional(),
+        docIds: z.array(z.union([z.string(), z.number()])).optional(),
+        includeOrganization: z.boolean().optional(),
+      });
+      const validation = querySchema.safeParse(req.body);
+      if (!validation.success) {
+        return res.status(400).json({ message: validation.error.errors[0].message });
       }
+      const { query, jurisdiction, regulator, docId, docIds: requestDocIds, includeOrganization } = validation.data;
+      const userId = req.session.userId;
 
       let docIds: number[] | undefined;
       let userIds: string[] | undefined;
@@ -304,8 +338,8 @@ export function registerRegTechRoutes(app: Express) {
       const selectedDocIds: number[] = [];
       if (requestDocIds && Array.isArray(requestDocIds) && requestDocIds.length > 0) {
         selectedDocIds.push(...requestDocIds.map((id: any) => parseInt(id)));
-      } else if (docId && docId !== 'all') {
-        selectedDocIds.push(parseInt(docId));
+      } else if (docId && String(docId) !== 'all') {
+        selectedDocIds.push(parseInt(String(docId)));
       }
 
       if (selectedDocIds.length > 0) {
@@ -510,7 +544,7 @@ Return your answer in plain text format followed by a Sources section with citat
     }
   });
 
-  app.post('/api/regtech/obligations/analyze', isAuthenticated, async (req: any, res) => {
+  app.post('/api/regtech/obligations/analyze', isAuthenticated, aiRateLimit, async (req: any, res) => {
     try {
       const { documentIds } = req.body;
 
@@ -791,13 +825,17 @@ Return the information in a structured format with real source URLs.`
     }
   });
 
-  app.post('/api/regtech/diff', isAuthenticated, async (req: any, res) => {
+  app.post('/api/regtech/diff', isAuthenticated, aiRateLimit, async (req: any, res) => {
     try {
-      const { docIdOld, docIdNew } = req.body;
-
-      if (!docIdOld || !docIdNew) {
-        return res.status(400).json({ message: 'Both document IDs are required' });
+      const diffSchema = z.object({
+        docIdOld: z.number({ required_error: 'Old document ID is required' }),
+        docIdNew: z.number({ required_error: 'New document ID is required' }),
+      });
+      const validation = diffSchema.safeParse(req.body);
+      if (!validation.success) {
+        return res.status(400).json({ message: validation.error.errors[0].message });
       }
+      const { docIdOld, docIdNew } = validation.data;
 
       const [oldDoc, newDoc] = await Promise.all([
         storage.getRegulatoryDocument(docIdOld),
@@ -1377,7 +1415,7 @@ Rules:
     }
   });
 
-  app.post('/api/regtech/analyze-url', isAuthenticated, async (req: any, res) => {
+  app.post('/api/regtech/analyze-url', isAuthenticated, aiRateLimit, async (req: any, res) => {
     try {
       const { url } = req.body;
       console.log('Analyzing URL:', url);
@@ -4146,11 +4184,18 @@ Penalties: Civil penalties up to AUD 22 million for body corporates and AUD 1.1 
 
   app.post('/api/regtech/web-alert-sets', isAuthenticated, async (req: any, res) => {
     try {
-      const { name, region, jurisdictions, keywords, cadence } = req.body;
-      
-      if (!name || !region || !jurisdictions || !Array.isArray(jurisdictions)) {
-        return res.status(400).json({ message: 'Name, region, and jurisdictions are required' });
+      const webAlertSetSchema = z.object({
+        name: z.string().min(1, 'Name is required').max(200),
+        region: z.string().min(1, 'Region is required'),
+        jurisdictions: z.array(z.string()).min(1, 'At least one jurisdiction is required'),
+        keywords: z.array(z.string()).nullable().optional(),
+        cadence: z.enum(['daily', 'weekly', 'monthly']).optional().default('weekly'),
+      });
+      const validation = webAlertSetSchema.safeParse(req.body);
+      if (!validation.success) {
+        return res.status(400).json({ message: validation.error.errors[0].message });
       }
+      const { name, region, jurisdictions, keywords, cadence } = validation.data;
       
       const alertSet = await storage.createWebAlertSet({
         userId: req.session.userId,
@@ -4211,7 +4256,7 @@ Penalties: Civil penalties up to AUD 22 million for body corporates and AUD 1.1 
     }
   });
 
-  app.post('/api/regtech/web-alert-sets/:id/scan', isAuthenticated, async (req: any, res) => {
+  app.post('/api/regtech/web-alert-sets/:id/scan', isAuthenticated, aiRateLimit, async (req: any, res) => {
     try {
       const id = parseInt(req.params.id);
       const alertSet = await storage.getWebAlertSet(id);

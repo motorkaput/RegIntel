@@ -10,9 +10,10 @@ import multer from "multer";
 import { regtechUsers } from "@shared/schema";
 import { nanoid } from "nanoid";
 import { db } from "./db";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import OpenAI from "openai";
 import bcrypt from "bcrypt";
+import { z } from "zod";
 import { initializeAdminUser } from "./initAdmin";
 
 function buildOrgChart(employees: any[]): any[] {
@@ -143,16 +144,59 @@ function isAuthenticated(req: any, res: any, next: any) {
   next();
 }
 
+// Simple in-memory rate limiter for AI endpoints
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+function rateLimit(windowMs: number, maxRequests: number) {
+  return (req: any, res: any, next: any) => {
+    const key = `${req.session?.userId || req.ip}:${req.path}`;
+    const now = Date.now();
+    const entry = rateLimitMap.get(key);
+    if (!entry || now > entry.resetAt) {
+      rateLimitMap.set(key, { count: 1, resetAt: now + windowMs });
+      return next();
+    }
+    if (entry.count >= maxRequests) {
+      return res.status(429).json({ message: 'Too many requests. Please try again later.' });
+    }
+    entry.count++;
+    next();
+  };
+}
+
+// Clean up expired rate limit entries every 5 minutes
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, entry] of rateLimitMap) {
+    if (now > entry.resetAt) rateLimitMap.delete(key);
+  }
+}, 5 * 60 * 1000);
+
 export async function registerRoutes(app: Express): Promise<Server> {
   initializeRazorpay();
   await initializeAdminUser();
 
+  // Health check endpoint - verifies database connectivity
+  app.get('/api/health', async (_req, res) => {
+    try {
+      await db.execute(sql`SELECT 1`);
+      res.json({ status: 'healthy', timestamp: new Date().toISOString(), database: 'connected' });
+    } catch (error) {
+      console.error('Health check failed:', error);
+      res.status(503).json({ status: 'unhealthy', timestamp: new Date().toISOString(), database: 'disconnected' });
+    }
+  });
+
   app.post('/api/auth/login', async (req: any, res) => {
     try {
-      const { email, password } = req.body;
-      if (!email || !password) {
-        return res.status(400).json({ message: 'Email and password required' });
+      const loginSchema = z.object({
+        email: z.string().email('Valid email is required'),
+        password: z.string().min(1, 'Password is required'),
+      });
+      const validation = loginSchema.safeParse(req.body);
+      if (!validation.success) {
+        return res.status(400).json({ message: validation.error.errors[0].message });
       }
+      const { email, password } = validation.data;
       let user = await storage.getUserByEmail(email);
       let isRegtechUser = false;
       if (!user) {
@@ -541,7 +585,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 
   // Question answering endpoint - now free
-  app.post('/api/fetch-patterns/question', async (req: any, res) => {
+  app.post('/api/fetch-patterns/question', rateLimit(60000, 10), async (req: any, res) => {
     try {
       const { question, documents } = req.body;
       
@@ -568,7 +612,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 
   // Context analysis endpoint - now free
-  app.post('/api/fetch-patterns/context-analysis', async (req: any, res) => {
+  app.post('/api/fetch-patterns/context-analysis', rateLimit(60000, 10), async (req: any, res) => {
     try {
       const { context, documents } = req.body;
       
