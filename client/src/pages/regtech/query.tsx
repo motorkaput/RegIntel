@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -182,8 +181,8 @@ export default function QueryPage() {
 
   return (
     <RegTechLayout>
-      <div className="space-y-6">
-        {/* Page Header - Bento style */}
+      <div className="space-y-6 page-enter">
+        {/* Page Header */}
         <div className="bg-white rounded-2xl p-6 border border-slate-200">
           <div className="flex items-center justify-between">
             <div>
@@ -401,10 +400,14 @@ export default function QueryPage() {
 
         {/* Empty state */}
         {sessionHistory.length === 0 && !queryMutation.isPending && (
-          <div className="bg-slate-50 rounded-2xl p-8 text-center border border-dashed border-slate-200">
-            <MessageSquare className="h-12 w-12 text-slate-300 mx-auto mb-4" />
-            <p className="text-slate-500">Your Q&A session will appear here</p>
-            <p className="text-sm text-slate-400 mt-1">Ask a question above to get started</p>
+          <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center">
+            <div className="mx-auto w-16 h-16 rounded-2xl bg-orange-50 flex items-center justify-center mb-4">
+              <MessageSquare className="h-8 w-8 text-orange-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-slate-900 mb-1">Ask your first question</h3>
+            <p className="text-sm text-slate-500 max-w-sm mx-auto">
+              Upload regulatory documents to the Library, then ask questions here to get AI-powered answers with citations.
+            </p>
           </div>
         )}
 

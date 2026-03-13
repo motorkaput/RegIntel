@@ -1,6 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { useEffect, useState } from "react";
-import { MessageSquare, FileText, GitCompare, Library, ChevronDown, LogOut, Bell, Settings, Menu, History, ClipboardCheck, Shield, Activity, BarChart3, HelpCircle } from "lucide-react";
+import { MessageSquare, FileText, GitCompare, Library, ChevronDown, LogOut, Bell, Settings, Menu, History, ClipboardCheck, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -44,7 +44,7 @@ export default function RegTechLayout({ children }: { children: React.ReactNode 
   const { user, isAuthenticated, isLoading } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const isAdmin = user?.email === "david@darkstreet.org";
+  const isAdmin = !!(user as any)?.isAdmin;
 
   const handleLogout = async () => {
     try {
@@ -64,7 +64,14 @@ export default function RegTechLayout({ children }: { children: React.ReactNode 
   }, [isAuthenticated, isLoading, setLocation]);
 
   if (isLoading || !isAuthenticated) {
-    return null;
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="h-10 w-10 rounded-xl bg-slate-200 animate-pulse mx-auto mb-3" />
+          <div className="h-3 w-24 bg-slate-200 rounded animate-pulse mx-auto" />
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -158,10 +165,10 @@ export default function RegTechLayout({ children }: { children: React.ReactNode 
                 return (
                   <Link key={item.href} href={item.href}>
                     <button
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
-                        isActive 
-                          ? 'bg-slate-900 text-white' 
-                          : 'text-slate-600 hover:bg-slate-100 border border-slate-300'
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-150 whitespace-nowrap ${
+                        isActive
+                          ? 'bg-slate-900 text-white shadow-sm'
+                          : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 border border-transparent hover:border-slate-200'
                       }`}
                       data-testid={`link-${item.label.toLowerCase()}`}
                     >
@@ -182,7 +189,7 @@ export default function RegTechLayout({ children }: { children: React.ReactNode 
 
       {/* Main Content */}
       <main className="flex-1">
-        <div className="max-w-7xl mx-auto px-4 lg:px-6 py-6">
+        <div className="max-w-7xl mx-auto px-4 lg:px-6 py-6" key={location}>
           {children}
         </div>
       </main>

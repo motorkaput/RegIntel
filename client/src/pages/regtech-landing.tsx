@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { FileUp, Search, Bell, GitCompare, Globe, Sparkles, Library, FileText, ClipboardCheck } from "lucide-react";
+import { Bell, GitCompare, Globe, Sparkles, Library, FileText, ClipboardCheck } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -71,11 +71,18 @@ export default function RegTechLanding() {
   };
 
   if (isLoading) {
-    return null;
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="text-center">
+          <img src={iconUrl} alt="RegIntel" className="h-12 w-12 mx-auto mb-4 animate-pulse" />
+          <p className="text-sm text-slate-500">Loading...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans">
+    <div className="min-h-screen bg-slate-50 font-sans page-enter">
       {/* Header */}
       <header className="bg-white border-b border-slate-200">
         <div className="max-w-6xl mx-auto flex h-14 items-center px-4 lg:px-6">

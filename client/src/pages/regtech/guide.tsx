@@ -55,13 +55,13 @@ function KeyPoint({ icon: Icon, label, children }: { icon: any; label: string; c
 export default function GuidePage() {
   return (
     <RegTechLayout>
-      <div className="space-y-6 max-w-4xl">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+      <div className="space-y-6 max-w-4xl page-enter">
+        <div className="bg-white rounded-2xl p-6 border border-slate-200">
+          <h1 className="text-2xl font-semibold text-slate-900 flex items-center gap-2">
             <HelpCircle className="h-6 w-6 text-indigo-600" />
             How It Works
           </h1>
-          <p className="text-slate-600 mt-1">
+          <p className="text-slate-600 mt-1 text-sm">
             Understand how RegIntel AI Engine processes your documents and generates insights
           </p>
         </div>

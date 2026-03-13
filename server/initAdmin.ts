@@ -7,8 +7,13 @@ import { eq } from "drizzle-orm";
 
 export async function initializeAdminUser() {
   try {
-    const adminEmail = "david@darkstreet.org";
-    const adminPassword = "43g1n73l!";
+    const adminEmail = process.env.ADMIN_EMAIL || "david@darkstreet.org";
+    const adminPassword = process.env.ADMIN_PASSWORD;
+
+    if (!adminPassword) {
+      console.log("ADMIN_PASSWORD not set, skipping admin user initialization");
+      return;
+    }
     
     // Check if admin already exists
     const existingAdmin = await storage.getUserByEmail(adminEmail);

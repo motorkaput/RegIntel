@@ -150,14 +150,14 @@ export default function ObligationsAnalysisPage() {
 
   return (
     <RegTechLayout>
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+      <div className="space-y-6 page-enter">
+        <div className="bg-white rounded-2xl p-6 border border-slate-200">
+          <h1 className="text-2xl font-semibold text-slate-900 flex items-center gap-2">
             <ClipboardCheck className="h-6 w-6 text-amber-600" />
             Obligation Analysis
           </h1>
-          <p className="text-slate-600 mt-1">
-            Analyze regulatory documents to understand your compliance obligations
+          <p className="text-slate-600 mt-1 text-sm">
+            Analyze regulatory documents to extract and understand your compliance obligations
           </p>
         </div>
 

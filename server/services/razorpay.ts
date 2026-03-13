@@ -5,14 +5,30 @@ import type { SubscriptionPlan } from "@shared/schema";
 let razorpayInstance: Razorpay;
 
 export function initializeRazorpay() {
+  const keyId = process.env.RAZORPAY_KEY_ID || process.env.RAZORPAY_API_KEY;
+  const keySecret = process.env.RAZORPAY_KEY_SECRET || process.env.RAZORPAY_SECRET_KEY;
+
+  if (!keyId || !keySecret) {
+    console.warn('Razorpay credentials not configured. Payment features will be unavailable.');
+    return;
+  }
+
   razorpayInstance = new Razorpay({
-    key_id: process.env.RAZORPAY_KEY_ID || process.env.RAZORPAY_API_KEY || "rzp_test_dummy_key",
-    key_secret: process.env.RAZORPAY_KEY_SECRET || process.env.RAZORPAY_SECRET_KEY || "dummy_secret",
+    key_id: keyId,
+    key_secret: keySecret,
   });
+}
+
+function ensureRazorpay(): Razorpay {
+  if (!razorpayInstance) {
+    throw new Error("Razorpay is not configured. Set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET environment variables.");
+  }
+  return razorpayInstance;
 }
 
 export async function createSubscription(plan: SubscriptionPlan) {
   try {
+    const rp = ensureRazorpay();
     const subscriptionData = {
       plan_id: plan.id,
       customer_notify: 1 as 0 | 1,
@@ -26,7 +42,7 @@ export async function createSubscription(plan: SubscriptionPlan) {
       },
     };
 
-    const subscription = await razorpayInstance.subscriptions.create(subscriptionData);
+    const subscription = await rp.subscriptions.create(subscriptionData);
     return subscription;
   } catch (error) {
     console.error("Error creating Razorpay subscription:", error);
@@ -36,6 +52,9 @@ export async function createSubscription(plan: SubscriptionPlan) {
 
 export async function createOrder(amount: number, currency: string = "USD") {
   try {
+    const rp = ensureRazorpay();
+    if (amount <= 0) throw new Error("Order amount must be positive");
+
     const orderData = {
       amount: Math.round(amount * 100), // Convert to paise/cents
       currency,
@@ -45,7 +64,7 @@ export async function createOrder(amount: number, currency: string = "USD") {
       },
     };
 
-    const order = await razorpayInstance.orders.create(orderData);
+    const order = await rp.orders.create(orderData);
     return order;
   } catch (error) {
     console.error("Error creating Razorpay order:", error);
@@ -55,7 +74,12 @@ export async function createOrder(amount: number, currency: string = "USD") {
 
 export function verifyPayment(paymentId: string, subscriptionId: string, signature: string): boolean {
   try {
-    const keySecret = process.env.RAZORPAY_KEY_SECRET || process.env.RAZORPAY_SECRET_KEY || "dummy_secret";
+    const keySecret = process.env.RAZORPAY_KEY_SECRET || process.env.RAZORPAY_SECRET_KEY;
+    if (!keySecret) {
+      console.error("Razorpay key secret not configured. Cannot verify payment.");
+      return false;
+    }
+
     const expectedSignature = crypto
       .createHmac("sha256", keySecret)
       .update(`${paymentId}|${subscriptionId}`)
@@ -70,7 +94,7 @@ export function verifyPayment(paymentId: string, subscriptionId: string, signatu
 
 export async function getSubscriptionDetails(subscriptionId: string) {
   try {
-    const subscription = await razorpayInstance.subscriptions.fetch(subscriptionId);
+    const subscription = await ensureRazorpay().subscriptions.fetch(subscriptionId);
     return subscription;
   } catch (error) {
     console.error("Error fetching subscription details:", error);
@@ -80,7 +104,7 @@ export async function getSubscriptionDetails(subscriptionId: string) {
 
 export async function cancelSubscription(subscriptionId: string) {
   try {
-    const subscription = await razorpayInstance.subscriptions.cancel(subscriptionId);
+    const subscription = await ensureRazorpay().subscriptions.cancel(subscriptionId);
     return subscription;
   } catch (error) {
     console.error("Error cancelling subscription:", error);

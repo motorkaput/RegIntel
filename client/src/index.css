@@ -477,6 +477,22 @@
     }
   }
 
+  /* Page transition */
+  .page-enter {
+    animation: pageEnter 0.2s ease-out;
+  }
+
+  @keyframes pageEnter {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
   /* Focus states */
   .focus-outline {
     @apply focus:outline-none focus:ring-2 focus:ring-accent-blue focus:ring-offset-2;

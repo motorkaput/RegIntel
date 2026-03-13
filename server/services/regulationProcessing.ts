@@ -16,7 +16,6 @@ import {
   serializeRulePackForDb,
   RULE_PACK_V1
 } from './segmentationRulePacks';
-import crypto from 'crypto';
 
 export interface RegulationMetadata {
   jurisdiction: string;

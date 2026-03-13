@@ -20,14 +20,14 @@ app.use(session({
   }),
   secret: process.env.SESSION_SECRET || 'fallback-secret-for-dev',
   resave: false,
-  saveUninitialized: true, // Save uninitialized sessions
-  name: 'fetchPatterns.sid',
+  saveUninitialized: false,
+  name: 'regintel.sid',
   cookie: {
-    secure: false,
+    secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
     maxAge: 24 * 60 * 60 * 1000,
     sameSite: 'lax',
-    path: '/' // Ensure cookie works for all paths
+    path: '/'
   }
 }));
 
