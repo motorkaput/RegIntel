@@ -4,80 +4,63 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { useAuth } from "@/hooks/useAuth";
 import NotFound from "@/pages/not-found";
-import FetchPatternsApp from "@/pages/fetch-patterns-app";
-import BetaLogin from "@/pages/beta-login";
-import HowToPage from "@/pages/how-to-page";
+import RegTechLanding from "@/pages/regtech-landing";
+import { Redirect } from "wouter";
+import RegTechDocuments from "@/pages/regtech/documents";
+import RegTechConsole from "@/pages/regtech/console";
+import RegTechQuery from "@/pages/regtech/query";
+import RegTechDiff from "@/pages/regtech/diff";
+import RegTechAlerts from "@/pages/regtech/alerts";
+import RegtechAdmin from "@/pages/regtech/admin";
+import RegTechSessions from "@/pages/regtech/sessions";
+import ObligationsAnalysisPage from "@/pages/regtech/obligations-analysis";
+import RegTechGuide from "@/pages/regtech/guide";
+import { SessionProvider } from "@/contexts/SessionContext";
+import { useAuth } from "@/hooks/useAuth";
 
-// === ARCHIVED COMPONENTS (Dark Street Tech Company Pages) ===
-// These are kept in archive but not actively routed
-// import Landing from "@/pages/landing";
-// import Home from "@/pages/home";
-// import DocumentAnalyzer from "@/pages/document-analyzer";
-// import PerformanceDashboard from "@/pages/performance-dashboard";
-// import Pricing from "@/pages/pricing";
-// import Subscription from "@/pages/subscription";
-// import FetchPatterns from "@/pages/fetch-patterns";
-// import PerMeateBetaLogin from "@/pages/permeate-beta-login";
-// import PerMeaTeEnterpriseApp from "@/pages/permeate-enterprise-app";
-// import PerMeaTeEnhanced from "@/pages/permeate-enhanced";
-// import Privacy from "@/pages/privacy";
-// import Terms from "@/pages/terms";
-// import AboutPage from "@/pages/about";
-// import Contact from "@/pages/contact";
-// import Security from "@/pages/security";
-// import PerMeaTeEnterprise from "@/pages/permeate-enterprise";
-// import Next from "@/pages/next";
-
-// Root redirect component
-function RootRedirect() {
-  const [, setLocation] = useLocation();
-  
-  useEffect(() => {
-    setLocation('/beta-login');
-  }, [setLocation]);
-  
-  return null;
+function RegTechRoutes() {
+  return (
+    <SessionProvider>
+      <Switch>
+        <Route path="/regtech">{() => <Redirect to="/regtech/console" />}</Route>
+        <Route path="/regtech/upload">{() => <Redirect to="/regtech/documents" />}</Route>
+        <Route path="/regtech/documents" component={RegTechDocuments} />
+        <Route path="/regtech/console" component={RegTechConsole} />
+        <Route path="/regtech/query" component={RegTechQuery} />
+        <Route path="/regtech/diff" component={RegTechDiff} />
+        <Route path="/regtech/alerts" component={RegTechAlerts} />
+        <Route path="/regtech/obligations-analysis" component={ObligationsAnalysisPage} />
+        <Route path="/regtech/obligations">{() => <Redirect to="/regtech/documents" />}</Route>
+        <Route path="/regtech/compliance">{() => <Redirect to="/regtech/documents" />}</Route>
+        <Route path="/regtech/audit">{() => <Redirect to="/regtech/documents" />}</Route>
+        <Route path="/regtech/dashboard">{() => <Redirect to="/regtech/documents" />}</Route>
+        <Route path="/regtech/sessions" component={RegTechSessions} />
+        <Route path="/regtech/guide" component={RegTechGuide} />
+        <Route path="/regtech/admin" component={RegtechAdmin} />
+        <Route component={NotFound} />
+      </Switch>
+    </SessionProvider>
+  );
 }
 
 function Router() {
+  const [location] = useLocation();
   const { isAuthenticated, isLoading } = useAuth();
+
+  useEffect(() => {
+    console.log('[Router] Current location:', location);
+  }, [location]);
+
+  if (location.startsWith('/regtech') && !isLoading && isAuthenticated) {
+    return <RegTechRoutes />;
+  }
 
   return (
     <Switch>
-      {/* Root URL redirect to Fetch Patterns login */}
-      <Route path="/" component={RootRedirect} />
-      
-      {/* === FETCH PATTERNS - ONLY ACTIVE ROUTES === */}
-      <Route path="/beta-login" component={BetaLogin} />
-      <Route path="/fetchpatterns" component={FetchPatternsApp} />
-      <Route path="/fetchpatterns/howto" component={HowToPage} />
-      
-      {/* === ARCHIVED ROUTES (Dark Street Tech Company Pages) === */}
-      {/* All other company pages are archived and no longer accessible */}
-      {/* 
-      <Route path="/fetch-patterns" component={FetchPatterns} />
-      <Route path="/permeate-enterprise" component={PerMeaTeEnterprise} />
-      <Route path="/next" component={Next} />
-      <Route path="/about" component={AboutPage} />
-      <Route path="/pricing" component={Pricing} />
-      <Route path="/home" component={Home} />
-      <Route path="/document-analyzer" component={DocumentAnalyzer} />
-      <Route path="/performance-dashboard" component={PerformanceDashboard} />
-      <Route path="/subscription" component={Subscription} />
-      <Route path="/z9m3k/pe-beta-login" component={PerMeateBetaLogin} />
-      <Route path="/pe-workspace" component={PerMeaTeEnhanced} />
-      <Route path="/z9m3k/pe-workspace" component={PerMeaTeEnhanced} />
-      <Route path="/enhanced-pe" component={PerMeaTeEnhanced} />
-      <Route path="/permeate-enhanced" component={PerMeaTeEnhanced} />
-      <Route path="/m8x3r/pe-system" component={PerMeaTeEnhanced} />
-      <Route path="/privacy" component={Privacy} />
-      <Route path="/terms" component={Terms} />
-      <Route path="/contact" component={Contact} />
-      <Route path="/security" component={Security} />
-      */}
-      
+      <Route path="/" component={RegTechLanding} />
+      <Route path="/login" component={RegTechLanding} />
+      <Route path="/regtech/*">{() => <RegTechLanding />}</Route>
       <Route component={NotFound} />
     </Switch>
   );
@@ -87,7 +70,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <div className="pt-14">
+        <div className="pt-4">
           <Toaster />
           <Router />
         </div>

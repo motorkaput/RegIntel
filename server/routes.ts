@@ -1,6 +1,6 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { setupAuth, isAuthenticated } from "./replitAuth";
+import { registerRegTechRoutes } from "./routes/regtech";
 
 // Helper function to build org chart
 function buildOrgChart(employees: any[]): any[] {
@@ -39,9 +39,13 @@ import { generatePerformanceAnalytics } from "./services/performanceAnalytics";
 import { processDocumentWithAI, answerQuestion, analyzeContext } from "./services/fetchPatternsAI";
 // PerMeaTe AI services are handled inline
 import multer from "multer";
-import { insertDocumentSchema, insertSubscriptionSchema } from "@shared/schema";
+import { insertDocumentSchema, insertSubscriptionSchema, regtechUsers } from "@shared/schema";
 import { nanoid } from "nanoid";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 import OpenAI from "openai";
+import bcrypt from "bcrypt";
+import { initializeAdminUser } from "./initAdmin";
 
 // Initialize OpenAI for PerMeaTe Enterprise
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY_PE });
@@ -140,11 +144,92 @@ const upload = multer({
 // In-memory storage for free version
 const freeVersionAnalyses = new Map<string, any>();
 
+function isAuthenticated(req: any, res: any, next: any) {
+  if (!req.session.userId) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+  next();
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
-  // White-label authentication system
-  
-  // Initialize Razorpay
   initializeRazorpay();
+  await initializeAdminUser();
+
+  app.post('/api/auth/login', async (req: any, res) => {
+    try {
+      const { email, password } = req.body;
+      if (!email || !password) {
+        return res.status(400).json({ message: 'Email and password required' });
+      }
+      let user = await storage.getUserByEmail(email);
+      let isRegtechUser = false;
+      if (!user) {
+        const [regtechUser] = await db.select().from(regtechUsers).where(eq(regtechUsers.email, email)).limit(1);
+        if (regtechUser) {
+          user = regtechUser as any;
+          isRegtechUser = true;
+        }
+      }
+      if (!user || !user.password) {
+        return res.status(401).json({ message: 'Invalid credentials' });
+      }
+      const isValid = await bcrypt.compare(password, user.password);
+      if (!isValid) {
+        return res.status(401).json({ message: 'Invalid credentials' });
+      }
+      req.session.regenerate((err: any) => {
+        if (err) {
+          console.error('Session regeneration error:', err);
+          return res.status(500).json({ message: 'Login failed' });
+        }
+        req.session.userId = user.id;
+        req.session.isRegtechUser = isRegtechUser;
+        req.session.save((saveErr: any) => {
+          if (saveErr) {
+            console.error('Session save error:', saveErr);
+            return res.status(500).json({ message: 'Login failed' });
+          }
+          const { password: _, ...userWithoutPassword } = user;
+          res.json(userWithoutPassword);
+        });
+      });
+    } catch (error) {
+      console.error('Login error:', error);
+      res.status(500).json({ message: 'Login failed' });
+    }
+  });
+
+  app.post('/api/auth/logout', (req: any, res) => {
+    req.session.destroy((err: any) => {
+      if (err) {
+        return res.status(500).json({ message: 'Logout failed' });
+      }
+      res.json({ message: 'Logged out successfully' });
+    });
+  });
+
+  app.get('/api/auth/me', async (req: any, res) => {
+    try {
+      if (!req.session.userId) {
+        return res.status(401).json({ message: 'Not authenticated' });
+      }
+      let user = await storage.getUser(req.session.userId);
+      if (!user) {
+        const [regtechUser] = await db.select().from(regtechUsers).where(eq(regtechUsers.id, req.session.userId)).limit(1);
+        if (regtechUser) {
+          user = regtechUser as any;
+        }
+      }
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+      const { password: _, ...userWithoutPassword } = user;
+      res.json(userWithoutPassword);
+    } catch (error) {
+      console.error('Get current user error:', error);
+      res.status(500).json({ message: 'Failed to get user' });
+    }
+  });
 
   // PerMeaTe Enterprise Authentication - separate from Dark Street Tech
   app.post('/api/permeate/login', async (req, res) => {
@@ -593,58 +678,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Open Beta Authentication Routes
-  app.post('/api/auth/register', async (req, res) => {
-    try {
-      const { email, password, displayName } = req.body;
-      
-      if (!email || !password || !displayName) {
-        return res.status(400).json({ message: 'Email, password, and display name are required' });
-      }
-
-      // Check if user already exists
-      const existingUser = await storage.getOpenBetaUserByEmail(email);
-      if (existingUser) {
-        return res.status(409).json({ message: 'User already exists with this email' });
-      }
-
-      // Hash password
-      const bcrypt = await import('bcrypt');
-      const saltRounds = 12;
-      const passwordHash = await bcrypt.hash(password, saltRounds);
-
-      // Create user
-      const user = await storage.createOpenBetaUser({
-        id: crypto.randomUUID(),
-        email,
-        firstName: displayName,
-      });
-
-      // Return user data
-      const userResponse = user;
-      res.status(201).json(userResponse);
-    } catch (error) {
-      console.error('Registration error:', error);
-      res.status(500).json({ message: 'Failed to create account' });
-    }
-  });
-
-  app.post('/api/auth/login', async (req, res) => {
-    try {
-      const { email, password } = req.body;
-      
-      if (!email || !password) {
-        return res.status(400).json({ message: 'Email and password are required' });
-      }
-
-      // This authentication method is no longer available
-      return res.status(404).json({ message: 'Authentication method not available' });
-    } catch (error) {
-      console.error('Login error:', error);
-      res.status(500).json({ message: 'Failed to sign in' });
-    }
-  });
-
   // PerMeaTe Enterprise routes
   app.post('/api/permeate/analyze-csv', async (req, res) => {
     try {
@@ -784,6 +817,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Register PerMeaTe Enterprise routes
   registerPermeateRoutes(app);
+
+  // Register RegTech routes
+  registerRegTechRoutes(app);
 
   const httpServer = createServer(app);
   return httpServer;
@@ -1293,11 +1329,5 @@ function registerPermeateRoutes(app: Express) {
       console.error("Performance analysis error:", error);
       res.status(500).json({ message: "Failed to analyze performance" });
     }
-  });
-
-  // Simple URL access route for PerMeaTe Enterprise - serve directly
-  app.get("/m8x3r/pe-system", (req, res) => {
-    // Redirect to the actual PerMeaTe application, not the marketing page
-    res.redirect("/permeate-enhanced");
   });
 }

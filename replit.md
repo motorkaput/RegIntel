@@ -1,24 +1,21 @@
-# Dark Street Tech - AI-Powered SaaS Platform
+# RegIntel — Regulatory Intelligence Platform
 
 ## Overview
-Dark Street Tech is a full-stack AI-powered SaaS platform providing document analysis and performance analytics. It features a React frontend with a dark cyberpunk aesthetic and a Node.js/Express backend with PostgreSQL. The platform aims to offer robust solutions for businesses, enabling efficient document processing, insightful performance analytics, and streamlined subscription management, with a vision for significant market impact.
+RegIntel is a full-stack AI-powered regulatory intelligence SaaS platform for BFSI organizations. It provides document ingestion (Mistral OCR), legal unit segmentation, obligation extraction (GPT-4o/4.1), controls/evidence mapping, and comprehensive audit trails. The platform features a React frontend with a professional enterprise design and a Node.js/Express backend with PostgreSQL. It is rebranded from the former "FetchPatterns RegTech" application.
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
-Design preference: Mature, professional look inspired by Palantir.com instead of quirky/neon design.
+Design preference: Mature, professional look inspired by Palantir.com.
 
-## Recent Changes (August 11, 2025)
-✓ **Fetch Patterns Beta - COMPLETED**: Fully functional document analysis tool with comprehensive features
-✓ Opera browser "Save as PDF" functionality implemented using html2canvas for seamless native content format
-✓ Complete colorful UI system with meaningful color coding throughout interface
-✓ Professional two-tier sticky headers with Dark Street Tech branding and Footer integration
-✓ Comprehensive How-to page with detailed feature explanations and user guidance
-✓ Enhanced accessibility with tooltips and test IDs on all interactive elements
-✓ Responsive design confirmed working across desktop, tablet, and mobile devices
-✓ Word cloud visualization with 1-100 word customization limit and export options
-✓ Walking dog animation synchronized with progress bars for engaging user experience
-✓ Authentication: `/beta-login` with Username: "BetaUser" / Password: "9f4e7d2a8b1c5e3f6a0d7b9c2e4f8a1b"
-✓ System ready for PerMeaTe Enterprise development as separate application
+## Recent Changes (March 13, 2026)
+✓ **RegIntel Rebrand - COMPLETED**: All references to "FetchPatterns RegTech" / "FPRT" replaced with "RegIntel" across frontend and backend
+✓ Old non-RegTech pages deleted (about, beta-login, contact, fetch-patterns, how-to, landing, permeate-*, pricing, privacy, security, subscription, terms, etc.)
+✓ Old non-RegTech components deleted (navbar, footer, dynamic-hero, pricing-cards, etc.)
+✓ App.tsx rebuilt with RegTech-only routing — root URL (`/`) shows RegIntel login page
+✓ Authentication: Email/password login via `/api/auth/login`, session-based with connect-pg-simple
+✓ Admin: david@darkstreet.org / 43g1n73l!
+✓ Database schema includes all RegTech tables (regulatory_documents, document_chunks, obligations, etc.) + pgvector extension
+✓ RegIntel Implementation Guide created at `attached_assets/REGINTEL_SETUP_GUIDE.md` for deploying as independent project
 
 ## System Architecture
 
@@ -28,32 +25,54 @@ Design preference: Mature, professional look inspired by Palantir.com instead of
 - **UI Framework**: Tailwind CSS with shadcn/ui components
 - **State Management**: TanStack Query
 - **Routing**: Wouter
-- **Styling**: Professional dark theme with a sophisticated blue color palette and enterprise-focused design. All elements use `max-w-7xl` for alignment, consistent `px-4 sm:px-6 lg:px-8` padding, and `h-12` (48px) uniform header heights with `h-6` (24px) logo sizing, ensuring zero gap positioning and seamless scrolling.
+- **Styling**: Professional light theme with enterprise-focused slate/indigo color palette
 
 ### Backend
 - **Framework**: Express.js with TypeScript
 - **Runtime**: Node.js with ES modules
 - **Database ORM**: Drizzle ORM
-- **Authentication**: Replit Auth with OpenID Connect, managing sessions via PostgreSQL.
-- **File Processing**: Multer for file uploads (in-memory storage, 10MB limit).
+- **Authentication**: Email/password with bcrypt, express-session backed by PostgreSQL (connect-pg-simple)
+- **File Processing**: Multer for file uploads (in-memory storage, 10MB limit)
 
 ### Data Storage
-- **Database**: PostgreSQL (Neon serverless)
+- **Database**: PostgreSQL (Neon serverless) with pgvector extension
 - **ORM**: Drizzle ORM with a schema-first approach
-- **Migrations**: Drizzle Kit
+- **Migrations**: Drizzle Kit (`npx drizzle-kit push --force`)
 
 ### Key Features
-- **Authentication System**: Replit Auth integration, PostgreSQL-backed sessions, automatic user creation, HTTP-only cookies.
-- **Document Processing**: Simulated OCR, text extraction, mock AI analysis (sentiment, quality scoring), and performance tracking. Supports DOCX, PDF, XLSX, images, and PPTX with robust error handling and progress tracking. Includes features like word clouds (Fibonacci spiral, no overlap), document summarization, and classification.
-- **Subscription Management**: Razorpay integration for payments, flexible plans, 30-day free trial.
-- **Performance Analytics**: Metrics collection, real-time dashboards (using Recharts), trend analysis, and report generation.
-- **PerMeaTe Enterprise Module**: Administrator onboarding wizard, multi-user system (Administrator, Project Leader, Team Member, Organization Leader), OpenAI integration for goal breakdown and intelligent task assignment, authentic CSV processing for organizational structure and employee import, and comprehensive data persistence. Features professional enterprise UI matching Dark Street Tech design.
+- **RegIntel Core**: Document Library, Console, Query AI, Diff Comparison, Obligations Analysis, Alerts, Sessions, Guide, Admin Panel, User Profile
+- **Document Processing**: Mistral OCR 3 for document ingestion, text extraction from PDF/DOCX/images, AI-powered analysis
+- **Legal Unit Segmentation**: Rule-pack-based segmentation of regulatory documents
+- **Obligation Extraction**: GPT-4o/4.1 powered extraction of regulatory obligations with confidence scoring
+- **Vector Search**: pgvector embeddings (text-embedding-3-large) for semantic document retrieval
+- **Session Archives**: Word document export of analysis sessions
+- **PerMeaTe Enterprise Module**: Separate module still present in codebase (administrator onboarding, multi-user system, OpenAI integration)
+
+### Authentication
+- Login: POST `/api/auth/login` (email + password)
+- Session: GET `/api/auth/me`
+- Logout: POST `/api/auth/logout`
+- Checks both `users` and `regtech_users` tables
+
+### Active Pages & Routes
+- `/` — RegIntel login page (regtech-landing.tsx)
+- `/regtech/documents` — Document Library
+- `/regtech/console` — Analysis Console
+- `/regtech/query` — Query AI
+- `/regtech/diff` — Document Diff
+- `/regtech/alerts` — Alert Configuration
+- `/regtech/obligations-analysis` — Obligations Analysis
+- `/regtech/sessions` — Session Management
+- `/regtech/guide` — How It Works guide
+- `/regtech/admin` — Admin Panel
+- `/regtech/profile` — User Profile
 
 ## External Dependencies
 - **@neondatabase/serverless**: PostgreSQL connection management
 - **drizzle-orm**: Type-safe database operations
 - **@tanstack/react-query**: Server state management
-- **passport**: Authentication middleware
+- **bcrypt**: Password hashing
+- **connect-pg-simple**: PostgreSQL session store
 - **razorpay**: Payment processing
 - **multer**: File upload handling
 - **@radix-ui/**: Accessible UI component primitives
@@ -65,9 +84,6 @@ Design preference: Mature, professional look inspired by Palantir.com instead of
 - **drizzle-kit**: Database schema management
 - **esbuild**: Production backend bundling
 - **mammoth.js**: DOCX text extraction
-- **XLSX**: Spreadsheet data extraction
-- **html2canvas**: PNG export for word clouds
-- **d3.js**: Streamgraph backgrounds and word cloud visualization
-- **D3's color palettes**: For streamgraph visualization
-- **OpenAI API**: For AI-powered analysis (e.g., GPT-4o for PerMeaTe Enterprise)
-- **JSZip**: PPTX direct XML parsing
+- **docx**: Word document generation
+- **OpenAI API**: GPT-4o/4.1 for obligation extraction and query answering
+- **Mistral API**: OCR 3 for document ingestion
