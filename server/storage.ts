@@ -1307,7 +1307,7 @@ export class DatabaseStorage implements IStorage {
     const existingUrls = new Set(existingAlerts.map(a => a.sourceUrl));
     
     // Filter out alerts that already exist
-    const newAlerts = alertsToCreate.filter(alert => !existingUrls.has(alert.sourceUrl));
+    const newAlerts = alertsToCreate.filter(alert => !existingUrls.has(alert.sourceUrl ?? null));
     
     if (newAlerts.length === 0) {
       console.log('All scanned alerts already exist, skipping insertion');

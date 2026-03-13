@@ -1199,11 +1199,11 @@ Rules:
         return res.status(404).json({ message: 'Document not found' });
       }
 
-      if (!document.filePath) {
+      if (!(document as any).filePath) {
         return res.status(404).json({ message: 'Document file not found' });
       }
 
-      res.download(document.filePath, document.filename || 'document');
+      res.download((document as any).filePath, (document as any).filename || 'document');
 
     } catch (error) {
       console.error('Document download error:', error);
@@ -2514,7 +2514,7 @@ Use plain language without markdown formatting, hyphens, or special characters.`
       }
 
       // Verify document ownership
-      const doc = await storage.getDocumentById(docId);
+      const doc = await storage.getDocument(docId) as any;
       if (!doc || doc.uploadedBy !== userId) {
         return res.status(403).json({ message: 'Document not found or access denied' });
       }
@@ -2576,7 +2576,7 @@ Use plain language without markdown formatting, hyphens, or special characters.`
       const docId = parseInt(req.params.id, 10);
       
       // Verify document ownership
-      const doc = await storage.getDocumentById(docId);
+      const doc = await storage.getDocument(docId) as any;
       if (!doc || doc.uploadedBy !== userId) {
         return res.status(403).json({ message: 'Document not found or access denied' });
       }
@@ -4226,7 +4226,7 @@ Penalties: Civil penalties up to AUD 22 million for body corporates and AUD 1.1 
       // Get existing alert URLs to calculate actual new count
       const existingAlerts = await storage.getUserWebAlerts(req.session.userId);
       const existingUrls = new Set(existingAlerts.map(a => a.sourceUrl));
-      const newAlerts = alerts.filter(alert => !existingUrls.has(alert.sourceUrl));
+      const newAlerts = alerts.filter(alert => !existingUrls.has(alert.sourceUrl ?? null));
       
       if (alerts.length > 0) {
         await storage.createWebAlerts(alerts);

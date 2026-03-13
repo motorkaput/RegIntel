@@ -31,7 +31,7 @@ function RegTechRoutes() {
         <Route path="/regtech/diff" component={RegTechDiff} />
         <Route path="/regtech/alerts" component={RegTechAlerts} />
         <Route path="/regtech/obligations-analysis" component={ObligationsAnalysisPage} />
-        <Route path="/regtech/obligations">{() => <Redirect to="/regtech/documents" />}</Route>
+        <Route path="/regtech/obligations">{() => <Redirect to="/regtech/obligations-analysis" />}</Route>
         <Route path="/regtech/compliance">{() => <Redirect to="/regtech/documents" />}</Route>
         <Route path="/regtech/audit">{() => <Redirect to="/regtech/documents" />}</Route>
         <Route path="/regtech/dashboard">{() => <Redirect to="/regtech/documents" />}</Route>
@@ -70,7 +70,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <div className="pt-4">
+        <div>
           <Toaster />
           <Router />
         </div>

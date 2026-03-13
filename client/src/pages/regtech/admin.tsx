@@ -83,7 +83,7 @@ export default function RegtechAdmin() {
   const [deleteOrgId, setDeleteOrgId] = useState<string | null>(null);
   const { toast } = useToast();
 
-  const { data: currentUser, isLoading: loadingUser } = useQuery({
+  const { data: currentUser, isLoading: loadingUser } = useQuery<{ id: string; email: string; isAdmin?: boolean; role?: string }>({
     queryKey: ['/api/auth/me'],
   });
 
