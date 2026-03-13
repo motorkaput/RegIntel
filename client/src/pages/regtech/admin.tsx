@@ -230,7 +230,7 @@ export default function RegtechAdmin() {
 
   return (
     <RegTechLayout>
-      <div className="space-y-6">
+      <div className="space-y-6 page-enter">
         <div className="bg-white rounded-2xl p-6 border border-slate-200">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">

@@ -4,8 +4,9 @@ import RegTechLayout from "./layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, FileDown, Clock, Activity, Calendar, Trash2 } from "lucide-react";
+import { Loader2, FileDown, Clock, Activity, Calendar, Trash2, History } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { PageLoadingSkeleton, EmptyState, ErrorState } from "@/components/ui/loading-skeleton";
 import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -125,11 +126,11 @@ function SessionCard({ session }: { session: Session }) {
   };
 
   return (
-    <Card className="bg-slate-900 border-slate-800">
+    <Card className="bg-slate-900 border-slate-800 rounded-2xl transition-colors hover:border-slate-700">
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg text-white">{session.name}</CardTitle>
-          <Badge variant={session.status === 'active' ? 'default' : 'secondary'}>
+          <Badge variant={session.status === 'active' ? 'default' : 'secondary'} className="rounded-xl">
             {session.status === 'active' ? 'Active' : 'Completed'}
           </Badge>
         </div>
@@ -154,7 +155,7 @@ function SessionCard({ session }: { session: Session }) {
               size="sm"
               onClick={handleArchive}
               disabled={isArchiving}
-              className="bg-slate-700 text-white border-slate-600 hover:bg-slate-600 hover:text-white"
+              className="bg-slate-700 text-white border-slate-600 hover:bg-slate-600 hover:text-white rounded-xl transition-colors"
             >
               {isArchiving ? (
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -165,7 +166,7 @@ function SessionCard({ session }: { session: Session }) {
             </Button>
           </div>
         </div>
-        
+
         {session.activities && session.activities.length > 0 && (
           <div className="border-t border-slate-800 pt-3 mt-3">
             <div className="flex items-center justify-between">
@@ -175,11 +176,11 @@ function SessionCard({ session }: { session: Session }) {
                   {['query', 'console', 'diff'].map(type => {
                     const count = session.activities.filter(a => a.activityType === type).length;
                     if (count === 0) return null;
-                    const colorClass = type === 'query' ? 'text-blue-400 border-blue-600' : 
-                      type === 'console' ? 'text-green-400 border-green-600' : 
+                    const colorClass = type === 'query' ? 'text-blue-400 border-blue-600' :
+                      type === 'console' ? 'text-green-400 border-green-600' :
                       'text-orange-400 border-orange-600';
                     return (
-                      <Badge key={type} variant="outline" className={`${colorClass}`}>
+                      <Badge key={type} variant="outline" className={`${colorClass} rounded-xl`}>
                         {type}: {count}
                       </Badge>
                     );
@@ -192,7 +193,7 @@ function SessionCard({ session }: { session: Session }) {
                     variant="ghost"
                     size="icon"
                     disabled={isDeleting}
-                    className="h-8 w-8 text-slate-400 hover:text-red-500 hover:bg-red-500/10"
+                    className="h-8 w-8 text-slate-400 hover:text-red-500 hover:bg-red-500/10 transition-colors"
                   >
                     {isDeleting ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
@@ -225,7 +226,7 @@ function SessionCard({ session }: { session: Session }) {
 }
 
 export default function SessionsPage() {
-  const { data, isLoading } = useQuery<{ sessions: Session[] }>({
+  const { data, isLoading, isError, refetch } = useQuery<{ sessions: Session[] }>({
     queryKey: ['/api/regtech/sessions'],
   });
 
@@ -234,7 +235,7 @@ export default function SessionsPage() {
 
   return (
     <RegTechLayout>
-      <div className="space-y-6">
+      <div className="page-enter space-y-6">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-slate-900 mb-2">Session History</h1>
           <p className="text-slate-600">
@@ -243,20 +244,19 @@ export default function SessionsPage() {
         </div>
 
         {isLoading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-slate-400" />
-          </div>
+          <PageLoadingSkeleton />
+        ) : isError ? (
+          <ErrorState
+            title="Failed to load sessions"
+            description="We couldn't load your session history. Please try again."
+            onRetry={() => refetch()}
+          />
         ) : sessionList.length === 0 ? (
-          <Card className="bg-slate-900 border-slate-800">
-            <CardContent className="py-12 text-center">
-              <Activity className="h-12 w-12 mx-auto text-slate-600 mb-4" />
-              <h3 className="text-lg font-medium text-white mb-2">No Sessions Yet</h3>
-              <p className="text-slate-400">
-                Start a new session to track your activities. Use the "Start New Session" button
-                in the session bar above to begin recording.
-              </p>
-            </CardContent>
-          </Card>
+          <EmptyState
+            icon={History}
+            title="No sessions yet"
+            description="Start a new session from the session bar above to begin tracking your research activities."
+          />
         ) : (
           <div className="space-y-4">
             {sessionList

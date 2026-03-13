@@ -3,7 +3,8 @@ import { useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, Loader2, Globe, FileText, Download, ArrowRight } from "lucide-react";
+import { ExternalLink, Loader2, Globe, FileText, Download, ArrowRight, Search } from "lucide-react";
+import { EmptyState } from "@/components/ui/loading-skeleton";
 import RegTechLayout from "./layout";
 import { ShareResults, getFormattedDateTimeForDisplay, DocxContentSection } from "@/components/regtech/ShareResults";
 import { useSession } from "@/contexts/SessionContext";
@@ -102,8 +103,8 @@ export default function ConsolePage() {
 
   return (
     <RegTechLayout>
-      <div className="space-y-6">
-        {/* Page Header - Bento style */}
+      <div className="space-y-6 page-enter">
+        {/* Page Header */}
         <div className="bg-white rounded-2xl p-6 border border-slate-200">
           <h1 className="text-2xl font-semibold text-slate-900" data-testid="text-page-title">Regulatory Console</h1>
           <p className="text-slate-600 mt-1 text-sm">
@@ -162,6 +163,15 @@ export default function ConsolePage() {
                 {(analyzeMutation.error as any)?.message || 'Failed to analyze URL. Please check the URL and try again.'}
               </p>
             </div>
+          )}
+
+          {/* Empty state when no analyses */}
+          {analyses.length === 0 && !analyzeMutation.isPending && !analyzeMutation.isError && (
+            <EmptyState
+              icon={Globe}
+              title="No analyses yet"
+              description="Paste a regulatory website URL above to analyze its content. The AI will extract key insights, identify regulatory impact, and summarize the page."
+            />
           )}
 
           {/* Display all accumulated analyses */}

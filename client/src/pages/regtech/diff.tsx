@@ -141,8 +141,8 @@ export default function DiffPage() {
 
   return (
     <RegTechLayout>
-      <div className="space-y-6">
-        {/* Page Header - Bento style */}
+      <div className="space-y-6 page-enter">
+        {/* Page Header */}
         <div className="bg-white rounded-2xl p-6 border border-slate-200">
           <h1 className="text-2xl font-semibold text-slate-900" data-testid="text-page-title">Document Comparison</h1>
           <p className="text-slate-600 mt-1 text-sm">

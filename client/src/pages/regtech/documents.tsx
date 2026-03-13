@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Combobox } from "@/components/ui/combobox";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { PageLoadingSkeleton, EmptyState, ErrorState } from "@/components/ui/loading-skeleton";
 import { FileText, Calendar as CalendarIcon, ExternalLink, MessageSquare, Download, Trash2, FileUp, Filter, X, ChevronDown, ChevronUp, Loader2, CheckCircle2, XCircle, Folder, Pencil, Check } from "lucide-react";
 import { format } from "date-fns";
 import RegTechLayout from "./layout";
@@ -134,7 +135,7 @@ export default function DocumentsPage() {
   const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
   const MAX_FILES = 10; // Maximum files per upload batch
 
-  const { data, isLoading } = useQuery<{ documents: any[] }>({
+  const { data, isLoading, isError, refetch } = useQuery<{ documents: any[] }>({
     queryKey: ['/api/regtech/documents'],
   });
 
@@ -554,7 +555,7 @@ export default function DocumentsPage() {
 
   return (
     <RegTechLayout>
-      <div className="space-y-6">
+      <div className="page-enter space-y-6">
         {/* Page Header - Bento style */}
         <div className="bg-white rounded-2xl p-6 border border-slate-200">
           <div className="flex items-center justify-between mb-4">
@@ -588,8 +589,9 @@ export default function DocumentsPage() {
             </div>
           )}
 
-          {/* Always Visible Upload Section */}
+          {/* Upload Documents */}
           <div className="mb-4 pb-4 border-b border-slate-100">
+            <label className="block text-sm font-medium text-slate-700 mb-2">Upload Documents</label>
             <form onSubmit={handleUpload} className="space-y-4">
               <div 
                 className={`border-2 border-dashed rounded-xl p-6 text-center transition-colors relative ${
@@ -758,12 +760,12 @@ export default function DocumentsPage() {
               </form>
             </div>
 
-          {/* Filters */}
+          {/* Filter Documents */}
           <div className="flex flex-wrap items-center gap-3 pt-4 border-t border-slate-100">
-            <div className="flex items-center gap-2 text-sm text-slate-500">
+            <label className="flex items-center gap-2 text-sm font-medium text-slate-700">
               <Filter className="h-4 w-4" />
-              <span>Filters:</span>
-            </div>
+              <span>Filter by</span>
+            </label>
             <Combobox
               options={JURISDICTIONS}
               value={jurisdictionFilter}
@@ -855,18 +857,31 @@ export default function DocumentsPage() {
         </div>
 
           {isLoading ? (
-          <div className="bg-white rounded-2xl p-12 border border-slate-200 text-center" data-testid="loading-spinner">
-            <div className="animate-spin rounded-full h-10 w-10 border-2 border-slate-300 border-t-slate-900 mx-auto"></div>
-            <p className="text-slate-500 mt-4 text-sm">Loading documents...</p>
+          <div data-testid="loading-spinner">
+            <PageLoadingSkeleton />
           </div>
+        ) : isError ? (
+          <ErrorState
+            title="Failed to load documents"
+            description="We couldn't retrieve your document library. Please check your connection and try again."
+            onRetry={() => refetch()}
+          />
         ) : documents.length === 0 ? (
-          <div className="bg-white rounded-2xl p-12 border border-slate-200 text-center">
-            <div className="h-16 w-16 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-4">
-              <FileText className="h-8 w-8 text-slate-400" />
-            </div>
-            <p className="text-slate-600 font-medium" data-testid="text-no-documents">No documents yet</p>
-            <p className="text-slate-400 text-sm mt-1">Use the upload area above to add your first regulatory document</p>
-          </div>
+          <EmptyState
+            icon={FileText}
+            title="No documents yet"
+            description="Upload your first regulatory document to get started with analysis, querying, and compliance tracking."
+            action={
+              <Button
+                onClick={() => document.getElementById('file-upload')?.click()}
+                className="bg-emerald-600 hover:bg-emerald-700"
+                data-testid="text-no-documents"
+              >
+                <FileUp className="h-4 w-4 mr-2" />
+                Upload a Document
+              </Button>
+            }
+          />
         ) : (
           <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
             <Table className="table-fixed w-full">
@@ -883,7 +898,7 @@ export default function DocumentsPage() {
                   </TableHeader>
                   <TableBody>
                     {documents.map((doc) => (
-                      <TableRow key={doc.id} data-testid={`row-document-${doc.id}`}>
+                      <TableRow key={doc.id} className="transition-colors hover:bg-slate-50" data-testid={`row-document-${doc.id}`}>
                         <TableCell>
                           <div>
                             {editingDocId === doc.id ? (

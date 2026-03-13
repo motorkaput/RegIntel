@@ -14,6 +14,7 @@ import { Bell, BellOff, CheckCircle, Plus, Settings, Trash2, Edit, X, AlertTrian
 import RegTechLayout from "./layout";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { PageLoadingSkeleton, EmptyState, ErrorState } from "@/components/ui/loading-skeleton";
 
 const cleanSummaryText = (text: string | null | undefined): string => {
   if (!text) return '';
@@ -247,11 +248,11 @@ export default function AlertsPage() {
     isActive: true,
   });
 
-  const { data: webAlertsData, isLoading: loadingWebAlerts } = useQuery<WebAlert[]>({
+  const { data: webAlertsData, isLoading: loadingWebAlerts, isError: isWebAlertsError, refetch: refetchWebAlerts } = useQuery<WebAlert[]>({
     queryKey: ['/api/regtech/web-alerts'],
   });
 
-  const { data: webAlertSetsData, isLoading: loadingAlertSets } = useQuery<WebAlertSet[]>({
+  const { data: webAlertSetsData, isLoading: loadingAlertSets, isError: isAlertSetsError, refetch: refetchAlertSets } = useQuery<WebAlertSet[]>({
     queryKey: ['/api/regtech/web-alert-sets'],
   });
 
@@ -532,7 +533,16 @@ export default function AlertsPage() {
 
   return (
     <RegTechLayout>
-      <div className="space-y-6">
+      <div className="space-y-6 page-enter">
+        {(loadingWebAlerts && loadingAlertSets) ? (
+          <PageLoadingSkeleton />
+        ) : (isWebAlertsError && isAlertSetsError) ? (
+          <ErrorState
+            title="Failed to load alerts"
+            description="We couldn't load your alerts data. Please check your connection and try again."
+            onRetry={() => { refetchWebAlerts(); refetchAlertSets(); }}
+          />
+        ) : (<>
         <div className="bg-white rounded-2xl p-6 border border-slate-200">
           <div className="flex items-center justify-between">
             <div>
@@ -567,7 +577,7 @@ export default function AlertsPage() {
           </div>
 
           {/* Web Alerts Tab */}
-          <TabsContent value="web-alerts" className="space-y-4">
+          <TabsContent value="web-alerts" className="space-y-4 transition-all duration-300 ease-in-out data-[state=inactive]:opacity-0 data-[state=active]:opacity-100">
             <div className="flex flex-wrap gap-2 justify-between items-center">
               <div className="flex gap-2">
                 <Button
@@ -593,7 +603,27 @@ export default function AlertsPage() {
               </Button>
             </div>
 
-            {webAlertSets.length > 0 && (
+            {loadingAlertSets ? (
+              <PageLoadingSkeleton />
+            ) : isAlertSetsError ? (
+              <ErrorState
+                title="Failed to load alert sets"
+                description="We couldn't retrieve your alert set configurations. Please try again."
+                onRetry={() => refetchAlertSets()}
+              />
+            ) : webAlertSets.length === 0 ? (
+              <EmptyState
+                icon={Rss}
+                title="No alert sets configured"
+                description="Create an alert set to start scanning regulatory websites for updates relevant to your compliance needs."
+                action={
+                  <Button onClick={() => setIsCreateAlertSetOpen(true)} className="rounded-xl bg-slate-900 hover:bg-slate-800">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create Your First Alert Set
+                  </Button>
+                }
+              />
+            ) : (
               <Card className="rounded-2xl">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-base flex items-center gap-2">
@@ -604,7 +634,7 @@ export default function AlertsPage() {
                 <CardContent>
                   <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
                     {webAlertSets.map((alertSet) => (
-                      <div key={alertSet.id} className="bg-slate-50 rounded-xl p-4 border border-slate-200">
+                      <div key={alertSet.id} className="bg-slate-50 rounded-xl p-4 border border-slate-200 transition-colors hover:bg-slate-50">
                         <div className="flex items-start justify-between mb-2">
                           <div className="font-medium text-slate-900">{alertSet.name}</div>
                           <div className="flex gap-1">
@@ -622,7 +652,7 @@ export default function AlertsPage() {
                         </div>
                         <div className="text-xs text-slate-500 mb-3 flex items-center gap-1">
                           <Clock className="h-3 w-3" />
-                          {alertSet.lastScannedAt 
+                          {alertSet.lastScannedAt
                             ? `Last scanned: ${new Date(alertSet.lastScannedAt).toLocaleDateString()}`
                             : 'Never scanned'}
                         </div>
@@ -652,28 +682,27 @@ export default function AlertsPage() {
             )}
 
             {loadingWebAlerts ? (
-              <div className="bg-white rounded-2xl p-12 border border-slate-200 text-center">
-                <div className="animate-spin rounded-full h-10 w-10 border-2 border-slate-300 border-t-slate-900 mx-auto"></div>
-                <p className="text-slate-500 mt-4 text-sm">Loading alerts...</p>
-              </div>
+              <PageLoadingSkeleton />
+            ) : isWebAlertsError ? (
+              <ErrorState
+                title="Failed to load alerts"
+                description="We couldn't retrieve your alerts. Please try again."
+                onRetry={() => refetchWebAlerts()}
+              />
             ) : filteredWebAlerts.length === 0 ? (
-              <Card className="rounded-2xl">
-                <CardContent className="py-12 text-center">
-                  <Globe className="h-12 w-12 text-slate-400 mx-auto mb-4" />
-                  <p className="text-slate-600 mb-2">
-                    {webFilter === 'unread' ? 'No unread web alerts' : 'No web alerts yet'}
-                  </p>
-                  <p className="text-slate-500 text-sm mb-4">
-                    Create an alert set and scan for regulatory updates from official websites
-                  </p>
-                  {webAlertSets.length === 0 && (
-                    <Button onClick={() => setIsCreateAlertSetOpen(true)} className="rounded-xl">
-                      <Plus className="h-4 w-4 mr-2" />
-                      Create Your First Alert Set
-                    </Button>
-                  )}
-                </CardContent>
-              </Card>
+              <EmptyState
+                icon={Bell}
+                title={webFilter === 'unread' ? 'No unread alerts' : 'No alerts yet'}
+                description={webFilter === 'unread'
+                  ? "You're all caught up. All alerts have been read."
+                  : "No alerts yet. Upload documents to start receiving regulatory alerts."}
+                action={webAlertSets.length === 0 ? (
+                  <Button onClick={() => setIsCreateAlertSetOpen(true)} className="rounded-xl">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create Your First Alert Set
+                  </Button>
+                ) : undefined}
+              />
             ) : (
               <div className="space-y-4">
                 {filteredWebAlerts.map((alert) => {
@@ -683,7 +712,7 @@ export default function AlertsPage() {
                   return (
                     <Card
                       key={alert.id}
-                      className={`rounded-2xl ${alert.status === 'unread' ? 'border-l-4 border-l-blue-600' : ''}`}
+                      className={`rounded-2xl transition-colors hover:bg-slate-50 ${alert.status === 'unread' ? 'border-l-4 border-l-blue-600' : ''}`}
                     >
                       <CardHeader className="pb-3">
                         <div className="flex items-start justify-between gap-4">
@@ -758,7 +787,7 @@ export default function AlertsPage() {
           </TabsContent>
 
           {/* Settings Tab */}
-          <TabsContent value="settings" className="space-y-6">
+          <TabsContent value="settings" className="space-y-6 transition-all duration-300 ease-in-out data-[state=inactive]:opacity-0 data-[state=active]:opacity-100">
             <Card className="rounded-2xl">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -778,18 +807,29 @@ export default function AlertsPage() {
                 </div>
 
                 {loadingAlertSets ? (
-                  <div className="text-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-2 border-slate-300 border-t-slate-900 mx-auto"></div>
-                  </div>
+                  <PageLoadingSkeleton />
+                ) : isAlertSetsError ? (
+                  <ErrorState
+                    title="Failed to load alert sets"
+                    description="We couldn't retrieve your alert set configurations."
+                    onRetry={() => refetchAlertSets()}
+                  />
                 ) : webAlertSets.length === 0 ? (
-                  <div className="text-center py-8 text-slate-500">
-                    <Globe className="h-10 w-10 mx-auto mb-2 text-slate-400" />
-                    <p>No alert sets configured yet</p>
-                  </div>
+                  <EmptyState
+                    icon={Globe}
+                    title="No alert sets configured yet"
+                    description="Set up your first alert set to monitor regulatory changes across jurisdictions."
+                    action={
+                      <Button onClick={() => setIsCreateAlertSetOpen(true)} className="rounded-xl bg-slate-900 hover:bg-slate-800">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Create Alert Set
+                      </Button>
+                    }
+                  />
                 ) : (
                   <div className="space-y-3">
                     {webAlertSets.map((alertSet) => (
-                      <div key={alertSet.id} className="bg-slate-50 rounded-xl p-4 border border-slate-200 flex items-center justify-between">
+                      <div key={alertSet.id} className="bg-slate-50 rounded-xl p-4 border border-slate-200 flex items-center justify-between transition-colors hover:bg-slate-50">
                         <div>
                           <div className="font-medium text-slate-900">{alertSet.name}</div>
                           <div className="text-sm text-slate-600 mt-1">
@@ -815,6 +855,7 @@ export default function AlertsPage() {
             </Card>
           </TabsContent>
         </Tabs>
+        </>)}
       </div>
 
       {/* Create/Edit Web Alert Set Dialog */}
@@ -825,7 +866,7 @@ export default function AlertsPage() {
         }
         setIsCreateAlertSetOpen(open);
       }}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-lg transition-all duration-200 ease-out">
           <DialogHeader>
             <DialogTitle>{editingAlertSet ? 'Edit Alert Set' : 'Create Alert Set'}</DialogTitle>
             <DialogDescription>
@@ -944,7 +985,7 @@ export default function AlertsPage() {
         }
         setIsCreateDialogOpen(open);
       }}>
-        <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+        <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto transition-all duration-200 ease-out">
           <DialogHeader>
             <DialogTitle>{editingConfig ? 'Edit Alert Rule' : 'Create Alert Rule'}</DialogTitle>
             <DialogDescription>
