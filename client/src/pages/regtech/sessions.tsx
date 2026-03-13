@@ -7,9 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Loader2, FileDown, Clock, Activity, Calendar, Trash2, History } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { PageLoadingSkeleton, EmptyState, ErrorState } from "@/components/ui/loading-skeleton";
-import { queryClient } from "@/lib/queryClient";
+import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
 
 interface SessionActivity {
   id: string;
