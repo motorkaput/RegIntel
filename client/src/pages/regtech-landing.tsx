@@ -159,7 +159,7 @@ export default function RegTechLanding() {
               </form>
               <p className="mt-4 text-xs text-slate-400 text-center">
                 Want to onboard your organization? Email{" "}
-                <a href="mailto:hello@darkstreet.org" className="text-slate-600 hover:text-slate-900">hello@darkstreet.org</a>
+                <a href="mailto:hello@regintel.darkstreet.tech" className="text-slate-600 hover:text-slate-900">hello@regintel.darkstreet.tech</a>
               </p>
             </CardContent>
           </Card>
@@ -282,7 +282,7 @@ export default function RegTechLanding() {
       {/* Footer */}
       <footer className="border-t border-slate-200 bg-white py-4 px-4">
         <div className="max-w-6xl mx-auto text-center text-xs text-slate-500">
-          © <a href="https://darkstreet.consulting" target="_blank" rel="noopener noreferrer" className="hover:text-slate-900 transition-colors">Dark Street</a>. All rights reserved.
+          © RegIntel. All rights reserved.
         </div>
       </footer>
     </div>

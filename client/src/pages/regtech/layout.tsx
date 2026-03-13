@@ -248,8 +248,8 @@ export default function RegTechLayout({ children }: { children: React.ReactNode 
         {/* Minimal Footer */}
         <footer className="border-t border-slate-200 bg-white py-6">
           <div className="max-w-7xl mx-auto px-4 lg:px-6 flex justify-between items-center text-xs text-slate-500">
-            <span>© <a href="https://darkstreet.consulting" target="_blank" rel="noopener noreferrer" className="hover:text-slate-900 transition-colors">Dark Street</a>. All rights reserved.</span>
-            <a href="mailto:hello@darkstreet.org" className="hover:text-slate-900 transition-colors">hello@darkstreet.org</a>
+            <span>© RegIntel. All rights reserved.</span>
+            <a href="mailto:hello@regintel.darkstreet.tech" className="hover:text-slate-900 transition-colors">hello@regintel.darkstreet.tech</a>
           </div>
         </footer>
       </div>

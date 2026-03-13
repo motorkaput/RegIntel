@@ -24,6 +24,7 @@ function RegTechRoutes() {
     <SessionProvider>
       <Switch>
         <Route path="/regtech">{() => <Redirect to="/regtech/console" />}</Route>
+        <Route path="/regtech/login">{() => <Redirect to="/regtech/console" />}</Route>
         <Route path="/regtech/upload">{() => <Redirect to="/regtech/documents" />}</Route>
         <Route path="/regtech/documents" component={RegTechDocuments} />
         <Route path="/regtech/console" component={RegTechConsole} />
