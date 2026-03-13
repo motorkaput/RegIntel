@@ -2,6 +2,10 @@ import { storage } from '../storage';
 import { generateEmbedding } from './regTechEmbeddings';
 import type { DocumentChunk, RegulatoryDocument } from '@shared/schema';
 
+function escapeRegExp(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 export interface RetrievalResult {
   chunk: DocumentChunk;
   document: RegulatoryDocument;
@@ -25,14 +29,17 @@ export async function hybridSearch(
   filters?: RetrievalFilters,
   limit: number = 10
 ): Promise<RetrievalResult[]> {
-  const [vectorResults, keywordResults] = await Promise.all([
-    vectorSearch(query, filters, limit * 2),
-    keywordSearch(query, filters, limit * 2),
-  ]);
-  
-  const mergedResults = mergeAndRankResults(vectorResults, keywordResults, limit);
-  
-  return mergedResults;
+  try {
+    const [vectorResults, keywordResults] = await Promise.all([
+      vectorSearch(query, filters, limit * 2),
+      keywordSearch(query, filters, limit * 2),
+    ]);
+
+    return mergeAndRankResults(vectorResults, keywordResults, limit);
+  } catch (error) {
+    console.error('Hybrid search failed:', error);
+    throw new Error(`Search failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
 }
 
 export async function vectorSearch(
@@ -40,8 +47,9 @@ export async function vectorSearch(
   filters?: RetrievalFilters,
   limit: number = 10
 ): Promise<RetrievalResult[]> {
+  try {
   const embedding = await generateEmbedding(query);
-  
+
   const chunks = await storage.searchSimilarChunks(
     embedding,
     limit,
@@ -85,6 +93,10 @@ export async function vectorSearch(
   }
   
   return results;
+  } catch (error) {
+    console.error('Vector search failed:', error);
+    return [];
+  }
 }
 
 export async function keywordSearch(
@@ -92,6 +104,7 @@ export async function keywordSearch(
   filters?: RetrievalFilters,
   limit: number = 10
 ): Promise<RetrievalResult[]> {
+  try {
   const documents = await storage.searchRegulatoryDocuments(
     query,
     {
@@ -120,15 +133,18 @@ export async function keywordSearch(
   const allDocChunks = await Promise.all(chunksPromises);
   
   const results: RetrievalResult[] = [];
-  const queryTerms = query.toLowerCase().split(/\s+/);
-  
+  const queryTerms = query.toLowerCase().split(/\s+/).filter(t => t.length > 0);
+
+  if (queryTerms.length === 0) return [];
+
   for (const { doc, chunks } of allDocChunks) {
     for (const chunk of chunks) {
       const chunkText = chunk.text.toLowerCase();
       let matchScore = 0;
-      
+
       for (const term of queryTerms) {
-        const occurrences = (chunkText.match(new RegExp(term, 'g')) || []).length;
+        const escapedTerm = escapeRegExp(term);
+        const occurrences = (chunkText.match(new RegExp(escapedTerm, 'g')) || []).length;
         matchScore += occurrences;
       }
       
@@ -146,6 +162,10 @@ export async function keywordSearch(
   }
   
   return results.sort((a, b) => b.score - a.score).slice(0, limit);
+  } catch (error) {
+    console.error('Keyword search failed:', error);
+    return [];
+  }
 }
 
 function mergeAndRankResults(
@@ -155,8 +175,8 @@ function mergeAndRankResults(
 ): RetrievalResult[] {
   const resultMap = new Map<number, RetrievalResult>();
   
-  const maxVectorScore = Math.max(...vectorResults.map(r => r.score), 1);
-  const maxKeywordScore = Math.max(...keywordResults.map(r => r.score), 1);
+  const maxVectorScore = vectorResults.length > 0 ? Math.max(...vectorResults.map(r => r.score)) : 1;
+  const maxKeywordScore = keywordResults.length > 0 ? Math.max(...keywordResults.map(r => r.score)) : 1;
   
   for (const result of vectorResults) {
     const normalizedScore = result.score / maxVectorScore;

@@ -76,7 +76,6 @@ import {
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, gte, lte, count, or, ilike, sql, inArray } from "drizzle-orm";
-import { cosineDistance } from "drizzle-orm";
 
 export interface IStorage {
   // Organization operations
