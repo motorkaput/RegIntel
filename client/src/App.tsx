@@ -24,6 +24,7 @@ function RegTechRoutes() {
         <Route path="/regtech">{() => <Redirect to="/regtech/console" />}</Route>
         <Route path="/regtech/login">{() => <Redirect to="/regtech/console" />}</Route>
         <Route path="/regtech/upload">{() => <Redirect to="/regtech/documents" />}</Route>
+        <Route path="/regtech/dashboard">{() => <Redirect to="/regtech/console" />}</Route>
         <Route path="/regtech/documents" component={RegTechDocuments} />
         <Route path="/regtech/console" component={RegTechConsole} />
         <Route path="/regtech/query" component={RegTechQuery} />
@@ -33,7 +34,6 @@ function RegTechRoutes() {
         <Route path="/regtech/obligations">{() => <Redirect to="/regtech/obligations-analysis" />}</Route>
         <Route path="/regtech/compliance">{() => <Redirect to="/regtech/documents" />}</Route>
         <Route path="/regtech/audit">{() => <Redirect to="/regtech/documents" />}</Route>
-        <Route path="/regtech/dashboard">{() => <Redirect to="/regtech/documents" />}</Route>
         <Route path="/regtech/sessions" component={RegTechSessions} />
         <Route path="/regtech/guide" component={RegTechGuide} />
         <Route path="/regtech/admin" component={RegtechAdmin} />

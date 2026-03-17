@@ -1,13 +1,31 @@
 import { Link, useLocation } from "wouter";
 import { useEffect, useState } from "react";
-import { MessageSquare, FileText, GitCompare, Library, ChevronDown, LogOut, Bell, Settings, Menu, History, ClipboardCheck, HelpCircle } from "lucide-react";
+import {
+  LayoutDashboard,
+  Bell,
+  FileText,
+  Search,
+  ClipboardCheck,
+  BarChart3,
+  History,
+  Settings,
+  HelpCircle,
+  LogOut,
+  ChevronLeft,
+  ChevronRight,
+  Menu,
+  X,
+  GitCompare,
+  MessageSquare,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import iconUrl from "@assets/fprt-icon_1767950294399.png";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { SessionBar } from "@/components/regtech/SessionBar";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const ROLE_LABELS: Record<string, string> = {
   cco: "Chief Compliance Officer",
@@ -18,31 +36,32 @@ const ROLE_LABELS: Record<string, string> = {
   business_analyst: "Business Analyst",
 };
 
-const navItems = [
-  { href: "/regtech/documents", icon: Library, label: "Library", description: "Upload & browse documents", color: "bg-blue-500" },
-  { href: "/regtech/console", icon: FileText, label: "Console", description: "Regulatory news feed", color: "bg-violet-500" },
-  { href: "/regtech/query", icon: MessageSquare, label: "Query AI", description: "Ask questions", color: "bg-orange-500" },
-  { href: "/regtech/diff", icon: GitCompare, label: "Diff", description: "Compare documents", color: "bg-cyan-500" },
-  { href: "/regtech/obligations-analysis", icon: ClipboardCheck, label: "Obligations", description: "Analyze obligations", color: "bg-amber-500" },
-  { href: "/regtech/alerts", icon: Bell, label: "Alerts", description: "Notifications", color: "bg-rose-500" },
-  { href: "/regtech/sessions", icon: History, label: "Sessions", description: "Session history", color: "bg-emerald-500" },
-  { href: "/regtech/guide", icon: HelpCircle, label: "Guide", description: "How it works", color: "bg-indigo-500" },
+interface NavItem {
+  href: string;
+  icon: typeof LayoutDashboard;
+  label: string;
+  badge?: string;
+}
+
+const mainNavItems: NavItem[] = [
+  { href: "/regtech/console", icon: LayoutDashboard, label: "Dashboard" },
+  { href: "/regtech/alerts", icon: Bell, label: "Web Alerts", badge: "NEW" },
+  { href: "/regtech/documents", icon: FileText, label: "Documents" },
+  { href: "/regtech/query", icon: MessageSquare, label: "Compliance Analysis" },
+  { href: "/regtech/obligations-analysis", icon: ClipboardCheck, label: "Obligations Tracker" },
+  { href: "/regtech/diff", icon: GitCompare, label: "Reports" },
+  { href: "/regtech/sessions", icon: History, label: "Sessions" },
 ];
 
-/* ============================================================
-   V2 FEATURES - Hidden from navigation, code preserved
-   Uncomment these items in navItems array to re-enable in v2
-   ============================================================
-   { href: "/regtech/dashboard", icon: BarChart3, label: "Dashboard", description: "Compliance overview", color: "bg-indigo-500" },
-   { href: "/regtech/obligations", icon: ClipboardCheck, label: "Obligations", description: "Explore obligations", color: "bg-amber-500" },
-   { href: "/regtech/compliance", icon: Shield, label: "Compliance", description: "Controls & evidence", color: "bg-teal-500" },
-   { href: "/regtech/audit", icon: Activity, label: "Audit", description: "AI decision logs", color: "bg-slate-500" },
-   ============================================================ */
+const bottomNavItems: NavItem[] = [
+  { href: "/regtech/guide", icon: HelpCircle, label: "Guide" },
+];
 
 export default function RegTechLayout({ children }: { children: React.ReactNode }) {
   const [location, setLocation] = useLocation();
   const { user, isAuthenticated, isLoading } = useAuth();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const isAdmin = !!(user as any)?.isAdmin;
 
@@ -63,202 +82,308 @@ export default function RegTechLayout({ children }: { children: React.ReactNode 
     }
   }, [isAuthenticated, isLoading, setLocation]);
 
+  // Close mobile menu on navigation
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [location]);
+
   if (isLoading || !isAuthenticated) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--ds-bg)' }}>
         <div className="text-center">
-          <div className="h-10 w-10 rounded-xl bg-slate-200 animate-pulse mx-auto mb-3" />
-          <div className="h-3 w-24 bg-slate-200 rounded animate-pulse mx-auto" />
+          <div className="h-10 w-10 rounded-xl animate-pulse mx-auto mb-3" style={{ background: 'var(--ds-border)' }} />
+          <div className="h-3 w-24 rounded animate-pulse mx-auto" style={{ background: 'var(--ds-border)' }} />
         </div>
       </div>
     );
   }
 
-  return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
-      {/* Sticky Header Container */}
-      <header className="sticky top-0 z-50 w-full">
-        {/* Tier 1: Branding + User Account */}
-        <div className="bg-slate-900 text-white">
-          <div className="max-w-7xl mx-auto flex h-14 items-center justify-between px-4 lg:px-6">
-            {/* Left: Mobile menu + Logo */}
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => setMobileMenuOpen(true)}
-                className="lg:hidden p-1 text-slate-300 hover:text-white"
-                data-testid="button-mobile-menu"
-              >
-                <Menu className="h-5 w-5" />
-              </button>
+  const currentPage = [...mainNavItems, ...bottomNavItems].find(item => location === item.href);
+  const pageTitle = currentPage?.label || "RegIntel";
 
-              <Link href="/regtech/documents" data-testid="link-home" className="flex items-center gap-3">
-                <img src={iconUrl} alt="RegIntel" className="h-9 w-9 flex-shrink-0" />
-                <div className="flex flex-col justify-center">
-                  <span className="text-sm sm:text-base font-semibold text-white leading-tight">RegIntel</span>
-                  <span className="text-[10px] sm:text-xs text-slate-400 leading-tight hidden sm:block">Regulatory Intelligence Platform</span>
-                </div>
-              </Link>
+  const renderNavItem = (item: NavItem, collapsed: boolean) => {
+    const Icon = item.icon;
+    const isActive = location === item.href;
+    const isWebAlerts = item.label === "Web Alerts";
+
+    const navLink = (
+      <Link href={item.href}>
+        <div
+          className={`group flex items-center gap-3 px-3 py-2.5 rounded-md cursor-pointer transition-all duration-150 relative ${
+            isActive
+              ? 'text-white'
+              : 'hover:text-white'
+          } ${collapsed ? 'justify-center px-0 mx-2' : 'mx-3'}`}
+          style={{
+            background: isActive ? 'rgba(255,255,255,0.08)' : 'transparent',
+            color: isActive ? '#FFFFFF' : 'var(--ds-text-on-dark-muted)',
+            borderLeft: isActive && !collapsed ? '3px solid var(--ds-gold)' : isActive && collapsed ? 'none' : '3px solid transparent',
+            paddingLeft: collapsed ? undefined : isActive ? '9px' : '12px',
+          }}
+          onMouseEnter={(e) => {
+            if (!isActive) e.currentTarget.style.background = 'rgba(255,255,255,0.04)';
+          }}
+          onMouseLeave={(e) => {
+            if (!isActive) e.currentTarget.style.background = 'transparent';
+          }}
+        >
+          {isActive && collapsed && (
+            <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r" style={{ background: 'var(--ds-gold)' }} />
+          )}
+          <Icon className={`h-[18px] w-[18px] flex-shrink-0 ${isWebAlerts && !isActive ? 'text-[var(--ds-gold)]' : ''}`} />
+          {!collapsed && (
+            <span className="text-[13px] font-medium truncate flex-1">{item.label}</span>
+          )}
+          {!collapsed && item.badge && (
+            <span
+              className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full"
+              style={{
+                background: 'var(--ds-gold)',
+                color: 'var(--ds-imperial)',
+              }}
+            >
+              {item.badge}
+            </span>
+          )}
+        </div>
+      </Link>
+    );
+
+    if (collapsed) {
+      return (
+        <Tooltip key={item.href} delayDuration={0}>
+          <TooltipTrigger asChild>{navLink}</TooltipTrigger>
+          <TooltipContent side="right" className="font-medium">
+            {item.label}
+          </TooltipContent>
+        </Tooltip>
+      );
+    }
+
+    return <div key={item.href}>{navLink}</div>;
+  };
+
+  const sidebarContent = (collapsed: boolean, isMobile: boolean = false) => (
+    <div
+      className="flex flex-col h-full"
+      style={{ background: 'var(--ds-imperial)' }}
+    >
+      {/* Logo Section */}
+      <div className={`flex items-center h-14 border-b ${collapsed ? 'justify-center px-2' : 'px-4'}`} style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
+        {!collapsed && (
+          <Link href="/regtech/console" className="flex items-center gap-2.5">
+            <div
+              className="h-8 w-8 rounded-md flex items-center justify-center flex-shrink-0"
+              style={{ background: 'var(--ds-gold)' }}
+            >
+              <span className="text-sm font-bold" style={{ color: 'var(--ds-imperial)' }}>R</span>
             </div>
-
-            {/* Right: User menu */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="flex items-center gap-2 h-9 text-white hover:bg-slate-800" data-testid="button-account-menu">
-                  <div className="h-7 w-7 rounded-full bg-white text-slate-900 flex items-center justify-center text-xs font-medium">
-                    {user?.firstName?.[0] || user?.email?.[0]?.toUpperCase() || 'U'}
-                  </div>
-                  <div className="hidden md:flex flex-col items-start text-left">
-                    <span className="text-xs font-medium text-white" data-testid="text-username">
-                      {user?.firstName || user?.email?.split('@')[0] || 'User'}
-                    </span>
-                    {user?.role && (
-                      <span className="text-[10px] text-slate-400" data-testid="text-user-role">
-                        {ROLE_LABELS[user.role] || user.role}
-                      </span>
-                    )}
-                  </div>
-                  <ChevronDown className="h-3 w-3 text-slate-400" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel className="font-normal">
-                  <div className="flex flex-col gap-1">
-                    <p className="text-sm font-medium">{user?.firstName} {user?.lastName}</p>
-                    <p className="text-xs text-slate-500">{user?.email}</p>
-                    {user?.role && (
-                      <span className="text-xs text-emerald-600 font-medium">{ROLE_LABELS[user.role] || user.role}</span>
-                    )}
-                  </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                {isAdmin && (
-                  <>
-                    <DropdownMenuItem asChild className="cursor-pointer">
-                      <Link href="/regtech/admin" className="flex items-center">
-                        <Settings className="mr-2 h-4 w-4" />
-                        Admin Dashboard
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                  </>
-                )}
-                <DropdownMenuItem onClick={handleLogout} className="text-red-600 cursor-pointer" data-testid="menu-logout">
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Logout
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </div>
-
-        {/* Tier 2: Session Bar */}
-        <SessionBar />
-
-        {/* Tier 3: Navigation */}
-        <div className="bg-white border-b border-slate-200">
-          <div className="max-w-7xl mx-auto px-4 lg:px-6">
-            <nav className="hidden lg:flex items-center gap-1 py-2 overflow-x-auto">
-              {navItems.map((item) => {
-                const Icon = item.icon;
-                const isActive = location === item.href;
-                
-                return (
-                  <Link key={item.href} href={item.href}>
-                    <button
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-150 whitespace-nowrap ${
-                        isActive
-                          ? 'bg-slate-900 text-white shadow-sm'
-                          : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 border border-transparent hover:border-slate-200'
-                      }`}
-                      data-testid={`link-${item.label.toLowerCase()}`}
-                    >
-                      <Icon className="h-4 w-4" />
-                      {item.label}
-                    </button>
-                  </Link>
-                );
-              })}
-            </nav>
-            {/* Mobile: show current page indicator */}
-            <div className="lg:hidden py-2 text-sm text-slate-600">
-              {navItems.find(item => item.href === location)?.label || 'RegTech'}
+            <div className="flex flex-col">
+              <span className="brand-name text-[15px] text-white leading-tight">RegIntel</span>
+              <span className="text-[10px] leading-tight" style={{ color: 'var(--ds-text-on-dark-muted)' }}>
+                Regulatory Intelligence
+              </span>
             </div>
+          </Link>
+        )}
+        {collapsed && !isMobile && (
+          <Link href="/regtech/console">
+            <div
+              className="h-8 w-8 rounded-md flex items-center justify-center"
+              style={{ background: 'var(--ds-gold)' }}
+            >
+              <span className="text-sm font-bold" style={{ color: 'var(--ds-imperial)' }}>R</span>
+            </div>
+          </Link>
+        )}
+        {isMobile && (
+          <button
+            onClick={() => setMobileOpen(false)}
+            className="ml-auto p-1 rounded hover:bg-white/10 transition-colors"
+          >
+            <X className="h-5 w-5 text-white" />
+          </button>
+        )}
+      </div>
+
+      {/* Main Navigation */}
+      <nav className="flex-1 py-3 space-y-0.5 overflow-y-auto">
+        {!collapsed && (
+          <div className="px-4 mb-2">
+            <span className="text-[11px] font-semibold uppercase tracking-[1.5px]" style={{ color: 'var(--ds-text-on-dark-muted)' }}>
+              Navigation
+            </span>
           </div>
-        </div>
-      </header>
+        )}
+        {mainNavItems.map(item => renderNavItem(item, collapsed))}
 
-      {/* Main Content */}
-      <main className="flex-1">
-        <div className="max-w-7xl mx-auto px-4 lg:px-6 py-6" key={location}>
-          {children}
-        </div>
-      </main>
-
-      {/* Mobile Navigation Sheet */}
-      <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-        <SheetContent side="left" className="w-80 p-0">
-          <SheetHeader className="p-4 border-b">
-            <SheetTitle className="flex items-center gap-3">
-              <img src={iconUrl} alt="RegIntel" className="h-8 w-8" />
-              <div className="text-left">
-                <div className="text-sm font-semibold">RegIntel</div>
-                <div className="text-xs text-slate-500 font-normal">Regulatory Intelligence Platform</div>
+        {isAdmin && (
+          <>
+            {!collapsed && (
+              <div className="px-4 mt-4 mb-2">
+                <span className="text-[11px] font-semibold uppercase tracking-[1.5px]" style={{ color: 'var(--ds-text-on-dark-muted)' }}>
+                  Admin
+                </span>
               </div>
-            </SheetTitle>
-          </SheetHeader>
-          
-          {/* Mobile Nav Grid - Bento style */}
-          <div className="p-4">
-            <div className="grid grid-cols-2 gap-3">
-              {navItems.map((item) => {
-                const Icon = item.icon;
-                const isActive = location === item.href;
-                
-                return (
-                  <Link key={item.href} href={item.href}>
-                    <button
-                      onClick={() => setMobileMenuOpen(false)}
-                      className={`w-full p-4 rounded-xl text-left transition-all ${
-                        isActive 
-                          ? 'bg-slate-900 text-white' 
-                          : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
-                      }`}
-                      data-testid={`mobile-link-${item.label.toLowerCase()}`}
-                    >
-                      <Icon className="h-5 w-5 mb-2" />
-                      <div className="font-medium text-sm">{item.label}</div>
-                      <div className={`text-xs mt-0.5 ${isActive ? 'text-slate-300' : 'text-slate-500'}`}>
-                        {item.description}
-                      </div>
-                    </button>
-                  </Link>
-                );
-              })}
-            </div>
-            
-            {isAdmin && (
-              <Link href="/regtech/admin">
-                <button
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="w-full mt-3 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-left hover:bg-emerald-100 transition-colors"
-                >
-                  <Settings className="h-5 w-5 mb-2 text-emerald-600" />
-                  <div className="font-medium text-sm text-emerald-900">Admin Dashboard</div>
-                  <div className="text-xs text-emerald-600 mt-0.5">Manage users & orgs</div>
-                </button>
-              </Link>
             )}
-          </div>
-        </SheetContent>
-      </Sheet>
+            {renderNavItem({ href: "/regtech/admin", icon: Settings, label: "Admin" }, collapsed)}
+          </>
+        )}
+      </nav>
 
-        {/* Minimal Footer */}
-        <footer className="border-t border-slate-200 bg-white py-6">
-          <div className="max-w-7xl mx-auto px-4 lg:px-6 flex justify-between items-center text-xs text-slate-500">
-            <span>© RegIntel. All rights reserved.</span>
-            <a href="mailto:hello@regintel.darkstreet.tech" className="hover:text-slate-900 transition-colors">hello@regintel.darkstreet.tech</a>
+      {/* Bottom Section */}
+      <div className="border-t py-3 space-y-0.5" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
+        {bottomNavItems.map(item => renderNavItem(item, collapsed))}
+
+        {/* Collapse toggle (desktop only) */}
+        {!isMobile && (
+          <div className={`${collapsed ? 'flex justify-center' : 'mx-3'} mt-2`}>
+            <button
+              onClick={() => setSidebarCollapsed(!collapsed)}
+              className="flex items-center gap-2 px-3 py-2 rounded-md w-full transition-colors hover:bg-white/5"
+              style={{ color: 'var(--ds-text-on-dark-muted)' }}
+            >
+              {collapsed ? (
+                <ChevronRight className="h-4 w-4 mx-auto" />
+              ) : (
+                <>
+                  <ChevronLeft className="h-4 w-4" />
+                  <span className="text-[12px]">Collapse</span>
+                </>
+              )}
+            </button>
+          </div>
+        )}
+
+        {/* Dark Street Tech branding */}
+        {!collapsed && (
+          <div className="px-4 pt-2 pb-1">
+            <span className="text-[11px]" style={{ color: 'var(--ds-text-on-dark-muted)' }}>
+              Dark Street Tech
+            </span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen flex" style={{ background: 'var(--ds-bg)' }}>
+      {/* Desktop Sidebar */}
+      <aside
+        className={`hidden lg:flex flex-col flex-shrink-0 h-screen sticky top-0 transition-all duration-200 ${
+          sidebarCollapsed ? 'w-[56px]' : 'w-[240px]'
+        }`}
+      >
+        {sidebarContent(sidebarCollapsed)}
+      </aside>
+
+      {/* Mobile Overlay */}
+      {mobileOpen && (
+        <div className="lg:hidden fixed inset-0 z-50 flex">
+          <div
+            className="fixed inset-0 bg-black/50"
+            onClick={() => setMobileOpen(false)}
+          />
+          <aside className="relative w-[280px] h-full flex-shrink-0">
+            {sidebarContent(false, true)}
+          </aside>
+        </div>
+      )}
+
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col min-h-screen min-w-0">
+        {/* Top Bar */}
+        <header
+          className="sticky top-0 z-40 flex items-center h-14 px-4 lg:px-6 border-b"
+          style={{
+            background: 'var(--ds-surface)',
+            borderColor: 'var(--ds-border)',
+          }}
+        >
+          {/* Mobile menu button */}
+          <button
+            onClick={() => setMobileOpen(true)}
+            className="lg:hidden p-1.5 mr-3 rounded-md hover:bg-gray-100 transition-colors"
+          >
+            <Menu className="h-5 w-5" style={{ color: 'var(--ds-text)' }} />
+          </button>
+
+          {/* Page title / breadcrumb */}
+          <h1
+            className="text-[18px] font-semibold"
+            style={{ fontFamily: "'Playfair Display', serif", color: 'var(--ds-text)' }}
+          >
+            {pageTitle}
+          </h1>
+
+          <div className="flex-1" />
+
+          {/* Right side: user menu */}
+          <div className="flex items-center gap-3">
+            {/* User Avatar + Info */}
+            <div className="flex items-center gap-2.5">
+              <div className="hidden sm:flex flex-col items-end">
+                <span className="text-[13px] font-medium" style={{ color: 'var(--ds-text)' }}>
+                  {user?.firstName || user?.email?.split('@')[0] || 'User'}
+                </span>
+                {user?.role && (
+                  <span className="text-[11px]" style={{ color: 'var(--ds-text-muted)' }}>
+                    {ROLE_LABELS[user.role] || user.role}
+                  </span>
+                )}
+              </div>
+              <div
+                className="h-8 w-8 rounded-full flex items-center justify-center text-xs font-semibold"
+                style={{ background: 'var(--ds-imperial)', color: 'white' }}
+              >
+                {user?.firstName?.[0] || user?.email?.[0]?.toUpperCase() || 'U'}
+              </div>
+            </div>
+
+            {/* Logout */}
+            <Tooltip delayDuration={0}>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleLogout}
+                  className="h-8 w-8 p-0"
+                >
+                  <LogOut className="h-4 w-4" style={{ color: 'var(--ds-text-muted)' }} />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Logout</TooltipContent>
+            </Tooltip>
+          </div>
+        </header>
+
+        {/* Page Content */}
+        <main className="flex-1 p-4 lg:p-6" key={location}>
+          <div className="max-w-[1400px] mx-auto">
+            {children}
+          </div>
+        </main>
+
+        {/* Footer */}
+        <footer
+          className="border-t py-4 px-4 lg:px-6"
+          style={{
+            borderColor: 'var(--ds-border)',
+            background: 'var(--ds-surface)',
+          }}
+        >
+          <div className="max-w-[1400px] mx-auto flex flex-wrap justify-between items-center gap-2 text-[11px]" style={{ color: 'var(--ds-text-muted)' }}>
+            <span>&copy; {new Date().getFullYear()} RegIntel. All rights reserved.</span>
+            <div className="flex items-center gap-4">
+              <a href="/terms" className="hover:underline" style={{ color: 'var(--ds-text-muted)' }}>Terms</a>
+              <a href="/privacy" className="hover:underline" style={{ color: 'var(--ds-text-muted)' }}>Privacy</a>
+              <a href="/contact" className="hover:underline" style={{ color: 'var(--ds-text-muted)' }}>Contact</a>
+              <span>Dark Street Tech</span>
+            </div>
           </div>
         </footer>
       </div>
+    </div>
   );
 }

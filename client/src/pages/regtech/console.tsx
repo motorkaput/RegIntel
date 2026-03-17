@@ -105,9 +105,9 @@ export default function ConsolePage() {
     <RegTechLayout>
       <div className="space-y-6 page-enter">
         {/* Page Header */}
-        <div className="bg-white rounded-2xl p-6 border border-slate-200">
-          <h1 className="text-2xl font-semibold text-slate-900" data-testid="text-page-title">Regulatory Console</h1>
-          <p className="text-slate-600 mt-1 text-sm">
+        <div className="rounded-lg p-6 border" style={{ background: 'var(--ds-surface)', borderColor: 'var(--ds-border)' }}>
+          <h1 className="text-2xl font-semibold" style={{ color: 'var(--ds-text)' }} data-testid="text-page-title">Dashboard</h1>
+          <p className="mt-1 text-sm" style={{ color: 'var(--ds-text-secondary)' }}>
             Analyze regulatory content from FIU/FATF/AML regulator websites
           </p>
         </div>
@@ -141,7 +141,8 @@ export default function ConsolePage() {
               disabled={!url.trim() || analyzeMutation.isPending}
               onClick={handleAnalyze}
               data-testid="button-analyze"
-              className="rounded-xl bg-slate-900 hover:bg-slate-800 px-6"
+              className="rounded-md px-6 text-white hover:opacity-90"
+              style={{ background: 'var(--ds-imperial)' }}
             >
               {analyzeMutation.isPending ? (
                 <>
