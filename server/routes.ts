@@ -11,6 +11,7 @@ import { eq, sql } from "drizzle-orm";
 import bcrypt from "bcrypt";
 import { z } from "zod";
 import { initializeAdminUser } from "./initAdmin";
+import { passport } from "./auth";
 
 function isAuthenticated(req: any, res: any, next: any) {
   if (!req.session.userId) {
@@ -139,6 +140,120 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Get current user error:', error);
       res.status(500).json({ message: 'Failed to get user' });
+    }
+  });
+
+  // Google OAuth routes
+  app.get('/api/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+
+  app.get('/api/auth/google/callback',
+    passport.authenticate('google', { failureRedirect: '/login?error=google_auth_failed' }),
+    (req: any, res) => {
+      // Set session userId for compatibility with existing auth checks
+      if (req.user) {
+        req.session.userId = req.user.id;
+        req.session.isRegtechUser = req.user.isRegtechUser || false;
+        req.session.save(() => {
+          res.redirect('/regtech/documents');
+        });
+      } else {
+        res.redirect('/login?error=google_auth_failed');
+      }
+    }
+  );
+
+  // Microsoft OAuth routes
+  app.get('/api/auth/microsoft', (req, res, next) => {
+    const hasStrategy = (passport as any)._strategies?.microsoft;
+    if (!hasStrategy) {
+      return res.redirect('/login?error=microsoft_not_configured');
+    }
+    passport.authenticate('microsoft', { scope: 'openid profile email' })(req, res, next);
+  });
+
+  app.get('/api/auth/microsoft/callback',
+    (req, res, next) => {
+      const hasStrategy = (passport as any)._strategies?.microsoft;
+      if (!hasStrategy) {
+        return res.redirect('/login?error=microsoft_not_configured');
+      }
+      passport.authenticate('microsoft', { failureRedirect: '/login?error=microsoft_auth_failed' })(req, res, next);
+    },
+    (req: any, res) => {
+      if (req.user) {
+        req.session.userId = req.user.id;
+        req.session.isRegtechUser = req.user.isRegtechUser || false;
+        req.session.save(() => {
+          res.redirect('/regtech/documents');
+        });
+      } else {
+        res.redirect('/login?error=microsoft_auth_failed');
+      }
+    }
+  );
+
+  // Password reset request
+  app.post('/api/auth/forgot-password', async (req: any, res) => {
+    try {
+      const { email } = req.body;
+      if (!email) {
+        return res.status(400).json({ message: 'Email is required' });
+      }
+      // Always return success to prevent email enumeration
+      console.log(`Password reset requested for: ${email}`);
+      res.json({ message: 'If an account exists with that email, a reset link has been sent.' });
+    } catch (error) {
+      console.error('Forgot password error:', error);
+      res.status(500).json({ message: 'Failed to process request' });
+    }
+  });
+
+  // User registration
+  app.post('/api/auth/register', async (req: any, res) => {
+    try {
+      const registerSchema = z.object({
+        email: z.string().email('Valid email is required'),
+        password: z.string().min(8, 'Password must be at least 8 characters'),
+        firstName: z.string().min(1, 'First name is required'),
+        lastName: z.string().min(1, 'Last name is required'),
+      });
+      const validation = registerSchema.safeParse(req.body);
+      if (!validation.success) {
+        return res.status(400).json({ message: validation.error.errors[0].message });
+      }
+      const { email, password, firstName, lastName } = validation.data;
+
+      // Check if user already exists
+      const existing = await storage.getUserByEmail(email);
+      if (existing) {
+        return res.status(409).json({ message: 'An account with this email already exists' });
+      }
+
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const user = await storage.upsertUser({
+        id: nanoid(),
+        email,
+        password: hashedPassword,
+        firstName,
+        lastName,
+      });
+
+      req.session.regenerate((err: any) => {
+        if (err) {
+          return res.status(500).json({ message: 'Registration succeeded but login failed' });
+        }
+        req.session.userId = user.id;
+        req.session.save((saveErr: any) => {
+          if (saveErr) {
+            return res.status(500).json({ message: 'Registration succeeded but login failed' });
+          }
+          const { password: _, ...userWithoutPassword } = user;
+          res.status(201).json(userWithoutPassword);
+        });
+      });
+    } catch (error) {
+      console.error('Registration error:', error);
+      res.status(500).json({ message: 'Registration failed' });
     }
   });
 
