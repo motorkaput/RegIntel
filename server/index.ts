@@ -3,6 +3,7 @@ import session from "express-session";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { passport, setupMicrosoftAuth } from "./auth";
+import { startAlertScheduler } from "./services/alertScheduler";
 
 const app = express();
 app.use(express.json());
@@ -93,5 +94,8 @@ app.use((req, res, next) => {
     reusePort: true,
   }, () => {
     log(`serving on port ${port}`);
+
+    // Start the background alert scheduler
+    startAlertScheduler();
   });
 })();
