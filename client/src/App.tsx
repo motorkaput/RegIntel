@@ -5,6 +5,11 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import RegTechLanding from "@/pages/regtech-landing";
+import PricingPage from "@/pages/pricing";
+import TermsPage from "@/pages/terms";
+import PrivacyPage from "@/pages/privacy";
+import RefundPage from "@/pages/refund";
+import ContactPage from "@/pages/contact";
 import RegTechDocuments from "@/pages/regtech/documents";
 import RegTechConsole from "@/pages/regtech/console";
 import RegTechQuery from "@/pages/regtech/query";
@@ -55,6 +60,11 @@ function Router() {
     <Switch>
       <Route path="/" component={RegTechLanding} />
       <Route path="/login" component={RegTechLanding} />
+      <Route path="/pricing" component={PricingPage} />
+      <Route path="/terms" component={TermsPage} />
+      <Route path="/privacy" component={PrivacyPage} />
+      <Route path="/refund" component={RefundPage} />
+      <Route path="/contact" component={ContactPage} />
       <Route path="/regtech/*">{() => <RegTechLanding />}</Route>
       <Route component={NotFound} />
     </Switch>
