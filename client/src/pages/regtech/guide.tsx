@@ -218,11 +218,11 @@ export default function GuidePage() {
               </div>
             </SectionCard>
 
-            <SectionCard icon={FileText} iconColor="text-violet-600" title="Console (Regulatory News Feed)">
-              <p>Stay up to date with the latest regulatory developments from official sources.</p>
+            <SectionCard icon={FileText} iconColor="text-violet-600" title="Console (URL-Based Analysis)">
+              <p>Analyze regulatory content directly from official source URLs.</p>
               <div className="space-y-2">
-                <KeyPoint icon={Search} label="Web scanner">
-                  Enter a topic or regulatory area and the AI engine will search official regulatory sources for the latest updates, guidelines, and announcements.
+                <KeyPoint icon={Search} label="URL analysis">
+                  Paste a URL from any regulatory website and the AI engine will extract and analyze the content, identifying key regulatory updates, requirements, and implications.
                 </KeyPoint>
                 <KeyPoint icon={BarChart3} label="Analysis">
                   Each scanned result includes a summary, source URL for verification, and relevance assessment to help you decide what requires attention.
