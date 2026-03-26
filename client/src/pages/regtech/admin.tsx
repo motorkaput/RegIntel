@@ -244,8 +244,8 @@ export default function RegtechAdmin() {
                 Back
               </Button>
               <div>
-                <h1 className="text-2xl font-semibold text-slate-900">RegTech Admin</h1>
-                <p className="text-slate-600 mt-1 text-sm">Manage RegTech users and organizations</p>
+                <h1 className="text-2xl font-semibold text-slate-900">Admin Panel</h1>
+                <p className="text-slate-600 mt-1 text-sm">Manage users and organizations</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -288,7 +288,7 @@ export default function RegtechAdmin() {
               <div className="flex items-center justify-between mb-6">
                 <div>
                   <h2 className="text-lg font-semibold text-slate-900">User Management</h2>
-                  <p className="text-sm text-slate-500">Create and manage RegTech user accounts</p>
+                  <p className="text-sm text-slate-500">Create and manage user accounts</p>
                 </div>
                 <Dialog open={isCreateDialogOpen} onOpenChange={(open) => {
                   setIsCreateDialogOpen(open);

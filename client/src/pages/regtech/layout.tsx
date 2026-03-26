@@ -62,8 +62,8 @@ export default function RegTechLayout({ children }: { children: React.ReactNode 
     return (
       <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-xl font-bold font-heading text-[#001D51] dark:text-white animate-pulse">regintel</h1>
-          <p className="text-xs text-[#D4AF37] mt-1">Loading...</p>
+          <h1 className="text-xl font-bold font-heading text-[#001D51] dark:text-white animate-pulse">RegIntel</h1>
+          <p className="text-xs text-[#D4AF37]/60 mt-1">Loading...</p>
         </div>
       </div>
     );
@@ -102,8 +102,7 @@ export default function RegTechLayout({ children }: { children: React.ReactNode 
                 <Menu className="h-5 w-5" />
               </button>
               <Link href="/regtech/documents" className="flex items-center gap-2">
-                <span className="text-base font-bold font-heading text-white">regintel</span>
-                <span className="text-[10px] text-[#D4AF37] hidden sm:inline">by Dark Street Tech</span>
+                <span className="text-base font-bold font-heading text-white tracking-tight">RegIntel</span>
               </Link>
             </div>
 
@@ -192,8 +191,7 @@ export default function RegTechLayout({ children }: { children: React.ReactNode 
         <SheetContent side="left" className="w-80 p-0">
           <SheetHeader className="p-4 border-b">
             <SheetTitle className="flex items-center gap-2 text-left">
-              <span className="text-base font-bold font-heading">regintel</span>
-              <span className="text-xs text-[#D4AF37]">by Dark Street Tech</span>
+              <span className="text-base font-bold font-heading">RegIntel</span>
             </SheetTitle>
           </SheetHeader>
           <div className="p-4">
@@ -232,8 +230,7 @@ export default function RegTechLayout({ children }: { children: React.ReactNode 
         <div className="max-w-7xl mx-auto px-4 lg:px-6">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
             <div className="flex items-center gap-2">
-              <span className="font-heading font-bold text-slate-700 dark:text-slate-300">regintel</span>
-              <span className="text-[#D4AF37]">by Dark Street Tech</span>
+              <span className="font-heading font-bold text-slate-700 dark:text-slate-300">RegIntel</span>
             </div>
             <div className="flex items-center gap-4">
               <a href="mailto:hello@darkstreet.org" className="hover:text-[#D4AF37] transition">hello@darkstreet.org</a>
