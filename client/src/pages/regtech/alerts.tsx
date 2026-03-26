@@ -597,7 +597,7 @@ export default function AlertsPage() {
                   All ({webAlerts.length})
                 </Button>
               </div>
-              <Button onClick={() => setIsCreateAlertSetOpen(true)} className="rounded-xl bg-slate-900 hover:bg-slate-800">
+              <Button onClick={() => setIsCreateAlertSetOpen(true)} className="rounded-xl bg-slate-900 hover:bg-slate-800 text-white">
                 <Plus className="h-4 w-4 mr-2" />
                 New Alert Set
               </Button>
@@ -617,7 +617,7 @@ export default function AlertsPage() {
                 title="No alert sets configured"
                 description="Create an alert set to start scanning regulatory websites for updates relevant to your compliance needs."
                 action={
-                  <Button onClick={() => setIsCreateAlertSetOpen(true)} className="rounded-xl bg-slate-900 hover:bg-slate-800">
+                  <Button onClick={() => setIsCreateAlertSetOpen(true)} className="rounded-xl bg-slate-900 hover:bg-slate-800 text-white">
                     <Plus className="h-4 w-4 mr-2" />
                     Create Your First Alert Set
                   </Button>
@@ -800,7 +800,7 @@ export default function AlertsPage() {
                   <p className="text-slate-600 text-sm">
                     {webAlertSets.length} alert set{webAlertSets.length !== 1 ? 's' : ''} configured
                   </p>
-                  <Button onClick={() => setIsCreateAlertSetOpen(true)} className="rounded-xl bg-slate-900 hover:bg-slate-800">
+                  <Button onClick={() => setIsCreateAlertSetOpen(true)} className="rounded-xl bg-slate-900 hover:bg-slate-800 text-white">
                     <Plus className="h-4 w-4 mr-2" />
                     Create Alert Set
                   </Button>
@@ -820,7 +820,7 @@ export default function AlertsPage() {
                     title="No alert sets configured yet"
                     description="Set up your first alert set to monitor regulatory changes across jurisdictions."
                     action={
-                      <Button onClick={() => setIsCreateAlertSetOpen(true)} className="rounded-xl bg-slate-900 hover:bg-slate-800">
+                      <Button onClick={() => setIsCreateAlertSetOpen(true)} className="rounded-xl bg-slate-900 hover:bg-slate-800 text-white">
                         <Plus className="h-4 w-4 mr-2" />
                         Create Alert Set
                       </Button>

@@ -19,7 +19,7 @@ const ROLE_LABELS: Record<string, string> = {
 
 const navItems = [
   { href: "/regtech/documents", icon: Library, label: "Library", description: "Upload & browse documents" },
-  { href: "/regtech/console", icon: FileText, label: "Console", description: "Regulatory news feed" },
+  { href: "/regtech/console", icon: FileText, label: "Console", description: "URL-based analysis" },
   { href: "/regtech/query", icon: MessageSquare, label: "Query AI", description: "Ask questions" },
   { href: "/regtech/diff", icon: GitCompare, label: "Diff", description: "Compare documents" },
   { href: "/regtech/obligations-analysis", icon: ClipboardCheck, label: "Obligations", description: "Analyze obligations" },

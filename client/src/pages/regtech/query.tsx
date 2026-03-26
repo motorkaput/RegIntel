@@ -359,7 +359,7 @@ export default function QueryPage() {
 
               <Button
                 type="submit"
-                className="w-full rounded-xl bg-slate-900 hover:bg-slate-800"
+                className="w-full rounded-xl bg-slate-900 hover:bg-slate-800 text-white"
                 disabled={queryMutation.isPending || !query.trim()}
                 data-testid="button-submit"
               >

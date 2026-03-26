@@ -209,7 +209,7 @@ export default function RegtechAdmin() {
             <Shield className="h-12 w-12 text-slate-400 mx-auto mb-4" />
             <h2 className="text-xl font-semibold text-slate-900 mb-2">Access Denied</h2>
             <p className="text-slate-600 mb-6">You need administrator privileges to access this page.</p>
-            <Button onClick={() => setLocation("/regtech/console")} className="bg-slate-900 hover:bg-slate-800">
+            <Button onClick={() => setLocation("/regtech/console")} className="bg-slate-900 hover:bg-slate-800 text-white">
               Go to Dashboard
             </Button>
           </div>
@@ -295,7 +295,7 @@ export default function RegtechAdmin() {
                   if (open) setNewUser(prev => ({ ...prev, password: generateSecurePassword() }));
                 }}>
                   <DialogTrigger asChild>
-                    <Button className="bg-slate-900 hover:bg-slate-800">
+                    <Button className="bg-slate-900 hover:bg-slate-800 text-white">
                       <Plus className="h-4 w-4 mr-2" />
                       Add User
                     </Button>
@@ -390,7 +390,7 @@ export default function RegtechAdmin() {
                         </div>
                         <p className="text-xs text-slate-500 mt-2">Copy this password to share with the user.</p>
                       </div>
-                      <Button type="submit" className="w-full bg-slate-900 hover:bg-slate-800" disabled={createUserMutation.isPending}>
+                      <Button type="submit" className="w-full bg-slate-900 hover:bg-slate-800 text-white" disabled={createUserMutation.isPending}>
                         {createUserMutation.isPending ? "Creating..." : "Create User"}
                       </Button>
                     </form>
@@ -525,7 +525,7 @@ export default function RegtechAdmin() {
                 </div>
                 <Dialog open={isCreateOrgDialogOpen} onOpenChange={setIsCreateOrgDialogOpen}>
                   <DialogTrigger asChild>
-                    <Button className="bg-slate-900 hover:bg-slate-800">
+                    <Button className="bg-slate-900 hover:bg-slate-800 text-white">
                       <Plus className="h-4 w-4 mr-2" />
                       Add Organization
                     </Button>
@@ -567,7 +567,7 @@ export default function RegtechAdmin() {
                           placeholder="acme.com"
                         />
                       </div>
-                      <Button type="submit" className="w-full bg-slate-900 hover:bg-slate-800" disabled={createOrgMutation.isPending}>
+                      <Button type="submit" className="w-full bg-slate-900 hover:bg-slate-800 text-white" disabled={createOrgMutation.isPending}>
                         {createOrgMutation.isPending ? "Creating..." : "Create Organization"}
                       </Button>
                     </form>
@@ -690,7 +690,7 @@ export default function RegtechAdmin() {
               </div>
             </div>
             <Button
-              className="w-full bg-slate-900 hover:bg-slate-800"
+              className="w-full bg-slate-900 hover:bg-slate-800 text-white"
               onClick={() => resetPasswordUserId && resetPasswordMutation.mutate({ userId: resetPasswordUserId, newPassword })}
               disabled={resetPasswordMutation.isPending}
             >
