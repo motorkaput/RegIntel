@@ -419,6 +419,10 @@ export default function DiffPage() {
           </div>
         )}
 
+        {result && (
+          <p className="text-[10px] text-slate-400 italic mt-2">RegIntel can make mistakes. Please verify all important information before taking decisions.</p>
+        )}
+
         {activeDocuments.length < 2 && (
           <Card>
             <CardContent className="py-12 text-center">

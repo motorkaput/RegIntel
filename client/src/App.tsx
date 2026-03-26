@@ -14,6 +14,7 @@ import RegtechAdmin from "@/pages/regtech/admin";
 import RegTechSessions from "@/pages/regtech/sessions";
 import ObligationsAnalysisPage from "@/pages/regtech/obligations-analysis";
 import RegTechGuide from "@/pages/regtech/guide";
+import PricingPage from "@/pages/regtech/pricing";
 import { SessionProvider } from "@/contexts/SessionContext";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -37,6 +38,7 @@ function RegTechRoutes() {
         <Route path="/regtech/sessions" component={RegTechSessions} />
         <Route path="/regtech/guide" component={RegTechGuide} />
         <Route path="/regtech/admin" component={RegtechAdmin} />
+        <Route path="/regtech/pricing" component={PricingPage} />
         <Route component={NotFound} />
       </Switch>
     </SessionProvider>
@@ -47,7 +49,7 @@ function Router() {
   const [location] = useLocation();
   const { isAuthenticated, isLoading } = useAuth();
 
-  if (location.startsWith('/regtech') && !isLoading && isAuthenticated) {
+  if (location.startsWith("/regtech") && !isLoading && isAuthenticated) {
     return <RegTechRoutes />;
   }
 

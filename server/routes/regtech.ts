@@ -3648,7 +3648,25 @@ Use plain language without markdown formatting, hyphens, or special characters.`
       if (!(await isRegtechAdmin(req))) {
         return res.status(403).json({ message: 'Admin access required' });
       }
-      const users = await db.select({
+      // Query main users table (where new signups go) with subscription info
+      const mainUsers = await db.select({
+        id: users.id,
+        email: users.email,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        role: users.role,
+        organizationId: users.organizationId,
+        isAdmin: users.isAdmin,
+        isActive: sql<boolean>`true`.as('is_active'),
+        subscriptionStatus: users.subscriptionStatus,
+        trialEndsAt: users.trialEndsAt,
+        accessExpiresAt: users.accessExpiresAt,
+        createdAt: users.createdAt,
+        source: sql<string>`'main'`.as('source'),
+      }).from(users).orderBy(users.createdAt);
+
+      // Query regtech users table for backwards compat
+      const rtUsers = await db.select({
         id: regtechUsers.id,
         email: regtechUsers.email,
         firstName: regtechUsers.firstName,
@@ -3657,12 +3675,25 @@ Use plain language without markdown formatting, hyphens, or special characters.`
         organizationId: regtechUsers.organizationId,
         isAdmin: regtechUsers.isAdmin,
         isActive: regtechUsers.isActive,
-        lastLoginAt: regtechUsers.lastLoginAt,
+        subscriptionStatus: sql<string>`'active'`.as('subscription_status'),
+        trialEndsAt: sql<Date | null>`null`.as('trial_ends_at'),
+        accessExpiresAt: sql<Date | null>`null`.as('access_expires_at'),
         createdAt: regtechUsers.createdAt,
+        source: sql<string>`'regtech'`.as('source'),
       }).from(regtechUsers).orderBy(regtechUsers.createdAt);
-      res.json(users);
+
+      // Merge, deduplicate by email
+      const seenEmails = new Set<string>();
+      const allUsers = [];
+      for (const u of [...mainUsers, ...rtUsers]) {
+        if (u.email && !seenEmails.has(u.email)) {
+          seenEmails.add(u.email);
+          allUsers.push(u);
+        }
+      }
+      res.json(allUsers);
     } catch (error) {
-      console.error('Get regtech users error:', error);
+      console.error('Get admin users error:', error);
       res.status(500).json({ message: 'Failed to get users' });
     }
   });
@@ -3736,6 +3767,36 @@ Use plain language without markdown formatting, hyphens, or special characters.`
     } catch (error) {
       console.error('Reset regtech user password error:', error);
       res.status(500).json({ message: 'Failed to reset password' });
+    }
+  });
+
+  // Admin: Update user subscription plan
+  app.post('/api/regtech/admin/users/:id/update-plan', isAuthenticated, async (req: any, res) => {
+    try {
+      if (!(await isRegtechAdmin(req))) {
+        return res.status(403).json({ message: 'Admin access required' });
+      }
+      const { id } = req.params;
+      const { subscriptionStatus } = req.body;
+      if (!subscriptionStatus || !['trial', 'active', 'expired'].includes(subscriptionStatus)) {
+        return res.status(400).json({ message: 'Invalid subscription status' });
+      }
+      const updates: any = { subscriptionStatus, updatedAt: new Date() };
+      if (subscriptionStatus === 'active') {
+        const exp = new Date();
+        exp.setFullYear(exp.getFullYear() + 1);
+        updates.accessExpiresAt = exp;
+      }
+      if (subscriptionStatus === 'trial') {
+        const trialEnd = new Date();
+        trialEnd.setDate(trialEnd.getDate() + 14);
+        updates.trialEndsAt = trialEnd;
+      }
+      await db.update(users).set(updates).where(eq(users.id, id));
+      res.json({ message: 'Plan updated successfully' });
+    } catch (error) {
+      console.error('Update user plan error:', error);
+      res.status(500).json({ message: 'Failed to update plan' });
     }
   });
 

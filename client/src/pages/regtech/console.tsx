@@ -292,6 +292,10 @@ export default function ConsolePage() {
                     <p className="text-sm text-slate-700">{item.regulatoryImpact}</p>
                   </div>
                 )}
+
+                {(item.summary || item.keyPoints?.length > 0) && (
+                  <p className="text-[10px] text-slate-400 italic">RegIntel can make mistakes. Please verify all important information before taking decisions.</p>
+                )}
               </div>
             </div>
           ))}

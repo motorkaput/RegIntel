@@ -401,7 +401,7 @@ export default function RegtechAdmin() {
               {loadingUsers ? (
                 <div className="p-8 text-center text-slate-600">Loading users...</div>
               ) : users && users.length > 0 ? (
-                <div className="rounded-xl border border-slate-200 overflow-hidden">
+                <div className="rounded-xl border border-slate-200 overflow-hidden overflow-x-auto">
                   <Table>
                     <TableHeader className="bg-slate-50">
                       <TableRow>
@@ -409,6 +409,7 @@ export default function RegtechAdmin() {
                         <TableHead className="text-slate-600">Email</TableHead>
                         <TableHead className="text-slate-600">Organization</TableHead>
                         <TableHead className="text-slate-600">Role</TableHead>
+                        <TableHead className="text-slate-600">Plan</TableHead>
                         <TableHead className="text-slate-600">Status</TableHead>
                         <TableHead className="text-slate-600">Actions</TableHead>
                       </TableRow>
@@ -443,6 +444,29 @@ export default function RegtechAdmin() {
                                 User
                               </span>
                             )}
+                          </TableCell>
+                          <TableCell>
+                            <Select
+                              value={user.subscriptionStatus || 'trial'}
+                              onValueChange={async (value) => {
+                                try {
+                                  await apiRequest(`/api/regtech/admin/users/${user.id}/update-plan`, 'POST', { subscriptionStatus: value });
+                                  queryClient.invalidateQueries({ queryKey: ['/api/regtech/admin/users'] });
+                                  toast({ title: "Updated", description: `Plan set to ${value}` });
+                                } catch (e: any) {
+                                  toast({ title: "Error", description: e.message, variant: "destructive" });
+                                }
+                              }}
+                            >
+                              <SelectTrigger className="h-7 text-xs w-[110px]">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="trial">Trial</SelectItem>
+                                <SelectItem value="active">Active</SelectItem>
+                                <SelectItem value="expired">Expired</SelectItem>
+                              </SelectContent>
+                            </Select>
                           </TableCell>
                           <TableCell>
                             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${

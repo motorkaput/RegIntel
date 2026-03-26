@@ -548,6 +548,7 @@ export default function ObligationsAnalysisPage() {
                 )}
               </TabsContent>
             </Tabs>
+            <p className="text-[10px] text-slate-400 italic mt-4">RegIntel can make mistakes. Please verify all important information before taking decisions.</p>
           </>
         )}
 

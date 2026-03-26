@@ -240,6 +240,7 @@ export default function QueryPage() {
                       <div className="prose prose-sm max-w-none text-slate-700" data-testid={`text-answer-${idx}`}>
                         <FormattedAnswer text={entry.answer} />
                       </div>
+                      <p className="text-[10px] text-slate-400 mt-2 italic">RegIntel can make mistakes. Please verify all important information before taking decisions.</p>
 
                       {entry.sources && entry.sources.length > 0 && (
                         <div className="mt-4 pt-4 border-t border-slate-100">
