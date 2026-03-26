@@ -34,6 +34,9 @@ RUN npm ci --omit=dev
 # Copy built artifacts
 COPY --from=base /app/dist ./dist
 
+# pdf-parse reads a test file at module load — create empty stub
+RUN mkdir -p test/data && touch test/data/05-versions-space.pdf
+
 ENV NODE_ENV=production
 ENV PORT=8080
 
