@@ -35,7 +35,8 @@ import {
   ensureRulePackExists 
 } from '../services/regulationProcessing';
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+let _openai: OpenAI | null = null;
+function getOpenAI() { return _openai ??= new OpenAI({ apiKey: process.env.OPENAI_API_KEY }); }
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -96,7 +97,7 @@ async function classifyDocument(text: string, filename: string): Promise<{ class
   try {
     const sampleText = text.slice(0, 6000);
     
-    const response = await openai.chat.completions.create({
+    const response = await getOpenAI().chat.completions.create({
       model: 'gpt-4.1-mini',
       messages: [
         {
@@ -477,7 +478,7 @@ Return your answer in plain text format followed by a Sources section with citat
 
       const userPrompt = `CONTEXT:\n${context}\n\nQUESTION: ${query}\n\nProvide a concise answer with citations.`;
 
-      const response = await openai.chat.completions.create({
+      const response = await getOpenAI().chat.completions.create({
         model: "gpt-4.1",
         messages: [
           { role: "system", content: systemPrompt },
@@ -650,7 +651,7 @@ IMPORTANT GUIDELINES:
 6. Leave regulatoryUpdates as an empty array - we will fetch real updates separately
 7. All dates should be in readable format (e.g., "31 March 2025" or "Within 30 days of detection")`;
 
-      const response = await openai.chat.completions.create({
+      const response = await getOpenAI().chat.completions.create({
         model: "gpt-4.1",
         messages: [{ role: "user", content: analysisPrompt }],
         response_format: { type: "json_object" },
@@ -670,7 +671,7 @@ IMPORTANT GUIDELINES:
       try {
         const searchQuery = `Latest ${jurisdictions.join(' ')} AML anti-money laundering CFT regulatory updates news ${regulators.join(' ')} 2024 2025`;
         
-        const webSearchResponse = await openai.responses.create({
+        const webSearchResponse = await getOpenAI().responses.create({
           model: "gpt-4.1",
           tools: [{ type: "web_search_preview" }],
           input: `Search for the latest regulatory updates, news, and announcements related to AML/CFT (Anti-Money Laundering / Counter-Financing of Terrorism) regulations for ${jurisdictions.join(', ')}. 
@@ -891,7 +892,7 @@ Rules:
 - complianceImpact should be actionable guidance
 - The impactScore should be 1-10 based on regulatory impact (1=minor clarifications, 10=major new requirements)`;
 
-      const response = await openai.chat.completions.create({
+      const response = await getOpenAI().chat.completions.create({
         model: "gpt-4.1",
         messages: [
           {
@@ -1535,7 +1536,7 @@ Regulatory Impact: 1-2 sentences about who is affected and what they need to do,
 
 Use plain language without markdown formatting, hyphens, or special characters.`;
 
-      const aiResponse = await openai.chat.completions.create({
+      const aiResponse = await getOpenAI().chat.completions.create({
         model: "gpt-4.1-mini",
         messages: [
           { 
@@ -4782,7 +4783,7 @@ Return JSON array of obligations in this exact format:
 
 Every obligation MUST include a citation_ref with section reference.`;
 
-    const response = await openai.chat.completions.create({
+    const response = await getOpenAI().chat.completions.create({
       model: "gpt-4.1-mini",
       messages: [{ role: "user", content: obligationPrompt }],
       response_format: { type: "json_object" },
@@ -4835,7 +4836,7 @@ ${text.substring(0, 3000)}
 
 Provide a brief, professional summary without special formatting.`;
 
-    const response = await openai.chat.completions.create({
+    const response = await getOpenAI().chat.completions.create({
       model: "gpt-4.1-mini",
       messages: [{ role: "user", content: summaryPrompt }],
       temperature: 0.3,

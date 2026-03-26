@@ -1,6 +1,7 @@
 import OpenAI from "openai";
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+let _openai: OpenAI | null = null;
+function getOpenAI() { return _openai ??= new OpenAI({ apiKey: process.env.OPENAI_API_KEY }); }
 
 export interface ExtractedMetadata {
   title: string;
@@ -61,7 +62,7 @@ IMPORTANT for non-English documents:
 If you cannot find a field, set it to null. Be accurate—only extract what you're confident about.`;
 
   try {
-    const response = await openai.chat.completions.create({
+    const response = await getOpenAI().chat.completions.create({
       model: "gpt-4.1",
       messages: [
         { 

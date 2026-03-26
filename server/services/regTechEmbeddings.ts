@@ -1,6 +1,7 @@
 import OpenAI from "openai";
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+let _openai: OpenAI | null = null;
+function getOpenAI() { return _openai ??= new OpenAI({ apiKey: process.env.OPENAI_API_KEY }); }
 
 export interface TextChunk {
   text: string;
@@ -89,7 +90,7 @@ export function chunkText(
 
 export async function generateEmbedding(text: string): Promise<number[]> {
   try {
-    const response = await openai.embeddings.create({
+    const response = await getOpenAI().embeddings.create({
       model: "text-embedding-3-large",
       input: text,
       dimensions: 2000,
@@ -114,7 +115,7 @@ export async function generateEmbeddings(texts: string[]): Promise<number[][]> {
     for (let i = 0; i < texts.length; i += MAX_BATCH_SIZE) {
       const batch = texts.slice(i, i + MAX_BATCH_SIZE);
       
-      const response = await openai.embeddings.create({
+      const response = await getOpenAI().embeddings.create({
         model: "text-embedding-3-large",
         input: batch,
         dimensions: 2000,

@@ -3,7 +3,8 @@ import OpenAI from "openai";
 import { REGULATORY_WEBSITES, DEFAULT_KEYWORDS } from "@shared/webAlertConstants";
 import type { WebAlertSet, InsertWebAlert } from "@shared/schema";
 
-const openai = new OpenAI();
+let _openai: OpenAI | null = null;
+function getOpenAI() { return _openai ??= new OpenAI({ apiKey: process.env.OPENAI_API_KEY }); }
 
 interface ScrapedContent {
   title: string;
@@ -208,7 +209,7 @@ Only include genuinely newsworthy regulatory updates. Skip generic website conte
 Respond with ONLY a valid JSON array. If no relevant updates are found, respond with an empty array [].`;
 
   try {
-    const response = await openai.chat.completions.create({
+    const response = await getOpenAI().chat.completions.create({
       model: "gpt-4.1",
       messages: [{ role: "user", content: prompt }],
       temperature: 0.3,

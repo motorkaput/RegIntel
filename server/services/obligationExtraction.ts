@@ -4,7 +4,8 @@ import { regulatoryObligations, legalUnits, regulations, aiAuditLog } from '@sha
 import { eq } from 'drizzle-orm';
 import { generateId } from './segmentationRulePacks';
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+let _openai: OpenAI | null = null;
+function getOpenAI() { return _openai ??= new OpenAI({ apiKey: process.env.OPENAI_API_KEY }); }
 
 export interface ExtractedObligation {
   obligationKey: string;
@@ -112,7 +113,7 @@ export async function extractObligationsFromLegalUnit(
     .limit(1);
 
   try {
-    const response = await openai.chat.completions.create({
+    const response = await getOpenAI().chat.completions.create({
       model: 'gpt-4.1',
       messages: [
         { role: 'system', content: EXTRACTION_PROMPT },

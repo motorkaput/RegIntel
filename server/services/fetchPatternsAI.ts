@@ -2,10 +2,8 @@ import OpenAI from "openai";
 import mammoth from "mammoth";
 import * as XLSX from "xlsx";
 
-// the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+let _openai: OpenAI | null = null;
+function getOpenAI() { return _openai ??= new OpenAI({ apiKey: process.env.OPENAI_API_KEY }); }
 
 export interface DocumentAnalysis {
   text: string;
@@ -82,7 +80,7 @@ export async function extractTextFromFile(buffer: Buffer, mimeType: string): Pro
               pageCount++;
               console.log(`Processing PDF page ${pageNum}...`);
               
-              const response = await openai.chat.completions.create({
+              const response = await getOpenAI().chat.completions.create({
                 model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
                 messages: [
                   {
@@ -279,7 +277,7 @@ export async function extractTextFromFile(buffer: Buffer, mimeType: string): Pro
             const base64Image = buffer.toString('base64');
             const imageExtension = mimeType.split('/')[1];
             
-            const response = await openai.chat.completions.create({
+            const response = await getOpenAI().chat.completions.create({
               model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
               messages: [
                 {
@@ -462,7 +460,7 @@ QUALITY STANDARDS:
 
     console.log('Sending request to OpenAI...');
     
-    const response = await openai.chat.completions.create({
+    const response = await getOpenAI().chat.completions.create({
       model: "gpt-4o",
       messages: [
         {
@@ -556,7 +554,7 @@ export async function answerQuestion(
       `Document: ${doc.filename}\n${doc.text.substring(0, 2000)}`
     ).join('\n\n');
 
-    const response = await openai.chat.completions.create({
+    const response = await getOpenAI().chat.completions.create({
       model: "gpt-4o",
       messages: [
         {
@@ -602,7 +600,7 @@ export async function analyzeContext(
       `Document: ${doc.filename}\n${doc.text}`
     ).join('\n\n---\n\n');
 
-    const response = await openai.chat.completions.create({
+    const response = await getOpenAI().chat.completions.create({
       model: "gpt-4o",
       messages: [
         {
