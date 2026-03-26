@@ -129,9 +129,9 @@ export default function RegTechLanding() {
         <div className="max-w-6xl mx-auto flex h-16 items-center justify-between px-4 lg:px-6">
           <span className="text-xl font-bold font-heading tracking-tight">RegIntel</span>
           <div className="flex items-center gap-3">
-            <Button variant="ghost" className="text-white/70 hover:text-white hover:bg-white/10 text-sm" onClick={() => scrollToAuth("login")}>
+            <button className="text-white/70 hover:text-white hover:bg-white/10 text-sm px-4 py-2 rounded-md transition-colors" onClick={() => scrollToAuth("login")}>
               Sign In
-            </Button>
+            </button>
             <Button className="bg-[#D4AF37] text-[#001D51] hover:bg-[#c9a432] text-sm font-semibold" onClick={() => scrollToAuth("register")}>
               Start Free Trial
             </Button>

@@ -7,7 +7,10 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Session configuration for white-label auth
+// Trust Railway's reverse proxy (required for secure cookies behind proxy)
+app.set('trust proxy', 1);
+
+// Session configuration
 import connectPgSimple from 'connect-pg-simple';
 
 const PostgresSessionStore = connectPgSimple(session);
@@ -25,7 +28,7 @@ app.use(session({
   cookie: {
     secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
-    maxAge: 24 * 60 * 60 * 1000,
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     sameSite: 'lax',
     path: '/'
   }

@@ -35,6 +35,18 @@ function generateToken(user: any): string {
   );
 }
 
+// Compute safe user response with trial info
+function buildUserResponse(user: any, includeToken = false) {
+  const { password: _, ...safe } = user;
+  let trialDaysRemaining = 0;
+  if (user.subscriptionStatus === "trial" && user.trialEndsAt) {
+    trialDaysRemaining = Math.max(0, Math.ceil((new Date(user.trialEndsAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24)));
+  }
+  const result: any = { ...safe, trialDaysRemaining };
+  if (includeToken) result.token = generateToken(user);
+  return result;
+}
+
 export function isAuthenticated(req: any, res: any, next: any) {
   if (req.session?.userId) return next();
   const authHeader = req.headers.authorization;
@@ -156,9 +168,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         req.session.userId = user.id;
         req.session.save((saveErr: any) => {
           if (saveErr) return res.status(500).json({ message: "Registration failed" });
-          const token = generateToken(user);
-          const { password: _, ...safe } = user;
-          res.json({ ...safe, token });
+          res.json(buildUserResponse(user, true));
         });
       });
     } catch (error) {
@@ -189,9 +199,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         req.session.userId = user!.id;
         req.session.save((saveErr: any) => {
           if (saveErr) return res.status(500).json({ message: "Login failed" });
-          const token = generateToken(user);
-          const { password: _, ...safe } = user!;
-          res.json({ ...safe, token });
+          res.json(buildUserResponse(user, true));
         });
       });
     } catch (error) {
@@ -272,12 +280,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (ru) user = ru as any;
       }
       if (!user) return res.status(404).json({ message: "User not found" });
-      const { password: _, ...safe } = user;
-      let trialDaysRemaining = 0;
-      if (user.subscriptionStatus === "trial" && user.trialEndsAt) {
-        trialDaysRemaining = Math.max(0, Math.ceil((new Date(user.trialEndsAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24)));
-      }
-      res.json({ ...safe, trialDaysRemaining });
+      res.json(buildUserResponse(user));
     } catch (error) {
       res.status(500).json({ message: "Failed to get user" });
     }
