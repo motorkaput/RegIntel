@@ -16,7 +16,6 @@ export function log(message: string, source = "express") {
 }
 
 export async function setupVite(app: Express, server: Server) {
-  // Dynamic imports — only resolved in dev mode, never in production bundle
   const viteMod = "vite";
   const { createServer: createViteServer, createLogger } = await import(/* @vite-ignore */ viteMod);
   const viteLogger = createLogger();

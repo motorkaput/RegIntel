@@ -15,6 +15,7 @@ import RegTechSessions from "@/pages/regtech/sessions";
 import ObligationsAnalysisPage from "@/pages/regtech/obligations-analysis";
 import RegTechGuide from "@/pages/regtech/guide";
 import PricingPage from "@/pages/regtech/pricing";
+import DeadlinesPage from "@/pages/regtech/deadlines";
 import { SessionProvider } from "@/contexts/SessionContext";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -39,6 +40,7 @@ function RegTechRoutes() {
         <Route path="/regtech/guide" component={RegTechGuide} />
         <Route path="/regtech/admin" component={RegtechAdmin} />
         <Route path="/regtech/pricing" component={PricingPage} />
+        <Route path="/regtech/deadlines" component={DeadlinesPage} />
         <Route component={NotFound} />
       </Switch>
     </SessionProvider>

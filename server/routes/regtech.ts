@@ -4632,6 +4632,72 @@ Penalties: Civil penalties up to AUD 22 million for body corporates and AUD 1.1 
       res.status(500).json({ message: 'Failed to fetch document folders' });
     }
   });
+
+  // ============= Deadline Dashboard Routes =============
+
+  // Get all obligations with deadlines for current user
+  app.get('/api/regtech/deadlines', isAuthenticated, async (req: any, res) => {
+    try {
+      const obligations = await storage.getUserObligationsWithDeadlines(req.session.userId);
+      // Also get all obligations (for admin or if user has no uploaded docs)
+      const allObligations = obligations.length > 0 ? obligations : await storage.getAllObligationsWithDeadlines();
+      res.json(allObligations);
+    } catch (error) {
+      console.error('Get deadlines error:', error);
+      res.status(500).json({ message: 'Failed to fetch deadlines' });
+    }
+  });
+
+  // Get upcoming deadlines (next 90 days)
+  app.get('/api/regtech/deadlines/upcoming', isAuthenticated, async (req: any, res) => {
+    try {
+      let obligations = await storage.getUserObligationsWithDeadlines(req.session.userId);
+      if (obligations.length === 0) obligations = await storage.getAllObligationsWithDeadlines();
+      
+      const now = new Date();
+      const ninetyDays = new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000);
+      const upcoming = obligations.filter((o: any) => {
+        if (!o.deadline) return false;
+        const d = new Date(o.deadline);
+        return d >= now && d <= ninetyDays;
+      });
+      res.json(upcoming);
+    } catch (error) {
+      console.error('Get upcoming deadlines error:', error);
+      res.status(500).json({ message: 'Failed to fetch upcoming deadlines' });
+    }
+  });
+
+  // Get deadline stats
+  app.get('/api/regtech/deadlines/stats', isAuthenticated, async (req: any, res) => {
+    try {
+      let obligations = await storage.getUserObligationsWithDeadlines(req.session.userId);
+      if (obligations.length === 0) obligations = await storage.getAllObligationsWithDeadlines();
+
+      const now = new Date();
+      const endOfWeek = new Date(now);
+      endOfWeek.setDate(endOfWeek.getDate() + (7 - endOfWeek.getDay()));
+      const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+      const endOfQuarter = new Date(now.getFullYear(), Math.ceil((now.getMonth() + 1) / 3) * 3, 0);
+
+      let overdue = 0, dueThisWeek = 0, dueThisMonth = 0, dueThisQuarter = 0, total = 0;
+
+      for (const o of obligations) {
+        if (!o.deadline) continue;
+        const d = new Date(o.deadline);
+        total++;
+        if (d < now) overdue++;
+        else if (d <= endOfWeek) dueThisWeek++;
+        else if (d <= endOfMonth) dueThisMonth++;
+        else if (d <= endOfQuarter) dueThisQuarter++;
+      }
+
+      res.json({ overdue, dueThisWeek, dueThisMonth, dueThisQuarter, total });
+    } catch (error) {
+      console.error('Get deadline stats error:', error);
+      res.status(500).json({ message: 'Failed to fetch deadline stats' });
+    }
+  });
 }
 
 async function generateAlertsForNewDocument(

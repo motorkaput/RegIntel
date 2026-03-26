@@ -1,6 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { useEffect, useState } from "react";
-import { MessageSquare, FileText, GitCompare, Library, ChevronDown, LogOut, Bell, Settings, Menu, History, ClipboardCheck, HelpCircle, CreditCard, AlertTriangle } from "lucide-react";
+import { MessageSquare, FileText, GitCompare, Library, ChevronDown, LogOut, Bell, Settings, Menu, History, ClipboardCheck, HelpCircle, CreditCard, AlertTriangle, CalendarClock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -24,6 +24,7 @@ const navItems = [
   { href: "/regtech/diff", icon: GitCompare, label: "Diff", description: "Compare documents" },
   { href: "/regtech/obligations-analysis", icon: ClipboardCheck, label: "Obligations", description: "Analyze obligations" },
   { href: "/regtech/alerts", icon: Bell, label: "Alerts", description: "Notifications" },
+  { href: "/regtech/deadlines", icon: CalendarClock, label: "Deadlines", description: "Compliance deadlines" },
   { href: "/regtech/sessions", icon: History, label: "Sessions", description: "Session history" },
   { href: "/regtech/guide", icon: HelpCircle, label: "Guide", description: "How it works" },
 ];

@@ -200,6 +200,8 @@ export interface IStorage {
   // Web Alert Set operations
   createWebAlertSet(alertSet: InsertWebAlertSet): Promise<WebAlertSet>;
   getUserWebAlertSets(userId: string): Promise<WebAlertSet[]>;
+  getAllActiveAlertSets(): Promise<WebAlertSet[]>;
+  getAlertSetsDueForScan(): Promise<WebAlertSet[]>;
   getWebAlertSet(id: number): Promise<WebAlertSet | undefined>;
   updateWebAlertSet(id: number, updates: Partial<WebAlertSet>): Promise<WebAlertSet>;
   updateWebAlertSetLastScanned(id: number): Promise<WebAlertSet>;
@@ -214,6 +216,10 @@ export interface IStorage {
   updateWebAlert(id: number, updates: Partial<WebAlert>): Promise<WebAlert>;
   markWebAlertAsRead(id: number): Promise<WebAlert>;
   deleteWebAlert(id: number): Promise<void>;
+
+  // Deadline / Obligation queries
+  getAllObligationsWithDeadlines(): Promise<any[]>;
+  getUserObligationsWithDeadlines(userId: string): Promise<any[]>;
 
   // Document Folder operations
   getUserFolders(userId: string): Promise<DocumentFolder[]>;
@@ -1099,6 +1105,78 @@ export class DatabaseStorage implements IStorage {
   async deleteWebAlertSet(id: number): Promise<void> {
     await db.delete(webAlerts).where(eq(webAlerts.alertSetId, id));
     await db.delete(webAlertSets).where(eq(webAlertSets.id, id));
+  }
+
+  async getAllActiveAlertSets(): Promise<WebAlertSet[]> {
+    return await db
+      .select()
+      .from(webAlertSets)
+      .where(eq(webAlertSets.isActive, true))
+      .orderBy(webAlertSets.createdAt);
+  }
+
+  async getAlertSetsDueForScan(): Promise<WebAlertSet[]> {
+    const now = new Date();
+    const allActive = await this.getAllActiveAlertSets();
+    return allActive.filter((set) => {
+      if (!set.lastScannedAt) return true; // never scanned
+      const lastScan = new Date(set.lastScannedAt);
+      const cadence = set.cadence || "weekly";
+      const hoursSinceLastScan = (now.getTime() - lastScan.getTime()) / (1000 * 60 * 60);
+      if (cadence === "daily") return hoursSinceLastScan >= 24;
+      if (cadence === "weekly") return hoursSinceLastScan >= 168;
+      if (cadence === "monthly") return hoursSinceLastScan >= 720;
+      return hoursSinceLastScan >= 168;
+    });
+  }
+
+  async getAllObligationsWithDeadlines(): Promise<any[]> {
+    return await db
+      .select({
+        id: obligations.id,
+        docId: obligations.docId,
+        area: obligations.area,
+        actor: obligations.actor,
+        requirement: obligations.requirement,
+        deadline: obligations.deadline,
+        penalty: obligations.penalty,
+        citationRef: obligations.citationRef,
+        impactScore: obligations.impactScore,
+        createdAt: obligations.createdAt,
+        docTitle: regulatoryDocuments.title,
+        jurisdiction: regulatoryDocuments.jurisdiction,
+        regulator: regulatoryDocuments.regulator,
+      })
+      .from(obligations)
+      .innerJoin(regulatoryDocuments, eq(obligations.docId, regulatoryDocuments.id))
+      .where(sql`${obligations.deadline} IS NOT NULL`)
+      .orderBy(obligations.deadline);
+  }
+
+  async getUserObligationsWithDeadlines(userId: string): Promise<any[]> {
+    return await db
+      .select({
+        id: obligations.id,
+        docId: obligations.docId,
+        area: obligations.area,
+        actor: obligations.actor,
+        requirement: obligations.requirement,
+        deadline: obligations.deadline,
+        penalty: obligations.penalty,
+        citationRef: obligations.citationRef,
+        impactScore: obligations.impactScore,
+        createdAt: obligations.createdAt,
+        docTitle: regulatoryDocuments.title,
+        jurisdiction: regulatoryDocuments.jurisdiction,
+        regulator: regulatoryDocuments.regulator,
+      })
+      .from(obligations)
+      .innerJoin(regulatoryDocuments, eq(obligations.docId, regulatoryDocuments.id))
+      .where(and(
+        sql`${obligations.deadline} IS NOT NULL`,
+        eq(regulatoryDocuments.uploadedBy, userId)
+      ))
+      .orderBy(obligations.deadline);
   }
 
   // Web Alert operations

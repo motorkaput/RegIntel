@@ -543,6 +543,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch { res.status(500).json({ message: "Failed" }); }
   });
 
+  // Admin: trigger manual scan of all alert sets
+  app.post("/api/admin/trigger-scan", isAuthenticated, async (req: any, res) => {
+    try {
+      const u = await storage.getUser(req.session.userId);
+      if (!u?.isAdmin) return res.status(403).json({ message: "Admin required" });
+      const { triggerScanAll } = await import("./services/scheduler");
+      const result = await triggerScanAll();
+      res.json({ message: `Scanned ${result.scanned} alert sets, found ${result.alertsFound} new alerts`, ...result });
+    } catch (error: any) {
+      console.error("Trigger scan error:", error);
+      res.status(500).json({ message: "Scan failed: " + error.message });
+    }
+  });
+
   // Initialize default plans
   (async () => {
     try {

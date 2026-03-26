@@ -91,5 +91,13 @@ app.use((req, res, next) => {
     host: "0.0.0.0",
   }, () => {
     log(`serving on port ${port}`);
+    // Start regulatory feed scheduler in production
+    if (process.env.NODE_ENV === 'production') {
+      import('./services/scheduler').then(({ startScheduler }) => {
+        startScheduler();
+      }).catch(err => {
+        console.error('Failed to start scheduler:', err);
+      });
+    }
   });
 })();
