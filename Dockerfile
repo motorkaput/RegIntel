@@ -1,4 +1,4 @@
-FROM node:20-slim AS base
+FROM node:22-slim AS base
 WORKDIR /app
 
 # Install system dependencies for native modules (bcrypt, etc.)
@@ -19,7 +19,7 @@ COPY . .
 RUN npm run build
 
 # Production stage
-FROM node:20-slim AS production
+FROM node:22-slim AS production
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y \
